@@ -1,0 +1,198 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+  color: #e0f7fa;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-wrapper {
+  flex: 1;
+  padding-top: 80px;
+  padding-bottom: 40px;
+}
+
+.navbar-brand {
+  font-weight: bold;
+  color: #ef4444 !important; /* Rojo para administrador */
+}
+
+.navbar {
+  background-color: #1f2937 !important;
+}
+
+.hero-section {
+  min-height: 50vh;
+  background: linear-gradient(to right, #1f2937, #ef4444); /* degradado rojo */
+  color: white;
+  padding: 60px 0 30px;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stats-section {
+  margin-top: -50px;
+  padding: 60px 20px;
+}
+
+.card {
+  min-height: 290px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  color: white;
+}
+
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.card h5 {
+  color: #ffffff;
+}
+
+.card p {
+  color: #cfd8dc;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  border-color: #ef4444;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+  border-color: #dc2626;
+}
+
+/* Profile dropdown */
+.profile-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #ef4444;
+  transition: transform 0.2s ease;
+}
+
+.profile-img:hover {
+  transform: scale(1.1);
+}
+
+.dropdown-menu-custom {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  min-width: 200px;
+  padding: 10px;
+  margin-top: 5px;
+  display: none;
+  z-index: 1000;
+  color: white;
+}
+
+.dropdown-header {
+  font-weight: bold;
+  color: #ef4444;
+  font-size: 0.9rem;
+  padding: 5px 0;
+}
+
+.dropdown-item {
+  color: #e0f7fa;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: block;
+  transition: background-color 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.dropdown-item.text-danger {
+  color: #ef4444 !important;
+}
+
+.dropdown-item.text-danger:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444 !important;
+}
+
+.dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.2);
+  margin: 8px 0;
+}
+
+/* Footer */
+.footer {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  margin-top: auto;
+  padding: 20px 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.footer a {
+  color: #ef4444;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: #dc2626;
+}
+
+/* Badges */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.4em 0.6em;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .card {
+    min-height: 250px;
+  }
+  
+  .dropdown-menu-custom {
+    right: -10px;
+    min-width: 180px;
+  }
+}

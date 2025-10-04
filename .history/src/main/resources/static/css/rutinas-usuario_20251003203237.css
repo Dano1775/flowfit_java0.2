@@ -1,0 +1,556 @@
+/* ===== RUTINAS STYLES ===== */
+.rutina-card {
+    background: rgba(31, 41, 55, 0.85);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    border-radius: 20px;
+    padding: 28px;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    margin-bottom: 25px;
+}
+
+.rutina-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--usuario-primary), var(--usuario-secondary));
+    border-radius: 20px 20px 0 0;
+}
+
+.rutina-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(74, 222, 128, 0.03) 0%, 
+        rgba(31, 41, 55, 0.05) 50%, 
+        rgba(74, 222, 128, 0.01) 100%);
+    border-radius: 20px;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.rutina-card:hover {
+    transform: translateY(-10px);
+    border-color: rgba(74, 222, 128, 0.5);
+    box-shadow: 0 20px 50px rgba(74, 222, 128, 0.25);
+    background: rgba(31, 41, 55, 0.95);
+}
+
+.rutina-recommended {
+    border-color: rgba(74, 222, 128, 0.3);
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.9), rgba(74, 222, 128, 0.05));
+}
+
+.rutina-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 10px;
+}
+
+.rutina-header h5 {
+    color: white;
+    margin: 0;
+    flex-grow: 1;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.rutina-info {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.rutina-info span {
+    font-size: 0.9rem;
+}
+
+.rutina-actions {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 15px;
+}
+
+.stats-icon {
+    background: linear-gradient(135deg, var(--usuario-primary), var(--usuario-secondary));
+    border-radius: 16px;
+    width: 65px;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 8px 20px rgba(74, 222, 128, 0.4);
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover .stats-icon {
+    transform: scale(1.1);
+    box-shadow: 0 12px 25px rgba(74, 222, 128, 0.6);
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--usuario-primary), var(--usuario-secondary));
+}
+
+/* Badge colors with FlowFit theme */
+.badge.bg-primary {
+    background: linear-gradient(135deg, var(--usuario-primary), var(--usuario-secondary)) !important;
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+}
+
+.badge.bg-info {
+    background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
+}
+
+.badge.bg-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+}
+
+/* Rutinas especiales */
+.rutina-popular {
+    border-color: rgba(245, 158, 11, 0.4);
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.9), rgba(245, 158, 11, 0.05));
+}
+
+.rutina-popular::before {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+/* Mejoras en los badges */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Animaciones para botones */
+.btn-usuario-primary {
+    background: linear-gradient(135deg, var(--usuario-primary), var(--usuario-secondary));
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3);
+}
+
+.btn-usuario-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(74, 222, 128, 0.5);
+    background: linear-gradient(135deg, var(--usuario-secondary), var(--usuario-accent));
+}
+
+/* Stats cards mejoradas */
+.stats-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--usuario-primary), var(--usuario-secondary));
+}
+
+/* Mejoras en el texto */
+.rutina-info p.small {
+    line-height: 1.4;
+    margin-bottom: 8px;
+}
+
+.rutina-header h5 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Progress bar mejorado */
+.progress {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .rutina-card {
+        margin-bottom: 20px;
+        padding: 20px;
+    }
+    
+    .stats-icon {
+        width: 55px;
+        height: 55px;
+    }
+    
+    .rutina-header h5 {
+        font-size: 1.1rem;
+    }
+    
+    .btn-usuario-primary {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Empty state styling */
+.empty-state {
+    padding: 40px 20px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.05), rgba(31, 41, 55, 0.3));
+    border: 2px dashed rgba(74, 222, 128, 0.3);
+    transition: all 0.3s ease;
+}
+
+.empty-state:hover {
+    border-color: rgba(74, 222, 128, 0.5);
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.08), rgba(31, 41, 55, 0.4));
+}
+
+/* Section headers improved */
+h4.text-white {
+    font-weight: 700;
+    font-size: 1.3rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Better spacing for cards */
+.rutina-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.glass-card {
+    margin-bottom: 1.5rem;
+}
+
+/* Improved button styling */
+.btn-lg.btn-usuario-primary {
+    padding: 12px 24px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 12px;
+}
+
+/* Badge improvements */
+.badge.px-3 {
+    font-size: 0.8rem;
+    border-radius: 12px;
+}
+
+/* Button outline-success override */
+.btn-outline-success {
+    color: var(--usuario-primary);
+    border-color: var(--usuario-primary);
+    background: transparent;
+}
+
+.btn-outline-success:hover {
+    background: var(--usuario-primary);
+    border-color: var(--usuario-primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 222, 128, 0.3);
+}
+
+/* Container improvements */
+.container-fluid {
+    max-width: 1400px;
+}
+
+/* Enhanced responsive */
+@media (max-width: 992px) {
+    .main-content {
+        padding: 30px 20px;
+    }
+    
+    .glass-card {
+        padding: 24px;
+    }
+    
+    .rutina-card {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-content h1 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .d-flex.gap-2 {
+        justify-content: center;
+    }
+}
+
+/* ===== DETALLES DE RUTINA STYLES ===== */
+
+/* Breadcrumb styling */
+.breadcrumb {
+    background: rgba(31, 41, 55, 0.6);
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--usuario-secondary) !important;
+}
+
+.text-usuario-primary {
+    color: var(--usuario-primary) !important;
+}
+
+/* Ejercicio Cards */
+.ejercicio-card {
+    background: rgba(31, 41, 55, 0.85);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+}
+
+.ejercicio-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #06b6d4, #0891b2);
+    border-radius: 16px 16px 0 0;
+}
+
+.ejercicio-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(74, 222, 128, 0.4);
+    box-shadow: 0 12px 35px rgba(74, 222, 128, 0.2);
+    background: rgba(31, 41, 55, 0.95);
+}
+
+/* Ejercicio header */
+.ejercicio-number {
+    min-width: 40px;
+}
+
+.ejercicio-number .badge {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+}
+
+.ejercicio-header h5 {
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Ejercicio info */
+.ejercicio-info p {
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+.ejercicio-notas {
+    background: rgba(245, 158, 11, 0.1);
+    border-left: 4px solid #f59e0b;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-top: 16px;
+}
+
+/* Progress section specific */
+.progress {
+    height: 10px !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Badge usuario primary */
+.bg-usuario-primary {
+    background: linear-gradient(135deg, var(--usuario-primary), var(--usuario-secondary)) !important;
+}
+
+/* Image styling */
+.ejercicio-card img {
+    border: 2px solid rgba(74, 222, 128, 0.3);
+    transition: all 0.3s ease;
+}
+
+.ejercicio-card:hover img {
+    border-color: rgba(74, 222, 128, 0.6);
+    box-shadow: 0 8px 20px rgba(74, 222, 128, 0.2);
+}
+
+/* Responsive improvements for detalles */
+@media (max-width: 768px) {
+    .ejercicio-card {
+        margin-bottom: 20px;
+        padding: 20px;
+    }
+    
+    .ejercicio-number .badge {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+    
+    .breadcrumb {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ===== MODAL GLASSMORPHISM STYLES ===== */
+
+/* Modal backdrop personalizado */
+.modal-backdrop.show {
+    opacity: 0.8;
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.9), rgba(55, 65, 81, 0.7));
+    backdrop-filter: blur(8px);
+}
+
+/* Modal content glassmorphism */
+.modal-glassmorphism {
+    background: rgba(31, 41, 55, 0.95);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+    color: white;
+}
+
+/* Modal header */
+.modal-glassmorphism .modal-header {
+    background: linear-gradient(135deg, 
+        rgba(74, 222, 128, 0.1) 0%, 
+        rgba(31, 41, 55, 0.1) 100%);
+    border-bottom: 1px solid rgba(74, 222, 128, 0.2);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 25px;
+}
+
+.modal-glassmorphism .modal-title {
+    font-weight: 700;
+    font-size: 1.4rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal body */
+.modal-glassmorphism .modal-body {
+    padding: 25px;
+    max-height: 70vh;
+}
+
+/* Modal footer */
+.modal-glassmorphism .modal-footer {
+    background: linear-gradient(135deg, 
+        rgba(31, 41, 55, 0.1) 0%, 
+        rgba(74, 222, 128, 0.05) 100%);
+    border-top: 1px solid rgba(74, 222, 128, 0.2);
+    border-radius: 0 0 20px 20px;
+    padding: 20px 25px;
+}
+
+/* Close button personalizado */
+.btn-close-white {
+    filter: brightness(0) saturate(100%) invert(78%) sepia(14%) saturate(366%) hue-rotate(93deg) brightness(93%) contrast(94%);
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.btn-close-white:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Spinner personalizado */
+.spinner-border.text-usuario-primary {
+    color: var(--usuario-primary) !important;
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Modal ejercicio cards específicas */
+.modal-glassmorphism .ejercicio-card {
+    background: rgba(55, 65, 81, 0.7);
+    border: 1px solid rgba(74, 222, 128, 0.15);
+    margin-bottom: 20px;
+}
+
+.modal-glassmorphism .ejercicio-card:hover {
+    background: rgba(55, 65, 81, 0.9);
+    border-color: rgba(74, 222, 128, 0.3);
+}
+
+/* Modal progress section */
+.modal-progress-section {
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+/* Modal responsive */
+@media (max-width: 768px) {
+    .modal-xl {
+        max-width: 95%;
+    }
+    
+    .modal-glassmorphism .modal-body {
+        padding: 20px 15px;
+    }
+    
+    .modal-glassmorphism .modal-header,
+    .modal-glassmorphism .modal-footer {
+        padding: 15px 20px;
+    }
+}

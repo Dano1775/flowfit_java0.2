@@ -1,0 +1,129 @@
+/* Base */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+  color: #e0f7fa;
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+}
+
+/* Navbar Glass Effect */
+.glass-navbar {
+  backdrop-filter: blur(12px);
+  background-color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 1000;
+}
+
+/* Hero Section */
+.hero-section {
+  min-height: 100vh;
+  padding-top: 100px;
+  text-align: center;
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section .resaltado {
+  color: #4ade80;
+}
+
+/* Blobs */
+.blob {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: #4ade80;
+  opacity: 0.15;
+  filter: blur(100px);
+  z-index: 0;
+}
+
+.blob-1 {
+  top: -100px;
+  left: -100px;
+}
+
+.blob-2 {
+  bottom: -100px;
+  right: -100px;
+}
+
+/* Section Base */
+.about-section {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 20px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  padding: 60px 20px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+.about-section h2 {
+  color: #4ade80;
+  font-weight: 700;
+}
+
+/* Cards */
+.feature-card, .stat-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover, .stat-card:hover {
+  transform: scale(1.03);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Text Enhancements */
+ul {
+  padding-left: 1.5rem;
+}
+
+li {
+  margin-bottom: 0.6rem;
+}
+
+/* Buttons */
+.btn-success {
+  background-color: #4ade80;
+  border-color: #4ade80;
+  color: #111;
+}
+
+.btn-success:hover {
+  background-color: #22c55e;
+  border-color: #22c55e;
+  color: #000;
+}
+
+.btn-outline-light:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+/* Footer */
+.footer {
+  background: #111;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Tweaks */
+@media (max-width: 768px) {
+  .hero-section {
+    padding-top: 140px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .feature-card, .stat-card {
+    padding: 30px 20px;
+  }
+}

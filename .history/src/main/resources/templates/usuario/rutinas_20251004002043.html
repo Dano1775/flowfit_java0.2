@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Rutinas - FlowFit Usuario</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link th:href="@{/css/usuario-dashboard.css}" rel="stylesheet">
+  <link th:href="@{/css/rutinas-usuario.css}" rel="stylesheet">
+</head>
+<body class="dashboard-bg">
+
+  <!-- Sidebar -->
+  <nav class="sidebar d-flex flex-column">
+    <!-- Logo y Título -->
+    <div class="navbar-brand d-flex align-items-center mb-4">
+      <img src="/assets/logo_flowfit_usuario.png" alt="FlowFit" height="32" class="me-3 logo-usuario" style="border-radius: 8px; filter: drop-shadow(0 2px 4px rgba(74, 222, 128, 0.3));">
+      <span class="brand-text fs-4 fw-bold text-white">FlowFit VIP</span>
+    </div>
+
+    <!-- Navegación Principal -->
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a th:href="@{/usuario/dashboard}" class="nav-link usuario-nav-link">
+          <i class="bi bi-speedometer2 me-3"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/usuario/rutinas}" class="nav-link active usuario-nav-link" aria-current="page">
+          <i class="bi bi-calendar-check me-3"></i>
+          <span>Mis Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/usuario/progreso}" class="nav-link usuario-nav-link">
+          <i class="bi bi-graph-up me-3"></i>
+          <span>Mi Progreso</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Perfil de Usuario -->
+    <div class="border-top pt-3 mt-auto">
+      <div class="dropdown profile-dropdown-usuario">
+        <div class="profile-icon-usuario d-flex align-items-center w-100" id="profileDropdownUsuario" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-usuario me-3" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #4ade80; box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);">
+          <div class="flex-grow-1">
+            <div class="small fw-bold text-white" th:text="${#strings.substringBefore(usuario.nombre, ' ')}">Usuario</div>
+            <div class="small text-usuario-muted">FlowFit VIP</div>
+          </div>
+          <i class="bi bi-chevron-down text-usuario-accent"></i>
+        </div>
+        <ul class="dropdown-menu usuario-profile-menu" aria-labelledby="profileDropdownUsuario">
+          <li><a class="dropdown-item usuario-dropdown-item" th:href="@{/usuario/perfil}"><i class="bi bi-person-gear me-2"></i>Mi Perfil</a></li>
+          <li><a class="dropdown-item usuario-dropdown-item" th:href="@{/usuario/configuracion}"><i class="bi bi-gear me-2"></i>Configuración</a></li>
+          <li><a class="dropdown-item usuario-dropdown-item" th:href="@{/usuario/soporte}"><i class="bi bi-headset me-2"></i>Soporte</a></li>
+          <li><hr class="dropdown-divider" style="border-color: rgba(74, 222, 128, 0.2);"></li>
+          <li><a class="dropdown-item usuario-dropdown-item-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container-fluid">
+      <!-- Header Section -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div class="d-flex align-items-center">
+              <button class="btn btn-outline-light me-3 d-lg-none" id="sidebarToggle">
+                <i class="bi bi-list"></i>
+              </button>
+              <div>
+                <h1 class="mb-2">Mis Rutinas de Entrenamiento</h1></div>
+            </div>
+            <div>
+              <p class="lead mb-1">Explora y sigue tus rutinas personalizadas</p>
+              <small class="text-muted d-flex align-items-center">
+                <i class="bi bi-calendar3 me-2"></i>
+                <span th:text="${#dates.format(#dates.createNow(), 'EEEE, dd MMMM yyyy')}">Fecha actual</span>
+              </small>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-usuario-primary" data-bs-toggle="modal" data-bs-target="#filtrosModal">
+                <i class="bi bi-funnel me-2"></i>Filtrar
+              </button>
+              <a th:href="@{/usuario/progreso}" class="btn btn-outline-success">
+                <i class="bi bi-graph-up me-2"></i>Ver Progreso
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="bi bi-check-circle me-2"></i>
+      <span th:text="${successMessage}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-circle me-2"></i>
+      <span th:text="${errorMessage}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+      <!-- Stats Cards -->
+      <div class="row mb-5">
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="glass-card stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h3 class="mb-1 fw-bold text-white" th:text="${rutinasActivasCount}">0</h3>
+                <p class="text-muted mb-0 small fw-medium">Rutinas Activas</p>
+              </div>
+              <div class="stats-icon">
+                <i class="bi bi-activity fs-2"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="glass-card stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h3 class="mb-1 fw-bold text-white" th:text="${rutinasCompletadasCount}">0</h3>
+                <p class="text-muted mb-0 small fw-medium">Completadas</p>
+              </div>
+              <div class="stats-icon">
+                <i class="bi bi-check-circle fs-2"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="glass-card stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h3 class="mb-1 fw-bold text-white" th:text="${totalRutinas}">1</h3>
+                <p class="text-muted mb-0 small fw-medium">Total Asignadas</p>
+              </div>
+              <div class="stats-icon">
+                <i class="bi bi-lightning fs-2"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="glass-card stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h3 class="mb-1 fw-bold text-white" th:text="${progresoGeneral != null ? progresoGeneral + '%' : '0.0%'}">0.0%</h3>
+                <p class="text-muted mb-0 small fw-medium">Progreso General</p>
+              </div>
+              <div class="stats-icon">
+                <i class="bi bi-trophy fs-2"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rutinas Activas -->
+      <div class="row mb-5">
+        <div class="col-12">
+          <div class="glass-card">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="text-white mb-0"><i class="bi bi-play-circle me-2 text-success"></i>Rutinas Activas</h4>
+            <span class="badge bg-success px-3 py-2" th:text="${rutinasActivasCount + ' activas'}">0 activas</span>
+          </div>
+          
+          <!-- Mensaje si no hay rutinas activas -->
+          <div th:if="${rutinasActivas == null or #lists.isEmpty(rutinasActivas)}" class="text-center py-5">
+            <div class="empty-state">
+              <i class="bi bi-calendar-plus fs-1 mb-3 d-block" style="color: var(--usuario-primary);"></i>
+              <h4 class="text-white mb-2">¡Comienza tu Journey Fitness!</h4>
+              <p class="text-muted mb-4">No tienes rutinas activas aún. Explora nuestras rutinas recomendadas y empieza a entrenar.</p>
+              <a href="#rutinas-recomendadas" class="btn btn-usuario-primary btn-lg">
+                <i class="bi bi-rocket-takeoff me-2"></i>Explorar Rutinas
+              </a>
+            </div>
+          </div>
+
+          <!-- Lista de rutinas activas -->
+          <div th:if="${rutinasActivas != null and not #lists.isEmpty(rutinasActivas)}" class="row">
+            <div th:each="rutinaAsignada : ${rutinasActivas}" class="col-lg-4 col-md-6 mb-3">
+              <div class="rutina-card">
+                <div class="rutina-header">
+                  <h5 th:text="${rutinaAsignada.rutina.nombre}">Nombre de la Rutina</h5>
+                  <span class="badge bg-primary" th:text="${rutinaAsignada.rutina.categoria}">Tipo</span>
+                </div>
+                <div class="rutina-info">
+                  <div class="d-flex justify-content-between mb-2">
+                    <span><i class="bi bi-clock me-1"></i><span th:text="${rutinaAsignada.rutina.duracionMinutos}">30</span> min</span>
+                    <span><i class="bi bi-fire me-1"></i><span th:text="${rutinaAsignada.rutina.caloriasEstimadas}">200</span> kcal</span>
+                  </div>
+                  <div class="progress mb-2" style="height: 6px;">
+                    <div class="progress-bar bg-success" th:style="'width: ' + ${rutinaAsignada.progreso} + '%'"></div>
+                  </div>
+                  <small class="text-muted">Progreso: <span th:text="${rutinaAsignada.progreso}">0</span>%</small>
+                </div>
+                <div class="rutina-actions mt-3">
+                  <form th:action="@{/usuario/rutinas/completar}" method="post" class="d-inline">
+                    <input type="hidden" name="rutinaAsignadaId" th:value="${rutinaAsignada.id}">
+                    <button type="submit" class="btn btn-success btn-sm me-2">
+                      <i class="bi bi-check me-1"></i>Completar
+                    </button>
+                  </form>
+                  <button class="btn btn-outline-secondary btn-sm" th:onclick="'abrirModalDetalles(' + ${rutinaAsignada.rutina.id} + ')'">
+                    <i class="bi bi-eye me-1"></i>Ver Detalles
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rutinas Recomendadas -->
+      <div class="row mb-5" id="rutinas-recomendadas">
+        <div class="col-12">
+          <div class="glass-card">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="text-white mb-0"><i class="bi bi-star-fill me-2 text-warning"></i>Rutinas Recomendadas</h4>
+            <span class="badge bg-info px-3 py-2" th:text="${rutinasDisponibles != null ? rutinasDisponibles.size() + ' disponibles' : '0 disponibles'}">0 disponibles</span>
+          </div>
+          
+          <!-- Mensaje si no hay rutinas disponibles -->
+          <div th:if="${rutinasDisponibles == null or #lists.isEmpty(rutinasDisponibles)}" class="text-center py-4">
+            <i class="bi bi-star fs-1 text-muted mb-3 d-block"></i>
+            <h5 class="text-muted">No hay rutinas disponibles</h5>
+            <p class="text-muted">Pronto tendremos más rutinas para ti.</p>
+          </div>
+
+          <!-- Lista de rutinas disponibles -->
+          <div th:if="${rutinasDisponibles != null and not #lists.isEmpty(rutinasDisponibles)}" class="row">
+            <div th:each="rutina : ${rutinasDisponibles}" class="col-lg-4 col-md-6 mb-3">
+              <div class="rutina-card rutina-recommended">
+                <div class="rutina-header">
+                  <h5 th:text="${rutina.nombre}">Nombre de la Rutina</h5>
+                  <span class="badge bg-success" th:text="${rutina.dificultad}">Nivel</span>
+                </div>
+                <div class="rutina-info">
+                  <div class="d-flex justify-content-between mb-2">
+                    <span><i class="bi bi-clock me-1"></i><span th:text="${rutina.duracionMinutos}">30</span> min</span>
+                    <span><i class="bi bi-fire me-1"></i><span th:text="${rutina.caloriasEstimadas}">200</span> kcal</span>
+                  </div>
+                  <p class="small text-muted" th:text="${rutina.descripcion}">Descripción de la rutina.</p>
+                  <div class="d-flex justify-content-between small">
+                    <span><i class="bi bi-person me-1"></i><span th:text="${rutina.categoria}">Tipo</span></span>
+                    <span th:if="${rutina.entrenadorId != null}"><i class="bi bi-award me-1"></i>Con Entrenador</span>
+                    <span th:if="${rutina.entrenadorId == null}"><i class="bi bi-globe me-1"></i>Global</span>
+                  </div>
+                </div>
+                <div class="rutina-actions mt-3">
+                  <div class="d-flex gap-2">
+                    <form th:action="@{/usuario/rutinas/asignar}" method="post" class="flex-grow-1">
+                      <input type="hidden" name="rutinaId" th:value="${rutina.id}">
+                      <button type="submit" class="btn btn-usuario-primary btn-sm w-100">
+                        <i class="bi bi-plus me-1"></i>Agregar
+                      </button>
+                    </form>
+                    <button class="btn btn-outline-info btn-sm" th:onclick="'abrirModalDetalles(' + ${rutina.id} + ')'">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rutinas Populares -->
+    <div class="row mt-4" th:if="${rutinasPopulares != null and not #lists.isEmpty(rutinasPopulares)}">
+      <div class="col-12">
+        <div class="glass-card">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4><i class="bi bi-fire me-2"></i>Rutinas Populares</h4>
+            <span class="badge bg-warning text-dark">Más Elegidas</span>
+          </div>
+          
+          <div class="row">
+            <div th:each="rutina : ${rutinasPopulares}" class="col-lg-4 col-md-6 mb-3">
+              <div class="rutina-card rutina-popular">
+                <div class="rutina-header">
+                  <h5 th:text="${rutina.nombre}">Rutina Popular</h5>
+                  <span class="badge bg-warning text-dark">Popular</span>
+                </div>
+                <div class="rutina-info">
+                  <div class="d-flex justify-content-between mb-2">
+                    <span><i class="bi bi-clock me-1"></i><span th:text="${rutina.duracionMinutos}">30</span> min</span>
+                    <span><i class="bi bi-fire me-1"></i><span th:text="${rutina.caloriasEstimadas}">200</span> kcal</span>
+                  </div>
+                  <p class="small text-muted" th:text="${rutina.descripcion}">Descripción de la rutina.</p>
+                </div>
+                <div class="rutina-actions mt-3">
+                  <div class="d-flex gap-2">
+                    <form th:action="@{/usuario/rutinas/asignar}" method="post" class="flex-grow-1">
+                      <input type="hidden" name="rutinaId" th:value="${rutina.id}">
+                      <button type="submit" class="btn btn-warning btn-sm w-100 text-dark">
+                        <i class="bi bi-star me-1"></i>Probar
+                      </button>
+                    </form>
+                    <button class="btn btn-outline-warning btn-sm" th:onclick="'abrirModalDetalles(' + ${rutina.id} + ')'">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- Cierre container-fluid -->
+
+  </main>
+
+  <!-- Modal para Detalles de Rutina -->
+  <div class="modal fade" id="rutinaDetallesModal" tabindex="-1" aria-labelledby="rutinaDetallesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content modal-glassmorphism">
+        <div class="modal-header border-0">
+          <h4 class="modal-title text-white" id="rutinaDetallesModalLabel">
+            <i class="bi bi-list-check me-2 text-info"></i>
+            Detalles de la Rutina
+          </h4>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="rutinaDetallesContent">
+          <!-- Contenido dinámico se carga aquí -->
+          <div class="text-center py-5">
+            <div class="spinner-border text-usuario-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="text-muted mt-3">Cargando detalles de la rutina...</p>
+          </div>
+        </div>
+        <div class="modal-footer border-0" id="rutinaDetallesFooter">
+          <!-- Botones dinámicos se cargan aquí -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Custom JavaScript -->
+  <script>
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        if (alert.classList.contains('show')) {
+          const bsAlert = new bootstrap.Alert(alert);
+          bsAlert.close();
+        }
+      });
+    }, 5000);
+
+    // Smooth scroll to recommended routines
+    document.addEventListener('DOMContentLoaded', function() {
+      const exploreBtn = document.querySelector('a[href="#rutinas-recomendadas"]');
+      if (exploreBtn) {
+        exploreBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.getElementById('rutinas-recomendadas').scrollIntoView({
+            behavior: 'smooth'
+          });
+        });
+      }
+    });
+
+    // Confirm completion of routine
+    document.querySelectorAll('form[action*="completar"] button').forEach(button => {
+      button.addEventListener('click', function(e) {
+        if (!confirm('¿Estás seguro de que has completado esta rutina?')) {
+          e.preventDefault();
+        }
+      });
+    });
+
+    // ===== MODAL DETALLES DE RUTINA =====
+    
+    async function abrirModalDetalles(rutinaId) {
+      const modal = new bootstrap.Modal(document.getElementById('rutinaDetallesModal'));
+      const modalContent = document.getElementById('rutinaDetallesContent');
+      const modalFooter = document.getElementById('rutinaDetallesFooter');
+      const modalTitle = document.getElementById('rutinaDetallesModalLabel');
+      
+      // Mostrar loading
+      modalContent.innerHTML = `
+        <div class="text-center py-5">
+          <div class="spinner-border text-usuario-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p class="text-muted mt-3">Cargando detalles de la rutina...</p>
+        </div>
+      `;
+      modalFooter.innerHTML = '';
+      
+      // Abrir modal
+      modal.show();
+      
+      try {
+        // Llamar API para obtener detalles
+        const response = await fetch('/usuario/rutinas/detalles-api?rutinaId=' + rutinaId);
+        
+        if (!response.ok) {
+          throw new Error('Error al cargar los detalles');
+        }
+        
+        const data = await response.json();
+        
+        // Actualizar título del modal
+        modalTitle.innerHTML = 
+          '<i class="bi bi-list-check me-2 text-info"></i>' +
+          data.rutina.nombre;
+        
+        // Generar contenido del modal
+        let contenidoModal = generarContenidoModal(data);
+        modalContent.innerHTML = contenidoModal;
+        
+        // Generar footer del modal
+        let footerModal = generarFooterModal(data);
+        modalFooter.innerHTML = footerModal;
+        
+      } catch (error) {
+        console.error('Error:', error);
+        modalContent.innerHTML = 
+          '<div class="text-center py-5">' +
+            '<i class="bi bi-exclamation-triangle fs-1 text-warning mb-3 d-block"></i>' +
+            '<h4 class="text-white mb-2">Error al cargar detalles</h4>' +
+            '<p class="text-muted mb-4">No se pudieron cargar los detalles de la rutina. Intenta de nuevo.</p>' +
+            '<button class="btn btn-usuario-primary" onclick="abrirModalDetalles(' + rutinaId + ')">' +
+              '<i class="bi bi-arrow-clockwise me-2"></i>Reintentar' +
+            '</button>' +
+          '</div>';
+        modalFooter.innerHTML = '';
+      }
+    }
+    
+    function generarContenidoModal(data) {
+      let html = 
+        '<div class="row mb-4">' +
+          '<div class="col-12">' +
+            '<div class="d-flex gap-3 align-items-center mb-3">' +
+              '<span class="badge bg-success px-3 py-2">' + (data.rutina.dificultad || 'Intermedio') + '</span>' +
+              '<small class="text-muted">' +
+                '<i class="bi bi-clock me-1"></i>' + (data.rutina.duracionMinutos || 45) + ' minutos' +
+              '</small>' +
+              '<small class="text-muted">' +
+                '<i class="bi bi-fire me-1"></i>' + (data.rutina.caloriasEstimadas || 300) + ' kcal' +
+              '</small>' +
+            '</div>' +
+            '<p class="text-muted mb-0">' + (data.rutina.descripcion || 'Sin descripción disponible') + '</p>' +
+          '</div>' +
+        '</div>';
+      
+      // Sección de progreso si tiene rutina asignada
+      if (data.tieneRutinaAsignada) {
+        html += 
+          '<div class="modal-progress-section">' +
+            '<h5 class="text-white mb-3">' +
+              '<i class="bi bi-graph-up me-2 text-success"></i>Tu Progreso' +
+            '</h5>' +
+            '<div class="row">' +
+              '<div class="col-md-4 text-center">' +
+                '<h4 class="text-usuario-primary mb-1">' + (data.rutinaAsignada.progreso || 0) + '%</h4>' +
+                '<p class="text-muted mb-0 small">Progreso Actual</p>' +
+                '<div class="progress mt-2" style="height: 8px;">' +
+                  '<div class="progress-bar bg-success" style="width: ' + (data.rutinaAsignada.progreso || 0) + '%"></div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="col-md-4 text-center">' +
+                '<h4 class="text-white mb-1">' + (data.rutinaAsignada.estado || 'ACTIVA') + '</h4>' +
+                '<p class="text-muted mb-0 small">Estado</p>' +
+              '</div>' +
+              '<div class="col-md-4 text-center">' +
+                '<h4 class="text-white mb-1">Asignada</h4>' +
+                '<p class="text-muted mb-0 small">Fecha</p>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+      }
+      
+      // Lista de ejercicios
+      html += 
+        '<div class="mb-3">' +
+          '<h5 class="text-white mb-3">' +
+            '<i class="bi bi-list-check me-2 text-info"></i>' +
+            'Ejercicios (' + data.totalEjercicios + ')' +
+          '</h5>';
+      
+      if (data.ejercicios && data.ejercicios.length > 0) {
+        html += '<div class="row">';
+        data.ejercicios.forEach(function(ejercicio, index) {
+          html += 
+            '<div class="col-lg-6 col-md-12 mb-3">' +
+              '<div class="ejercicio-card">' +
+                '<div class="ejercicio-header d-flex align-items-center mb-3">' +
+                  '<div class="ejercicio-number me-3">' +
+                    '<span class="badge bg-usuario-primary rounded-circle">' + (index + 1) + '</span>' +
+                  '</div>' +
+                  '<div class="flex-grow-1">' +
+                    '<h6 class="mb-1 text-white">' + (ejercicio.ejercicioNombre || 'Ejercicio sin nombre') + '</h6>' +
+                    '<div class="d-flex gap-3 text-muted small">';
+          
+          if (ejercicio.duracionSegundos) {
+            html += '<span><i class="bi bi-clock me-1"></i>' + ejercicio.duracionSegundos + 's</span>';
+          }
+          if (ejercicio.repeticiones) {
+            html += '<span><i class="bi bi-repeat me-1"></i>' + ejercicio.repeticiones + ' reps</span>';
+          }
+          if (ejercicio.series) {
+            html += '<span><i class="bi bi-layers me-1"></i>' + ejercicio.series + ' series</span>';
+          }
+          
+          html += 
+                    '</div>' +
+                  '</div>' +
+                '</div>';
+          
+          // Agregar imagen del ejercicio si existe
+          if (ejercicio.ejercicioImagen) {
+            html += 
+              '<div class="ejercicio-imagen mb-3">' +
+                '<img src="/images/ejercicios/' + ejercicio.ejercicioImagen + '" ' +
+                     'alt="' + (ejercicio.ejercicioNombre || 'Ejercicio') + '" ' +
+                     'class="img-fluid rounded" ' +
+                     'style="width: 100%; height: 120px; object-fit: cover; border: 2px solid rgba(74, 222, 128, 0.3);" ' +
+                     'onerror="this.style.display=\'none\'">' +
+              '</div>';
+          }
+          
+          html += 
+                '<div class="ejercicio-info">' +
+                  '<p class="text-muted small mb-2">' + (ejercicio.ejercicioDescripcion || 'Sin descripción disponible') + '</p>';
+          
+          if (ejercicio.notas) {
+            html += 
+              '<div class="ejercicio-notas">' +
+                '<small class="text-warning">' +
+                  '<i class="bi bi-lightbulb me-1"></i>' +
+                  '<strong>Notas:</strong> ' + ejercicio.notas +
+                '</small>' +
+              '</div>';
+          }
+          
+          html += 
+                '</div>' +
+              '</div>' +
+            '</div>';
+        });
+        html += '</div>';
+      } else {
+        html += 
+          '<div class="text-center py-4">' +
+            '<i class="bi bi-exclamation-triangle fs-1 text-warning mb-3 d-block"></i>' +
+            '<h5 class="text-white mb-2">Esta rutina no tiene ejercicios configurados</h5>' +
+            '<p class="text-muted">Esta rutina está en proceso de configuración.</p>' +
+          '</div>';
+      }
+      
+      html += '</div>';
+      
+      return html;
+    }
+    
+    function generarFooterModal(data) {
+      let html = '<div class="d-flex justify-content-between align-items-center w-100">';
+      
+      if (data.tieneRutinaAsignada) {
+        html += 
+          '<div>' +
+            '<form action="/usuario/rutinas/completar" method="post" class="d-inline" onsubmit="return confirm(\'¿Estás seguro de que has completado esta rutina?\')">' +
+              '<input type="hidden" name="rutinaAsignadaId" value="' + data.rutinaAsignada.id + '">' +
+              '<button type="submit" class="btn btn-success">' +
+                '<i class="bi bi-check-circle me-2"></i>Marcar como Completada' +
+              '</button>' +
+            '</form>' +
+          '</div>';
+      } else {
+        html += 
+          '<div>' +
+            '<form action="/usuario/rutinas/asignar" method="post" class="d-inline" onsubmit="return confirm(\'¿Deseas agregar esta rutina a tu plan de entrenamiento?\')">' +
+              '<input type="hidden" name="rutinaId" value="' + data.rutina.id + '">' +
+              '<button type="submit" class="btn btn-usuario-primary">' +
+                '<i class="bi bi-plus me-2"></i>Agregar a Mis Rutinas' +
+              '</button>' +
+            '</form>' +
+          '</div>';
+      }
+      
+      html += 
+        '<div>' +
+          '<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">' +
+            '<i class="bi bi-x me-2"></i>Cerrar' +
+          '</button>' +
+        '</div>' +
+      '</div>';
+      
+      return html;
+    }
+  </script>
+
+  <!-- Sidebar Responsive JS -->
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      
+      sidebar.classList.toggle('show');
+      
+      if (overlay) {
+        overlay.style.display = sidebar.classList.contains('show') ? 'block' : 'none';
+      }
+    }
+    
+    function closeSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      
+      sidebar.classList.remove('show');
+      
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+    }
+    
+    // Toggle sidebar con botón
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', toggleSidebar);
+    }
+    
+    // Cerrar sidebar al hacer clic en overlay
+    const overlay = document.getElementById('sidebarOverlay');
+    if (overlay) {
+      overlay.addEventListener('click', closeSidebar);
+    }
+    
+    // Cerrar sidebar al hacer clic en un enlace (mobile)
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 768) {
+          closeSidebar();
+        }
+      });
+    });
+    
+    // Cerrar sidebar con tecla ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSidebar();
+      }
+    });
+  </script>
+
+</body>
+</html>

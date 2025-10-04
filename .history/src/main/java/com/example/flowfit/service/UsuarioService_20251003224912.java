@@ -1,0 +1,205 @@
+package com.example.flowfit.service;
+
+import com.example.flowfit.model.Usuario;
+import com.example.flowfit.repository.UsuarioRepository;
+import com.example.flowfit.repository.EjercicioCatalogoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+import java.util.List;
+
+@Service
+public class UsuarioService {
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private EjercicioCatalogoRepository ejercicioCatalogoRepository;
+
+    /**
+     * Authenticate user login - same logic as PHP login_controller
+     */
+    public LoginResult login(String correo, String clave) {
+        try {
+            // Find user by email
+            Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreo(correo);
+            
+            // User not found or wrong password
+            if (usuarioOpt.isEmpty() || !usuarioOpt.get().getClave().equals(clave)) {
+                return new LoginResult(false, "Credenciales incorrectas o inexistentes", null);
+            }
+            
+            Usuario usuario = usuarioOpt.get();
+            
+            // Check if account is pending approval (estado = 'I')
+            if ("I".equals(usuario.getEstado())) {
+                return new LoginResult(false, "Tu cuenta aún no ha sido aprobada por el administrador.", null);
+            }
+            
+            // Check if account was rejected (estado = 'R')
+            if ("R".equals(usuario.getEstado())) {
+                return new LoginResult(false, "Tu solicitud fue rechazada por el administrador.", null);
+            }
+            
+            // Check if account is active (estado = 'A')
+            if (!"A".equals(usuario.getEstado())) {
+                return new LoginResult(false, "Tu cuenta no está activa. Contacta al administrador.", null);
+            }
+            
+            // Login successful
+            return new LoginResult(true, "Login exitoso", usuario);
+            
+        } catch (Exception e) {
+            // Database error
+            return new LoginResult(false, "Error del servidor, intente más tarde", null);
+        }
+    }
+
+    /**
+     * Register new user - same logic as PHP registro_controller
+     */
+    public RegistrationResult register(String numeroDocumento, String nombre, String telefono, 
+                                     String correo, String clave, Usuario.PerfilUsuario perfilUsuario) {
+        try {
+            // Check if email already exists
+            if (usuarioRepository.existsByCorreo(correo)) {
+                return new RegistrationResult(false, "Ya existe un usuario con ese correo", null);
+            }
+
+            // Create new user
+            Usuario usuario = new Usuario();
+            usuario.setNumeroDocumento(numeroDocumento);
+            usuario.setNombre(nombre);
+            usuario.setTelefono(telefono);
+            usuario.setCorreo(correo);
+            usuario.setClave(clave); // Plain text as in PHP version
+            usuario.setPerfilUsuario(perfilUsuario);
+            
+            // Set status based on profile
+            if (perfilUsuario == Usuario.PerfilUsuario.Usuario) {
+                usuario.setEstado("A"); // Active immediately
+            } else {
+                usuario.setEstado("I"); // Inactive, needs approval
+            }
+
+            // Save user
+            Usuario savedUser = usuarioRepository.save(usuario);
+            
+            return new RegistrationResult(true, "Registro exitoso", savedUser);
+            
+        } catch (Exception e) {
+            return new RegistrationResult(false, "Error del servidor: " + e.getMessage(), null);
+        }
+    }
+
+    /**
+     * Get redirect URL based on user profile - same logic as PHP switch statement
+     */
+    public String getRedirectUrl(Usuario.PerfilUsuario perfil) {
+        switch (perfil) {
+            case Administrador:
+                return "/admin/dashboard";
+            case Entrenador:
+                return "/entrenador/dashboard";
+            case Nutricionista:
+                return "/nutricionista/dashboard";
+            case Usuario:
+                return "/usuario/dashboard";
+            default:
+                return "/login?error=Perfil no reconocido";
+        }
+    }
+
+    /**
+     * Login result class to encapsulate login response
+     */
+    public static class LoginResult {
+        private final boolean success;
+        private final String message;
+        private final Usuario usuario;
+
+        public LoginResult(boolean success, String message, Usuario usuario) {
+            this.success = success;
+            this.message = message;
+            this.usuario = usuario;
+        }
+
+        public boolean isSuccess() { return success; }
+        public String getMessage() { return message; }
+        public Usuario getUsuario() { return usuario; }
+    }
+
+    /**
+     * Registration result class to encapsulate registration response
+     */
+    public static class RegistrationResult {
+        private final boolean success;
+        private final String message;
+        private final Usuario usuario;
+
+        public RegistrationResult(boolean success, String message, Usuario usuario) {
+            this.success = success;
+            this.message = message;
+            this.usuario = usuario;
+        }
+
+        public boolean isSuccess() { return success; }
+        public String getMessage() { return message; }
+        public Usuario getUsuario() { return usuario; }
+    }
+
+    /**
+     * Admin dashboard statistics methods
+     */
+    public long contarUsuariosPendientes() {
+        return usuarioRepository.countByEstado("I");
+    }
+
+    public long contarTotalUsuarios() {
+        return usuarioRepository.count();
+    }
+
+    public long contarTotalEjercicios() {
+        return ejercicioCatalogoRepository.count();
+    }
+
+    public List<Usuario> obtenerUsuariosPendientes() {
+        return usuarioRepository.findByEstadoOrderByIdDesc("I");
+    }
+
+    /**
+     * Profile management methods
+     */
+    public Usuario buscarPorId(Integer id) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
+        return usuarioOpt.orElse(null);
+    }
+    
+    public Optional<Usuario> buscarPorCorreo(String correo) {
+        return usuarioRepository.findByCorreo(correo);
+    }
+
+    public Usuario guardarUsuario(Usuario usuario) {
+        return usuarioRepository.save(usuario);
+    }
+    
+    /**
+     * Get all users for management
+     */
+    public List<Usuario> obtenerTodosLosUsuarios() {
+        return usuarioRepository.findAll();
+    }
+
+    public Usuario obtenerUsuarioPorId(Integer id) {
+        return usuarioRepository.findById(id).orElse(null);
+    }
+    
+    /**
+     * Find user by ID - returns Optional for consistency
+     */
+    public Optional<Usuario> findById(Integer id) {
+        return usuarioRepository.findById(id);
+    }
+}

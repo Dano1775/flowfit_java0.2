@@ -1,0 +1,60 @@
+/* Fondo degradado oscuro estilo FlowFit */
+.login-background {
+  min-height: 100vh;
+  background: linear-gradient(to right, #0f172a, #1e293b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Contenedor con efecto glassmorphism */
+.form-container {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 420px;
+  color: #f1f5f9;
+}
+
+/* Inputs con glassmorphism también */
+.input-glass {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f1f5f9;
+}
+
+.input-glass::placeholder {
+  color: #94a3b8;
+}
+
+.input-glass:focus {
+  background: rgba(255, 255, 255, 0.15);
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(74, 222, 128, 0.25);
+  border-color: #4ade80;
+}
+
+/* Botón principal estilo FlowFit */
+.btn-flowfit {
+  background-color: #4ade80;
+  color: #0f172a;
+  font-weight: bold;
+  border: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.btn-flowfit:hover {
+  background-color: #22c55e;
+  transform: scale(1.03);
+}
+
+/* Color destacado para FlowFit */
+.highlight {
+  color: #4ade80;
+  font-weight: bold;
+}

@@ -1,0 +1,103 @@
+/* ===== RUTINAS STYLES ===== */
+.rutina-card {
+    background: rgba(31, 41, 55, 0.8);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.rutina-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(74, 222, 128, 0.4);
+    box-shadow: 0 10px 30px rgba(74, 222, 128, 0.2);
+}
+
+.rutina-recommended {
+    border-color: rgba(74, 222, 128, 0.3);
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.9), rgba(74, 222, 128, 0.05));
+}
+
+.rutina-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 10px;
+}
+
+.rutina-header h5 {
+    color: white;
+    margin: 0;
+    flex-grow: 1;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.rutina-info {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.rutina-info span {
+    font-size: 0.9rem;
+}
+
+.rutina-actions {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 15px;
+}
+
+.stats-icon {
+    background: linear-gradient(135deg, var(--usuario-primary), var(--usuario-secondary));
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--usuario-primary), var(--usuario-secondary));
+}
+
+/* Badge colors with FlowFit theme */
+.badge.bg-primary {
+    background: linear-gradient(135deg, var(--usuario-primary), var(--usuario-secondary)) !important;
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+}
+
+.badge.bg-info {
+    background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
+}
+
+.badge.bg-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .rutina-card {
+        margin-bottom: 20px;
+    }
+    
+    .stats-icon {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .user-avatar img {
+        width: 50px !important;
+        height: 50px !important;
+    }
+}
