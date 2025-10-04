@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Usuarios - FlowFit</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link th:href="@{/css/entrenador-dashboard.css}" rel="stylesheet">
+  
+  <!-- Custom FlowFit VIP Styles for Mis Usuarios -->
+  <style>
+    /* === FLOWFIT VIP ENTRENADOR THEME === */
+    
+    /* Section Headers */
+    .section-header-entrenador {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .section-title-entrenador {
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 1.5rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .section-subtitle-entrenador {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+      font-weight: 400;
+    }
+    
+    .icon-wrapper-entrenador {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .icon-wrapper-entrenador.danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3);
+    }
+    
+    .icon-wrapper-entrenador i {
+      font-size: 1.25rem;
+      color: #ffffff;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+    
+    .badge-entrenador {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: #ffffff;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+    }
+    
+    /* Glass Cards */
+    .glass-card-entrenador {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .glass-card-entrenador::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    }
+    
+    .glass-card-entrenador.hover-lift:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+    
+    /* Solicitud Cards Specific */
+    .solicitud-card {
+      border-left: 4px solid #f59e0b;
+      background: rgba(245, 158, 11, 0.05);
+    }
+    
+    .solicitud-card:hover {
+      border-left-color: #d97706;
+      background: rgba(245, 158, 11, 0.1);
+    }
+    
+    /* Usuario Cards Specific */
+    .usuario-card {
+      border-left: 4px solid #10b981;
+      background: rgba(16, 185, 129, 0.05);
+    }
+    
+    .usuario-card:hover {
+      border-left-color: #059669;
+      background: rgba(16, 185, 129, 0.1);
+    }
+    
+    /* User Info Styles */
+    .avatar-entrenador {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      flex-shrink: 0;
+    }
+    
+    .avatar-entrenador i {
+      font-size: 1.75rem;
+      color: #ffffff;
+    }
+    
+    .user-name-entrenador {
+      color: #ffffff;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .contact-info-entrenador {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    
+    .contact-item-entrenador {
+      display: flex;
+      align-items: center;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.875rem;
+    }
+    
+    .contact-item-entrenador i {
+      margin-right: 0.5rem;
+      color: rgba(59, 130, 246, 0.8);
+      width: 14px;
+    }
+    
+    .timestamp-entrenador {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.875rem;
+      font-style: italic;
+    }
+    
+    .assignment-date-entrenador {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .assignment-date-entrenador i {
+      color: rgba(16, 185, 129, 0.8);
+    }
+    
+    /* Message Box */
+    .message-box-entrenador {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .message-header-entrenador {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .message-header-entrenador i {
+      color: rgba(59, 130, 246, 0.8);
+    }
+    
+    .message-content-entrenador {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 0;
+      font-style: italic;
+    }
+    
+    /* Action Buttons */
+    .action-buttons-entrenador {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .btn-entrenador-success,
+    .btn-entrenador-danger,
+    .btn-entrenador-primary,
+    .btn-entrenador-secondary {
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+    
+    .btn-entrenador-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-entrenador-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+      color: #ffffff;
+    }
+    
+    .btn-entrenador-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-entrenador-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+      color: #ffffff;
+    }
+    
+    .btn-entrenador-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-entrenador-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+      color: #ffffff;
+    }
+    
+    .btn-entrenador-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-entrenador-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+    
+    /* Empty States */
+    .empty-state-entrenador {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      margin: 2rem 0;
+    }
+    
+    .empty-icon-entrenador {
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .empty-icon-entrenador i {
+      font-size: 2.5rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .empty-title-entrenador {
+      color: #ffffff;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .empty-subtitle-entrenador {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    /* Modal Styles */
+    .modal-entrenador {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-entrenador .modal-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.5rem;
+    }
+    
+    .modal-entrenador .modal-title {
+      color: #ffffff;
+      font-weight: 700;
+    }
+    
+    .modal-subtitle {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.875rem;
+    }
+    
+    .btn-close-entrenador {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 0.5rem;
+      transition: all 0.3s ease;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .btn-close-entrenador:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      transform: scale(1.1);
+    }
+    
+    .confirmation-message-entrenador p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    
+    .form-group-entrenador {
+      margin-bottom: 1rem;
+    }
+    
+    .form-label-entrenador {
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .form-label-entrenador i {
+      color: rgba(59, 130, 246, 0.8);
+    }
+    
+    .form-control-entrenador {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #ffffff;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      resize: vertical;
+    }
+    
+    .form-control-entrenador:focus {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(59, 130, 246, 0.5);
+      box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+      outline: none;
+      color: #ffffff;
+    }
+    
+    .form-control-entrenador::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .modal-entrenador .modal-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.5rem;
+    }
+    
+    .text-entrenador-accent {
+      color: #3b82f6 !important;
+    }
+    
+    /* User Header Specific */
+    .user-header-entrenador {
+      display: flex;
+      align-items: flex-start;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .action-buttons-entrenador {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .section-header-entrenador .d-flex {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+      }
+      
+      .badge-entrenador {
+        align-self: center;
+      }
+    }
+    
+    /* Animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease-out;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <nav class="sidebar d-flex flex-column">
+    <!-- Logo y Título -->
+    <div class="navbar-brand d-flex align-items-center mb-4">
+      <img src="/assets/logo_flowfit.png" alt="FlowFit" height="32" class="me-3 logo-entrenador" style="border-radius: 8px; filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3));">
+      <span class="brand-text fs-4 fw-bold text-white">FlowFit Coach</span>
+    </div>
+
+    <!-- Navegación Principal -->
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a th:href="@{/entrenador/dashboard}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-speedometer2 me-3"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/mis-usuarios}" class="nav-link active entrenador-nav-link" aria-current="page">
+          <i class="bi bi-people me-3"></i>
+          <span>Mis Usuarios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/rutinas/crear}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-plus-circle me-3"></i>
+          <span>Crear Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/rutinas}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-list-check me-3"></i>
+          <span>Ver Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/asignar-rutinas}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-person-plus-fill me-3"></i>
+          <span>Asignar Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/progreso}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-graph-up me-3"></i>
+          <span>Progreso de Usuarios</span>
+        </a>
+      </li>
+      <li class="nav-item mt-4">
+        <a th:href="@{/logout}" class="nav-link entrenador-nav-link logout-link">
+          <i class="bi bi-box-arrow-right me-3"></i>
+          <span>Cerrar Sesión</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Perfil del Entrenador -->
+    <div class="border-top pt-3 mt-auto">
+      <div class="dropdown profile-dropdown-entrenador">
+        <div class="profile-icon-entrenador d-flex align-items-center w-100" id="profileDropdownEntrenador" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-entrenador me-3" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);">
+          <div class="flex-grow-1">
+            <div class="small fw-bold text-white" th:text="${entrenador != null ? #strings.substringBefore(entrenador.nombre, ' ') : 'Entrenador'}">Entrenador</div>
+            <div class="small text-entrenador-muted">FlowFit Coach</div>
+          </div>
+          <i class="bi bi-chevron-down text-entrenador-accent"></i>
+        </div>
+        <ul class="dropdown-menu dropdown-menu-dark profile-dropdown-menu-entrenador">
+          <li><a class="dropdown-item" th:href="@{/entrenador/perfil}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile menu button -->
+  <button class="mobile-menu-btn d-lg-none" onclick="toggleSidebar()">
+    <i class="bi bi-list"></i>
+  </button>
+  
+  <!-- Overlay para cerrar sidebar en mobile -->
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- Main content -->
+  <div class="main-content">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 fade-in-up">
+      <div>
+        <h1 class="mb-2">Gestión de Usuarios</h1>
+        <p class="lead mb-0">Administra solicitudes y usuarios asignados</p>
+      </div>
+    </div>
+
+    <!-- Solicitudes Pendientes -->
+    <div class="mb-5 fade-in-up">
+      <div class="section-header-entrenador mb-4">
+        <div class="d-flex align-items-center">
+          <div class="icon-wrapper-entrenador me-3">
+            <i class="bi bi-bell"></i>
+          </div>
+          <div>
+            <h3 class="section-title-entrenador mb-1">Solicitudes Pendientes</h3>
+            <p class="section-subtitle-entrenador mb-0">Nuevas solicitudes de usuarios esperando tu aprobación</p>
+          </div>
+          <span class="badge-entrenador ms-auto" th:if="${solicitudesPendientes != null && !solicitudesPendientes.empty}" 
+                th:text="${solicitudesPendientes.size()}">0</span>
+        </div>
+      </div>
+      
+      <div th:if="${solicitudesPendientes != null && !solicitudesPendientes.empty}">
+        <div class="glass-card-entrenador solicitud-card mb-3 hover-lift" th:each="solicitud : ${solicitudesPendientes}">
+          <div class="card-body p-4">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <div class="d-flex align-items-start mb-3">
+                  <div class="avatar-entrenador me-3">
+                    <i class="bi bi-person-circle"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h5 class="user-name-entrenador mb-1" th:text="${solicitud.usuario.nombre}">Nombre del Usuario</h5>
+                    <div class="contact-info-entrenador">
+                      <div class="contact-item-entrenador">
+                        <i class="bi bi-envelope"></i>
+                        <span th:text="${solicitud.usuario.correo}">correo@ejemplo.com</span>
+                      </div>
+                      <div class="contact-item-entrenador">
+                        <i class="bi bi-telephone"></i>
+                        <span th:text="${solicitud.usuario.telefono}">123-456-7890</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="timestamp-entrenador mb-3">
+                  <i class="bi bi-clock me-1"></i>
+                  Solicitado el <span th:text="${#temporals.format(solicitud.fechaSolicitud, 'dd/MM/yyyy HH:mm')}"></span>
+                </div>
+                
+                <div th:if="${solicitud.mensajeSolicitud}" class="message-box-entrenador">
+                  <div class="message-header-entrenador">
+                    <i class="bi bi-chat-left-text me-2"></i>
+                    <strong>Mensaje del usuario:</strong>
+                  </div>
+                  <p class="message-content-entrenador" th:text="${solicitud.mensajeSolicitud}"></p>
+                </div>
+              </div>
+              
+              <div class="col-md-4 text-end">
+                <div class="action-buttons-entrenador">
+                  <button class="btn-entrenador-success mb-2 btn-aceptar w-100" 
+                          th:data-solicitud-id="${solicitud.id}"
+                          th:data-usuario-nombre="${solicitud.usuario.nombre}">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span>Aceptar Solicitud</span>
+                  </button>
+                  <button class="btn-entrenador-danger btn-rechazar w-100" 
+                          th:data-solicitud-id="${solicitud.id}"
+                          th:data-usuario-nombre="${solicitud.usuario.nombre}">
+                    <i class="bi bi-x-circle me-2"></i>
+                    <span>Rechazar</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div th:if="${solicitudesPendientes == null || solicitudesPendientes.empty}" class="empty-state-entrenador">
+        <div class="empty-icon-entrenador">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <h4 class="empty-title-entrenador">Sin solicitudes pendientes</h4>
+        <p class="empty-subtitle-entrenador">Todas las solicitudes han sido procesadas. ¡Excelente trabajo!</p>
+      </div>
+    </div>
+
+    <!-- Usuarios Asignados -->
+    <div class="fade-in-up">
+      <div class="section-header-entrenador mb-4">
+        <div class="d-flex align-items-center">
+          <div class="icon-wrapper-entrenador me-3">
+            <i class="bi bi-people-fill"></i>
+          </div>
+          <div>
+            <h3 class="section-title-entrenador mb-1">Mis Usuarios Asignados</h3>
+            <p class="section-subtitle-entrenador mb-0">Usuarios bajo tu supervisión y entrenamiento</p>
+          </div>
+          <span class="badge-entrenador ms-auto" th:if="${usuariosAsignados != null && !usuariosAsignados.empty}" 
+                th:text="${usuariosAsignados.size()}">0</span>
+        </div>
+      </div>
+      
+      <div th:if="${usuariosAsignados != null && !usuariosAsignados.empty}">
+        <div class="row g-4">
+          <div class="col-lg-6 col-xl-4" th:each="asignacion : ${usuariosAsignados}">
+            <div class="glass-card-entrenador usuario-card h-100 hover-lift">
+              <div class="card-body p-4">
+                <div class="user-header-entrenador mb-3">
+                  <div class="avatar-entrenador me-3">
+                    <i class="bi bi-person-check"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h5 class="user-name-entrenador mb-1" th:text="${asignacion.usuario.nombre}">Nombre del Usuario</h5>
+                    <div class="assignment-date-entrenador">
+                      <i class="bi bi-calendar-check me-1"></i>
+                      Asignado el <span th:text="${#temporals.format(asignacion.fechaAceptacion, 'dd/MM/yyyy')}"></span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="contact-info-entrenador mb-4">
+                  <div class="contact-item-entrenador">
+                    <i class="bi bi-envelope"></i>
+                    <span th:text="${asignacion.usuario.correo}">correo@ejemplo.com</span>
+                  </div>
+                  <div class="contact-item-entrenador">
+                    <i class="bi bi-telephone"></i>
+                    <span th:text="${asignacion.usuario.telefono}">123-456-7890</span>
+                  </div>
+                </div>
+                
+                <div class="mt-auto">
+                  <a th:href="@{/entrenador/asignar-rutinas(usuarioId=${asignacion.usuario.id})}" 
+                     class="btn-entrenador-primary w-100">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    <span>Asignar Rutina</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div th:if="${usuariosAsignados == null || usuariosAsignados.empty}" class="empty-state-entrenador">
+        <div class="empty-icon-entrenador">
+          <i class="bi bi-people"></i>
+        </div>
+        <h4 class="empty-title-entrenador">Sin usuarios asignados</h4>
+        <p class="empty-subtitle-entrenador">Los usuarios aparecerán aquí una vez que aceptes sus solicitudes de entrenamiento.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para aceptar solicitud -->
+  <div class="modal fade" id="modalAceptar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal-entrenador">
+        <div class="modal-header">
+          <div class="d-flex align-items-center">
+            <div class="icon-wrapper-entrenador me-3">
+              <i class="bi bi-check-circle"></i>
+            </div>
+            <div>
+              <h5 class="modal-title mb-0">Aceptar Usuario</h5>
+              <p class="modal-subtitle mb-0">Confirmar nueva asignación</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close-entrenador" data-bs-dismiss="modal">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="confirmation-message-entrenador mb-4">
+            <p>¿Deseas aceptar a <strong id="nombreUsuarioAceptar" class="text-entrenador-accent"></strong> como tu usuario asignado?</p>
+          </div>
+          <div class="form-group-entrenador">
+            <label for="mensajeAceptacion" class="form-label-entrenador">
+              <i class="bi bi-chat-left-heart me-2"></i>
+              Mensaje de bienvenida (opcional)
+            </label>
+            <textarea class="form-control-entrenador" id="mensajeAceptacion" rows="3" 
+                      placeholder="Escribe un mensaje personal de bienvenida para motivar a tu nuevo usuario..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-entrenador-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-2"></i>
+            <span>Cancelar</span>
+          </button>
+          <button type="button" class="btn-entrenador-success" id="confirmarAceptacion">
+            <i class="bi bi-check-circle me-2"></i>
+            <span>Aceptar Usuario</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para rechazar solicitud -->
+  <div class="modal fade" id="modalRechazar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal-entrenador">
+        <div class="modal-header">
+          <div class="d-flex align-items-center">
+            <div class="icon-wrapper-entrenador danger me-3">
+              <i class="bi bi-x-circle"></i>
+            </div>
+            <div>
+              <h5 class="modal-title mb-0">Rechazar Solicitud</h5>
+              <p class="modal-subtitle mb-0">Declinar asignación de usuario</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close-entrenador" data-bs-dismiss="modal">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="confirmation-message-entrenador mb-4">
+            <p>¿Estás seguro de que deseas rechazar la solicitud de <strong id="nombreUsuarioRechazar" class="text-danger"></strong>?</p>
+          </div>
+          <div class="form-group-entrenador">
+            <label for="mensajeRechazo" class="form-label-entrenador">
+              <i class="bi bi-chat-left-text me-2"></i>
+              Motivo del rechazo (opcional)
+            </label>
+            <textarea class="form-control-entrenador" id="mensajeRechazo" rows="3" 
+                      placeholder="Explica brevemente el motivo del rechazo para ayudar al usuario..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-entrenador-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-arrow-left me-2"></i>
+            <span>Cancelar</span>
+          </button>
+          <button type="button" class="btn-entrenador-danger" id="confirmarRechazo">
+            <i class="bi bi-x-circle me-2"></i>
+            <span>Rechazar Solicitud</span>
+            Rechazar Solicitud
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let solicitudSeleccionada = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Manejar clicks en botones de aceptar
+      const botonesAceptar = document.querySelectorAll('.btn-aceptar');
+      botonesAceptar.forEach(boton => {
+        boton.addEventListener('click', function() {
+          solicitudSeleccionada = this.getAttribute('data-solicitud-id');
+          const nombreUsuario = this.getAttribute('data-usuario-nombre');
+          
+          document.getElementById('nombreUsuarioAceptar').textContent = nombreUsuario;
+          
+          const modal = new bootstrap.Modal(document.getElementById('modalAceptar'));
+          modal.show();
+        });
+      });
+
+      // Manejar clicks en botones de rechazar
+      const botonesRechazar = document.querySelectorAll('.btn-rechazar');
+      botonesRechazar.forEach(boton => {
+        boton.addEventListener('click', function() {
+          solicitudSeleccionada = this.getAttribute('data-solicitud-id');
+          const nombreUsuario = this.getAttribute('data-usuario-nombre');
+          
+          document.getElementById('nombreUsuarioRechazar').textContent = nombreUsuario;
+          
+          const modal = new bootstrap.Modal(document.getElementById('modalRechazar'));
+          modal.show();
+        });
+      });
+
+      // Confirmar aceptación
+      document.getElementById('confirmarAceptacion').addEventListener('click', function() {
+        if (!solicitudSeleccionada) return;
+
+        const mensaje = document.getElementById('mensajeAceptacion').value;
+        procesarSolicitud('aceptar', mensaje);
+      });
+
+      // Confirmar rechazo
+      document.getElementById('confirmarRechazo').addEventListener('click', function() {
+        if (!solicitudSeleccionada) return;
+
+        const mensaje = document.getElementById('mensajeRechazo').value;
+        procesarSolicitud('rechazar', mensaje);
+      });
+    });
+
+    function procesarSolicitud(accion, mensaje) {
+      const formData = new FormData();
+      formData.append('asignacionId', solicitudSeleccionada);
+      formData.append('mensaje', mensaje);
+
+      const url = accion === 'aceptar' ? '/entrenador/aceptar-solicitud' : '/entrenador/rechazar-solicitud';
+      
+      fetch(url, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          location.reload();
+        } else {
+          alert('Error: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión');
+      })
+      .finally(() => {
+        // Cerrar modales
+        const modalAceptar = bootstrap.Modal.getInstance(document.getElementById('modalAceptar'));
+        const modalRechazar = bootstrap.Modal.getInstance(document.getElementById('modalRechazar'));
+        
+        if (modalAceptar) modalAceptar.hide();
+        if (modalRechazar) modalRechazar.hide();
+      });
+    }
+
+    // Funciones para sidebar móvil
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.add('active');
+      document.querySelector('.sidebar-overlay').classList.add('active');
+    }
+
+    function closeSidebar() {
+      document.querySelector('.sidebar').classList.remove('active');
+      document.querySelector('.sidebar-overlay').classList.remove('active');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Usuarios - FlowFit</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link th:href="@{/css/entrenador-dashboard.css}" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <nav class="sidebar d-flex flex-column">
+    <!-- Logo y Título -->
+    <div class="navbar-brand d-flex align-items-center mb-4">
+      <img src="/assets/logo_flowfit.png" alt="FlowFit" height="32" class="me-3 logo-entrenador" style="border-radius: 8px; filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3));">
+      <span class="brand-text fs-4 fw-bold text-white">FlowFit Coach</span>
+    </div>
+
+    <!-- Navegación Principal -->
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a th:href="@{/entrenador/dashboard}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-speedometer2 me-3"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/mis-usuarios}" class="nav-link active entrenador-nav-link" aria-current="page">
+          <i class="bi bi-people me-3"></i>
+          <span>Mis Usuarios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/rutinas/crear}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-plus-circle me-3"></i>
+          <span>Crear Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/rutinas}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-list-check me-3"></i>
+          <span>Ver Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/asignar-rutinas}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-person-plus-fill me-3"></i>
+          <span>Asignar Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/progreso}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-graph-up me-3"></i>
+          <span>Progreso de Usuarios</span>
+        </a>
+      </li>
+      <li class="nav-item mt-4">
+        <a th:href="@{/logout}" class="nav-link entrenador-nav-link logout-link">
+          <i class="bi bi-box-arrow-right me-3"></i>
+          <span>Cerrar Sesión</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Perfil del Entrenador -->
+    <div class="border-top pt-3 mt-auto">
+      <div class="dropdown profile-dropdown-entrenador">
+        <div class="profile-icon-entrenador d-flex align-items-center w-100" id="profileDropdownEntrenador" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-entrenador me-3" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);">
+          <div class="flex-grow-1">
+            <div class="small fw-bold text-white" th:text="${entrenador != null ? #strings.substringBefore(entrenador.nombre, ' ') : 'Entrenador'}">Entrenador</div>
+            <div class="small text-entrenador-muted">FlowFit Coach</div>
+          </div>
+          <i class="bi bi-chevron-down text-entrenador-accent"></i>
+        </div>
+        <ul class="dropdown-menu dropdown-menu-dark profile-dropdown-menu-entrenador">
+          <li><a class="dropdown-item" th:href="@{/entrenador/perfil}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile menu button -->
+  <button class="mobile-menu-btn d-lg-none" onclick="toggleSidebar()">
+    <i class="bi bi-list"></i>
+  </button>
+  
+  <!-- Overlay para cerrar sidebar en mobile -->
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- Main content -->
+  <div class="main-content">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 fade-in-up">
+      <div>
+        <h1 class="mb-2">Gestión de Usuarios</h1>
+        <p class="lead mb-0">Administra solicitudes y usuarios asignados</p>
+      </div>
+    </div>
+
+    <!-- Solicitudes Pendientes -->
+    <div class="mb-5 fade-in-up">
+      <div class="section-header-entrenador mb-4">
+        <div class="d-flex align-items-center">
+          <div class="icon-wrapper-entrenador me-3">
+            <i class="bi bi-bell"></i>
+          </div>
+          <div>
+            <h3 class="section-title-entrenador mb-1">Solicitudes Pendientes</h3>
+            <p class="section-subtitle-entrenador mb-0">Nuevas solicitudes de usuarios esperando tu aprobación</p>
+          </div>
+          <span class="badge-entrenador ms-auto" th:if="${solicitudesPendientes != null && !solicitudesPendientes.empty}" 
+                th:text="${solicitudesPendientes.size()}">0</span>
+        </div>
+      </div>
+      
+      <div th:if="${solicitudesPendientes != null && !solicitudesPendientes.empty}">
+        <div class="glass-card-entrenador solicitud-card mb-3 hover-lift" th:each="solicitud : ${solicitudesPendientes}">
+          <div class="card-body p-4">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <div class="d-flex align-items-start mb-3">
+                  <div class="avatar-entrenador me-3">
+                    <i class="bi bi-person-circle"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h5 class="user-name-entrenador mb-1" th:text="${solicitud.usuario.nombre}">Nombre del Usuario</h5>
+                    <div class="contact-info-entrenador">
+                      <div class="contact-item-entrenador">
+                        <i class="bi bi-envelope"></i>
+                        <span th:text="${solicitud.usuario.correo}">correo@ejemplo.com</span>
+                      </div>
+                      <div class="contact-item-entrenador">
+                        <i class="bi bi-telephone"></i>
+                        <span th:text="${solicitud.usuario.telefono}">123-456-7890</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="timestamp-entrenador mb-3">
+                  <i class="bi bi-clock me-1"></i>
+                  Solicitado el <span th:text="${#temporals.format(solicitud.fechaSolicitud, 'dd/MM/yyyy HH:mm')}"></span>
+                </div>
+                
+                <div th:if="${solicitud.mensajeSolicitud}" class="message-box-entrenador">
+                  <div class="message-header-entrenador">
+                    <i class="bi bi-chat-left-text me-2"></i>
+                    <strong>Mensaje del usuario:</strong>
+                  </div>
+                  <p class="message-content-entrenador" th:text="${solicitud.mensajeSolicitud}"></p>
+                </div>
+              </div>
+              
+              <div class="col-md-4 text-end">
+                <div class="action-buttons-entrenador">
+                  <button class="btn-entrenador-success mb-2 btn-aceptar w-100" 
+                          th:data-solicitud-id="${solicitud.id}"
+                          th:data-usuario-nombre="${solicitud.usuario.nombre}">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span>Aceptar Solicitud</span>
+                  </button>
+                  <button class="btn-entrenador-danger btn-rechazar w-100" 
+                          th:data-solicitud-id="${solicitud.id}"
+                          th:data-usuario-nombre="${solicitud.usuario.nombre}">
+                    <i class="bi bi-x-circle me-2"></i>
+                    <span>Rechazar</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div th:if="${solicitudesPendientes == null || solicitudesPendientes.empty}" class="empty-state-entrenador">
+        <div class="empty-icon-entrenador">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <h4 class="empty-title-entrenador">Sin solicitudes pendientes</h4>
+        <p class="empty-subtitle-entrenador">Todas las solicitudes han sido procesadas. ¡Excelente trabajo!</p>
+      </div>
+    </div>
+
+    <!-- Usuarios Asignados -->
+    <div class="fade-in-up">
+      <h3 class="mb-3">
+        <i class="bi bi-people-fill text-primary me-2"></i>
+        Mis Usuarios Asignados
+        <span class="badge bg-primary" th:if="${usuariosAsignados != null && !usuariosAsignados.empty}" 
+              th:text="${usuariosAsignados.size()}">0</span>
+      </h3>
+      
+      <div th:if="${usuariosAsignados != null && !usuariosAsignados.empty}">
+        <div class="row">
+          <div class="col-lg-6 col-xl-4 mb-4" th:each="asignacion : ${usuariosAsignados}">
+            <div class="entrenador-card h-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                  <i class="bi bi-person-check text-success me-3" style="font-size: 2.5rem;"></i>
+                  <div>
+                    <h5 class="card-title mb-1" th:text="${asignacion.usuario.nombre}">Nombre del Usuario</h5>
+                    <small class="text-muted">
+                      Asignado el <span th:text="${#temporals.format(asignacion.fechaAceptacion, 'dd/MM/yyyy')}"></span>
+                    </small>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <p class="text-muted mb-1">
+                    <i class="bi bi-envelope me-2"></i>
+                    <span th:text="${asignacion.usuario.correo}">correo@ejemplo.com</span>
+                  </p>
+                  <p class="text-muted mb-0">
+                    <i class="bi bi-telephone me-2"></i>
+                    <span th:text="${asignacion.usuario.telefono}">123-456-7890</span>
+                  </p>
+                </div>
+                
+                <div class="mt-auto">
+                  <a th:href="@{/entrenador/asignar-rutinas(usuarioId=${asignacion.usuario.id})}" 
+                     class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Asignar Rutina
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div th:if="${usuariosAsignados == null || usuariosAsignados.empty}" class="text-center py-4">
+        <i class="bi bi-person-x text-muted" style="font-size: 4rem;"></i>
+        <h4 class="mt-3 text-muted">Sin usuarios asignados</h4>
+        <p class="text-muted">Aún no tienes usuarios bajo tu supervisión.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para aceptar solicitud -->
+  <div class="modal fade" id="modalAceptar" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Aceptar Usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Deseas aceptar a <strong id="nombreUsuarioAceptar"></strong> como tu usuario asignado?</p>
+          <div class="mb-3">
+            <label for="mensajeAceptacion" class="form-label">Mensaje de bienvenida (opcional):</label>
+            <textarea class="form-control" id="mensajeAceptacion" rows="3" 
+                      placeholder="Escribe un mensaje de bienvenida para el usuario"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-success" id="confirmarAceptacion">
+            <i class="bi bi-check-circle me-2"></i>
+            Aceptar Usuario
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para rechazar solicitud -->
+  <div class="modal fade" id="modalRechazar" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Rechazar Solicitud</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas rechazar la solicitud de <strong id="nombreUsuarioRechazar"></strong>?</p>
+          <div class="mb-3">
+            <label for="mensajeRechazo" class="form-label">Motivo del rechazo (opcional):</label>
+            <textarea class="form-control" id="mensajeRechazo" rows="3" 
+                      placeholder="Explica brevemente el motivo del rechazo"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmarRechazo">
+            <i class="bi bi-x-circle me-2"></i>
+            Rechazar Solicitud
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let solicitudSeleccionada = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Manejar clicks en botones de aceptar
+      const botonesAceptar = document.querySelectorAll('.btn-aceptar');
+      botonesAceptar.forEach(boton => {
+        boton.addEventListener('click', function() {
+          solicitudSeleccionada = this.getAttribute('data-solicitud-id');
+          const nombreUsuario = this.getAttribute('data-usuario-nombre');
+          
+          document.getElementById('nombreUsuarioAceptar').textContent = nombreUsuario;
+          
+          const modal = new bootstrap.Modal(document.getElementById('modalAceptar'));
+          modal.show();
+        });
+      });
+
+      // Manejar clicks en botones de rechazar
+      const botonesRechazar = document.querySelectorAll('.btn-rechazar');
+      botonesRechazar.forEach(boton => {
+        boton.addEventListener('click', function() {
+          solicitudSeleccionada = this.getAttribute('data-solicitud-id');
+          const nombreUsuario = this.getAttribute('data-usuario-nombre');
+          
+          document.getElementById('nombreUsuarioRechazar').textContent = nombreUsuario;
+          
+          const modal = new bootstrap.Modal(document.getElementById('modalRechazar'));
+          modal.show();
+        });
+      });
+
+      // Confirmar aceptación
+      document.getElementById('confirmarAceptacion').addEventListener('click', function() {
+        if (!solicitudSeleccionada) return;
+
+        const mensaje = document.getElementById('mensajeAceptacion').value;
+        procesarSolicitud('aceptar', mensaje);
+      });
+
+      // Confirmar rechazo
+      document.getElementById('confirmarRechazo').addEventListener('click', function() {
+        if (!solicitudSeleccionada) return;
+
+        const mensaje = document.getElementById('mensajeRechazo').value;
+        procesarSolicitud('rechazar', mensaje);
+      });
+    });
+
+    function procesarSolicitud(accion, mensaje) {
+      const formData = new FormData();
+      formData.append('asignacionId', solicitudSeleccionada);
+      formData.append('mensaje', mensaje);
+
+      const url = accion === 'aceptar' ? '/entrenador/aceptar-solicitud' : '/entrenador/rechazar-solicitud';
+      
+      fetch(url, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          location.reload();
+        } else {
+          alert('Error: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión');
+      })
+      .finally(() => {
+        // Cerrar modales
+        const modalAceptar = bootstrap.Modal.getInstance(document.getElementById('modalAceptar'));
+        const modalRechazar = bootstrap.Modal.getInstance(document.getElementById('modalRechazar'));
+        
+        if (modalAceptar) modalAceptar.hide();
+        if (modalRechazar) modalRechazar.hide();
+      });
+    }
+
+    // Funciones para sidebar móvil
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.add('active');
+      document.querySelector('.sidebar-overlay').classList.add('active');
+    }
+
+    function closeSidebar() {
+      document.querySelector('.sidebar').classList.remove('active');
+      document.querySelector('.sidebar-overlay').classList.remove('active');
+    }
+  </script>
+</body>
+</html>
