@@ -18,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
@@ -230,7 +231,7 @@ public class EntrenadorController {
                                RedirectAttributes redirectAttributes) {
         try {
             Usuario entrenador = (Usuario) session.getAttribute("usuario");
-            if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            if (entrenador == null || !"Entrenador".equals(entrenador.getPerfilUsuario())) {
                 return "redirect:/login";
             }
 
@@ -276,7 +277,7 @@ public class EntrenadorController {
                                   RedirectAttributes redirectAttributes) {
         try {
             Usuario entrenador = (Usuario) session.getAttribute("usuario");
-            if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            if (entrenador == null || !"Entrenador".equals(entrenador.getPerfilUsuario())) {
                 return "redirect:/login";
             }
 
@@ -297,7 +298,7 @@ public class EntrenadorController {
     @GetMapping("/ejercicios")
     public String ejercicios(Model model, HttpSession session) {
         Usuario entrenador = (Usuario) session.getAttribute("usuario");
-        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+        if (entrenador == null || !"Entrenador".equals(entrenador.getPerfilUsuario())) {
             return "redirect:/login";
         }
 
@@ -317,7 +318,7 @@ public class EntrenadorController {
     @GetMapping("/historial-asignaciones")
     public String historialAsignaciones(Model model, HttpSession session) {
         Usuario entrenador = (Usuario) session.getAttribute("usuario");
-        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+        if (entrenador == null || !"Entrenador".equals(entrenador.getPerfilUsuario())) {
             return "redirect:/login";
         }
 
@@ -428,5 +429,118 @@ public class EntrenadorController {
         }
         
         return response;
+    }
+
+    /**
+     * Mostrar página de gestión de ejercicios del entrenador
+     */
+    @GetMapping("/ejercicios")
+    public String ejercicios(Model model, HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return "redirect:/login";
+        }
+
+        // Obtener ejercicios globales y personales del entrenador
+        List<EjercicioCatalogo> ejerciciosGlobales = ejercicioService.obtenerEjerciciosGlobales();
+        List<EjercicioCatalogo> ejerciciosPersonales = ejercicioService.obtenerEjerciciosPorCreador(entrenador.getId());
+
+        model.addAttribute("entrenador", entrenador);
+        model.addAttribute("ejerciciosGlobales", ejerciciosGlobales);
+        model.addAttribute("ejerciciosPersonales", ejerciciosPersonales);
+
+        return "Entrenador/ejercicios";
+    }
+
+    /**
+     * Mostrar formulario para crear ejercicio personalizado
+     */
+    @GetMapping("/ejercicios/crear")
+    public String mostrarFormularioCrearEjercicio(Model model, HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return "redirect:/login";
+        }
+        
+        model.addAttribute("entrenador", entrenador);
+        return "Entrenador/crear-ejercicio";
+    }
+
+    /**
+     * Procesar creación de ejercicio personalizado
+     */
+    @PostMapping("/ejercicios/crear")
+    public String crearEjercicio(@RequestParam("nombre") String nombre,
+                               @RequestParam("descripcion") String descripcion,
+                               @RequestParam("imagen") org.springframework.web.multipart.MultipartFile imagen,
+                               RedirectAttributes redirectAttributes,
+                               HttpSession session) {
+        try {
+            Usuario entrenador = (Usuario) session.getAttribute("usuario");
+            if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+                return "redirect:/login";
+            }
+            
+            if (nombre == null || nombre.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "El nombre del ejercicio es requerido");
+                return "redirect:/entrenador/ejercicios/crear";
+            }
+            
+            if (descripcion == null || descripcion.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "La descripción del ejercicio es requerida");
+                return "redirect:/entrenador/ejercicios/crear";
+            }
+            
+            if (imagen == null || imagen.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "La imagen del ejercicio es requerida");
+                return "redirect:/entrenador/ejercicios/crear";
+            }
+            
+            // Crear ejercicio personal del entrenador
+            EjercicioCatalogo ejercicio = ejercicioService.createTrainerExercise(
+                nombre.trim(), descripcion.trim(), imagen, entrenador);
+            
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "¡Ejercicio personalizado creado exitosamente! Ahora puedes usarlo en tus rutinas.");
+            return "redirect:/entrenador/ejercicios";
+            
+        } catch (java.io.IOException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al guardar la imagen: " + e.getMessage());
+            return "redirect:/entrenador/ejercicios/crear";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al crear el ejercicio: " + e.getMessage());
+            return "redirect:/entrenador/ejercicios/crear";
+        }
+    }
+
+    /**
+     * Eliminar ejercicio personalizado del entrenador
+     */
+    @PostMapping("/ejercicios/eliminar/{id}")
+    public String eliminarEjercicio(@PathVariable("id") Long id,
+                                  RedirectAttributes redirectAttributes,
+                                  HttpSession session) {
+        try {
+            Usuario entrenador = (Usuario) session.getAttribute("usuario");
+            if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+                return "redirect:/login";
+            }
+            
+            // Verificar que el ejercicio pertenece al entrenador
+            EjercicioCatalogo ejercicio = ejercicioService.obtenerEjercicioPorId(id);
+            if (ejercicio == null || !ejercicio.getCreadoPor().equals(entrenador.getId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", 
+                    "No tienes permisos para eliminar este ejercicio");
+                return "redirect:/entrenador/ejercicios";
+            }
+            
+            ejercicioService.eliminarEjercicio(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Ejercicio eliminado exitosamente");
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar el ejercicio: " + e.getMessage());
+        }
+        
+        return "redirect:/entrenador/ejercicios";
     }
 }

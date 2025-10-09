@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Rutinas - FlowFit Coach</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link th:href="@{/css/entrenador-dashboard.css}" rel="stylesheet">
+    
+    <style>
+      /* FlowFit VIP Rutinas Styles */
+      .rutina-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
+      
+      .rutina-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+        border-color: rgba(59, 130, 246, 0.4);
+      }
+      
+      .rutina-title {
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .rutina-description {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+      }
+      
+      .rutina-stats {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+      }
+      
+      .rutina-stat {
+        display: flex;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.875rem;
+      }
+      
+      .rutina-stat i {
+        color: rgba(59, 130, 246, 0.8);
+        margin-right: 0.5rem;
+        font-size: 1rem;
+      }
+      
+      .rutina-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+      
+      .btn-action {
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+      }
+      
+      .btn-primary-action {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: #ffffff;
+      }
+      
+      .btn-primary-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+        color: #ffffff;
+      }
+      
+      .btn-success-action {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff;
+      }
+      
+      .btn-success-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        color: #ffffff;
+      }
+      
+      .btn-outline-action {
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      
+      .btn-outline-action:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        transform: translateY(-1px);
+      }
+      
+      .floating-create-btn {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        border-radius: 50%;
+        color: #ffffff;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        z-index: 1000;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .floating-create-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 12px 36px rgba(16, 185, 129, 0.5);
+        color: #ffffff;
+      }
+      
+      .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        border: 2px dashed rgba(255, 255, 255, 0.2);
+      }
+      
+      .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+      }
+      
+      .empty-state-icon i {
+        font-size: 2rem;
+        color: #ffffff;
+      }
+      
+      .empty-state-title {
+        color: #ffffff;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      
+      .empty-state-text {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1rem;
+        margin-bottom: 2rem;
+      }
+      
+      @media (max-width: 768px) {
+        .rutina-stats {
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        
+        .rutina-actions {
+          flex-direction: column;
+        }
+        
+        .floating-create-btn {
+          bottom: 1rem;
+          right: 1rem;
+          width: 56px;
+          height: 56px;
+          font-size: 1.25rem;
+        }
+      }
+    </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <nav class="sidebar d-flex flex-column">
+    <!-- Logo y Título -->
+    <div class="navbar-brand d-flex align-items-center mb-4">
+      <img src="/assets/logo_flowfit.png" alt="FlowFit" height="32" class="me-3 logo-entrenador" style="border-radius: 8px; filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3));">
+      <span class="brand-text fs-4 fw-bold text-white">FlowFit Coach</span>
+    </div>
+
+    <!-- Navegación Principal -->
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a th:href="@{/entrenador/dashboard}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-speedometer2 me-3"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/mis-usuarios}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-people me-3"></i>
+          <span>Mis Usuarios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/ejercicios}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-heart-pulse me-3"></i>
+          <span>Mis Ejercicios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/rutinas/crear}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-plus-circle me-3"></i>
+          <span>Crear Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/rutinas}" class="nav-link active entrenador-nav-link" aria-current="page">
+          <i class="bi bi-list-check me-3"></i>
+          <span>Ver Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/asignar-rutinas}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-person-plus-fill me-3"></i>
+          <span>Asignar Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/progreso}" class="nav-link entrenador-nav-link">
+          <i class="bi bi-graph-up me-3"></i>
+          <span>Progreso de Usuarios</span>
+        </a>
+      </li>
+      <li class="nav-item mt-4">
+        <a th:href="@{/logout}" class="nav-link entrenador-nav-link logout-link">
+          <i class="bi bi-box-arrow-right me-3"></i>
+          <span>Cerrar Sesión</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Perfil del Entrenador -->
+    <div class="border-top pt-3 mt-auto">
+      <div class="dropdown profile-dropdown-entrenador">
+        <div class="profile-icon-entrenador d-flex align-items-center w-100" id="profileDropdownEntrenador" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-entrenador me-3" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);">
+          <div class="flex-grow-1">
+            <div class="small fw-bold text-white" th:text="${entrenador != null ? #strings.substringBefore(entrenador.nombre, ' ') : 'Entrenador'}">Entrenador</div>
+            <div class="small text-entrenador-muted">FlowFit Coach</div>
+          </div>
+          <i class="bi bi-chevron-down text-entrenador-accent"></i>
+        </div>
+        <ul class="dropdown-menu dropdown-menu-dark profile-dropdown-menu-entrenador">
+          <li><a class="dropdown-item" th:href="@{/entrenador/perfil}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile menu button -->
+  <button class="mobile-menu-btn d-lg-none" onclick="toggleSidebar()">
+    <i class="bi bi-list"></i>
+  </button>
+  
+  <!-- Overlay para cerrar sidebar en mobile -->
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- Main content -->
+  <div class="main-content">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 fade-in-up">
+      <div>
+        <h1 class="mb-2">
+          <i class="bi bi-list-check me-2"></i>
+          Mis Rutinas de Entrenamiento
+        </h1>
+        <p class="lead mb-0">Gestiona y asigna rutinas personalizadas a tus usuarios</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a th:href="@{/entrenador/rutinas/crear}" class="btn btn-success d-none d-md-inline-flex align-items-center">
+          <i class="bi bi-plus-circle me-2"></i>
+          Nueva Rutina
+        </a>
+      </div>
+    </div>
+
+    <!-- Mensajes -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+      <i class="bi bi-check-circle me-2"></i>
+      <span th:text="${successMessage}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      <span th:text="${errorMessage}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Estado vacío -->
+    <div th:if="${#lists.isEmpty(rutinas)}" class="empty-state fade-in-up">
+      <div class="empty-state-icon">
+        <i class="bi bi-journal-x"></i>
+      </div>
+      <h2 class="empty-state-title">No tienes rutinas creadas</h2>
+      <p class="empty-state-text">
+        Crea tu primera rutina personalizada para comenzar a entrenar a tus usuarios de manera efectiva
+      </p>
+      <a th:href="@{/entrenador/rutinas/crear}" class="btn-success-action">
+        <i class="bi bi-plus-circle me-2"></i>
+        Crear Mi Primera Rutina
+      </a>
+    </div>
+
+    <!-- Lista de rutinas -->
+    <div th:if="${!#lists.isEmpty(rutinas)}" class="row g-3 fade-in-up">
+      <div class="col-md-6 col-lg-4" th:each="rutina : ${rutinas}">
+        <div class="rutina-card">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <h3 class="rutina-title" th:text="${rutina.nombre}">Rutina Nombre</h3>
+            <div class="dropdown">
+              <button class="btn btn-sm text-white-50" data-bs-toggle="dropdown" style="background: none; border: none;">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <a class="dropdown-item" th:href="@{/entrenador/rutinas/{id}(id=${rutina.id})}">
+                    <i class="bi bi-eye me-2"></i>Ver Detalles
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" th:href="@{/entrenador/asignar-rutinas(rutina=${rutina.id})}">
+                    <i class="bi bi-person-plus me-2"></i>Asignar Usuario
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item text-danger" href="#" 
+                     th:onclick="'confirmarEliminar(' + ${rutina.id} + ', \'' + ${rutina.nombre} + '\')'">
+                    <i class="bi bi-trash me-2"></i>Eliminar
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="rutina-description" th:text="${rutina.descripcion ?: 'Sin descripción disponible'}">
+            Descripción de la rutina...
+          </p>
+
+          <div class="rutina-stats">
+            <div class="rutina-stat">
+              <i class="bi bi-activity"></i>
+              <span th:text="${rutina.ejercicios?.size() ?: 0} + ' ejercicios'">0 ejercicios</span>
+            </div>
+            <div class="rutina-stat">
+              <i class="bi bi-calendar-event"></i>
+              <span th:text="${#temporals.format(rutina.fechaCreacion, 'dd/MM/yyyy')}">01/01/2024</span>
+            </div>
+            <div class="rutina-stat">
+              <i class="bi bi-clock"></i>
+              <span>45 min</span>
+            </div>
+          </div>
+
+          <div class="rutina-actions">
+            <a th:href="@{/entrenador/rutinas/{id}(id=${rutina.id})}" class="btn-outline-action flex-fill text-center">
+              <i class="bi bi-eye me-1"></i>Ver
+            </a>
+            <a th:href="@{/entrenador/asignar-rutinas(rutina=${rutina.id})}" class="btn-primary-action flex-fill text-center">
+              <i class="bi bi-person-plus me-1"></i>Asignar
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón flotante para crear rutina -->
+  <a th:href="@{/entrenador/rutinas/crear}" class="floating-create-btn d-md-none" title="Crear nueva rutina">
+    <i class="bi bi-plus"></i>
+  </a>
+
+  <!-- Modal de confirmación para eliminar -->
+  <div class="modal fade" id="eliminarModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark">
+        <div class="modal-header">
+          <h5 class="modal-title text-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Confirmar Eliminación
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-light">¿Estás seguro de que deseas eliminar la rutina <strong id="rutinaEliminarNombre" class="text-warning"></strong>?</p>
+          <p class="text-warning small">
+            <i class="bi bi-info-circle me-1"></i>
+            Esta acción no se puede deshacer y eliminará todas las asignaciones relacionadas.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <form id="eliminarForm" method="post" style="display: inline;">
+            <button type="submit" class="btn btn-danger">
+              <i class="bi bi-trash me-1"></i>
+              Eliminar Rutina
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Funciones para sidebar móvil
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.add('active');
+      document.querySelector('.sidebar-overlay').classList.add('active');
+    }
+
+    function closeSidebar() {
+      document.querySelector('.sidebar').classList.remove('active');
+      document.querySelector('.sidebar-overlay').classList.remove('active');
+    }
+
+    // Confirmar eliminación de rutina
+    function confirmarEliminar(rutinaId, rutinaNombre) {
+      document.getElementById('rutinaEliminarNombre').textContent = rutinaNombre;
+      document.getElementById('eliminarForm').action = `/entrenador/rutinas/${rutinaId}/eliminar`;
+      
+      const modal = new bootstrap.Modal(document.getElementById('eliminarModal'));
+      modal.show();
+    }
+
+    // Auto-hide alerts after 5 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        setTimeout(() => {
+          alert.style.opacity = '0';
+          setTimeout(() => alert.remove(), 300);
+        }, 5000);
+      });
+    });
+  </script>
+</body>
+</html>
