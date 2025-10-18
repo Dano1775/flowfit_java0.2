@@ -109,7 +109,7 @@ public class RegistroController {
         // Registro exitoso - redirigir con mensaje de éxito
         if (perfilUsuario == Usuario.PerfilUsuario.Usuario) {
             return "redirect:/login?success=" +
-                    "¡Registro exitoso! Ya puedes iniciar sesión.";
+                    "Registro exitoso. Ya puedes iniciar sesion.";
         } else {
             return "redirect:/login?success=" +
                     "Tu solicitud de registro fue enviada correctamente. Espera a que un administrador apruebe tu cuenta.";
