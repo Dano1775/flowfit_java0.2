@@ -158,7 +158,7 @@ public class UsuarioService {
     }
 
     /**
-     * Métodos de estadísticas del panel de administración
+     * Admin dashboard statistics methods
      */
     public long contarUsuariosPendientes() {
         return usuarioRepository.countByEstado("I");
@@ -177,7 +177,7 @@ public class UsuarioService {
     }
 
     /**
-     * Métodos de gestión de perfiles
+     * Profile management methods
      */
     public Usuario buscarPorId(Integer id) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
@@ -193,7 +193,7 @@ public class UsuarioService {
     }
     
     /**
-     * Obtener todos los usuarios para gestión
+     * Get all users for management
      */
     public List<Usuario> obtenerTodosLosUsuarios() {
         return usuarioRepository.findAll();
@@ -204,7 +204,7 @@ public class UsuarioService {
     }
     
     /**
-     * Buscar usuario por ID - retorna Optional para consistencia
+     * Find user by ID - returns Optional for consistency
      */
     public Optional<Usuario> findById(Integer id) {
         return usuarioRepository.findById(id);

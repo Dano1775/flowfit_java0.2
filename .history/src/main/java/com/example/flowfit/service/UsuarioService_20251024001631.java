@@ -204,7 +204,7 @@ public class UsuarioService {
     }
     
     /**
-     * Buscar usuario por ID - retorna Optional para consistencia
+     * Find user by ID - returns Optional for consistency
      */
     public Optional<Usuario> findById(Integer id) {
         return usuarioRepository.findById(id);

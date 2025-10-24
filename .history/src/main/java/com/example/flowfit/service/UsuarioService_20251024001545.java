@@ -58,33 +58,33 @@ public class UsuarioService {
     }
 
     /**
-     * Registrar nuevo usuario - misma lógica que registro_controller de PHP
+     * Register new user - same logic as PHP registro_controller
      */
     public RegistrationResult register(String numeroDocumento, String nombre, String telefono, 
                                      String correo, String clave, Usuario.PerfilUsuario perfilUsuario) {
         try {
-            // Verificar si el correo ya existe
+            // Check if email already exists
             if (usuarioRepository.existsByCorreo(correo)) {
                 return new RegistrationResult(false, "Ya existe un usuario con ese correo", null);
             }
 
-            // Crear nuevo usuario
+            // Create new user
             Usuario usuario = new Usuario();
             usuario.setNumeroDocumento(numeroDocumento);
             usuario.setNombre(nombre);
             usuario.setTelefono(telefono);
             usuario.setCorreo(correo);
-            usuario.setClave(clave); // Texto plano como en la versión PHP
+            usuario.setClave(clave); // Plain text as in PHP version
             usuario.setPerfilUsuario(perfilUsuario);
             
-            // Establecer estado basado en el perfil
+            // Set status based on profile
             if (perfilUsuario == Usuario.PerfilUsuario.Usuario) {
-                usuario.setEstado("A"); // Activo inmediatamente
+                usuario.setEstado("A"); // Active immediately
             } else {
-                usuario.setEstado("I"); // Inactivo, necesita aprobación
+                usuario.setEstado("I"); // Inactive, needs approval
             }
 
-            // Guardar usuario
+            // Save user
             Usuario savedUser = usuarioRepository.save(usuario);
             
             return new RegistrationResult(true, "Registro exitoso", savedUser);
@@ -102,7 +102,7 @@ public class UsuarioService {
     }
 
     /**
-     * Obtener URL de redirección basada en el perfil del usuario - misma lógica que el switch de PHP
+     * Get redirect URL based on user profile - same logic as PHP switch statement
      */
     public String getRedirectUrl(Usuario.PerfilUsuario perfil) {
         switch (perfil) {
@@ -120,7 +120,7 @@ public class UsuarioService {
     }
 
     /**
-     * Clase de resultado de inicio de sesión para encapsular la respuesta del login
+     * Login result class to encapsulate login response
      */
     public static class LoginResult {
         private final boolean success;
@@ -139,7 +139,7 @@ public class UsuarioService {
     }
 
     /**
-     * Clase de resultado de registro para encapsular la respuesta del registro
+     * Registration result class to encapsulate registration response
      */
     public static class RegistrationResult {
         private final boolean success;
@@ -158,7 +158,7 @@ public class UsuarioService {
     }
 
     /**
-     * Métodos de estadísticas del panel de administración
+     * Admin dashboard statistics methods
      */
     public long contarUsuariosPendientes() {
         return usuarioRepository.countByEstado("I");
@@ -177,7 +177,7 @@ public class UsuarioService {
     }
 
     /**
-     * Métodos de gestión de perfiles
+     * Profile management methods
      */
     public Usuario buscarPorId(Integer id) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
@@ -193,7 +193,7 @@ public class UsuarioService {
     }
     
     /**
-     * Obtener todos los usuarios para gestión
+     * Get all users for management
      */
     public List<Usuario> obtenerTodosLosUsuarios() {
         return usuarioRepository.findAll();
@@ -204,7 +204,7 @@ public class UsuarioService {
     }
     
     /**
-     * Buscar usuario por ID - retorna Optional para consistencia
+     * Find user by ID - returns Optional for consistency
      */
     public Optional<Usuario> findById(Integer id) {
         return usuarioRepository.findById(id);
