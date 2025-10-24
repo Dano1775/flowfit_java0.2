@@ -30,7 +30,10 @@ public class Rutina {
     @Column(name = "entrenador_id")
     private Integer entrenadorId;
     
-    @Column(name = "fecha_creacion")
+    // @Column(name = "fecha_creacion")
+    // private LocalDate fechaCreacion;
+    
+    @Transient
     private LocalDate fechaCreacion;
     
     // Campos adicionales calculados

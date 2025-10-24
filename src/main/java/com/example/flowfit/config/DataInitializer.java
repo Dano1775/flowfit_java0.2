@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-@Component
+// @Component  // Comentado temporalmente para evitar problemas con la base de datos
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired

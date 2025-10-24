@@ -43,4 +43,29 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     
     // Buscar usuarios por perfil y estado
     List<Usuario> findByPerfilUsuarioAndEstado(Usuario.PerfilUsuario perfilUsuario, String estado);
+    
+    // Métodos para boletines informativos - segmentación
+    
+    // Buscar usuarios activos (con estado 'A')
+    @Query("SELECT u FROM Usuario u WHERE u.estado = 'A'")
+    List<Usuario> findUsuariosActivos();
+    
+    // Buscar solo entrenadores activos
+    @Query("SELECT u FROM Usuario u WHERE u.perfilUsuario = 'Entrenador' AND u.estado = 'A'")
+    List<Usuario> findEntrenadoresActivos();
+    
+    // Buscar solo usuarios regulares activos
+    @Query("SELECT u FROM Usuario u WHERE u.perfilUsuario = 'Usuario' AND u.estado = 'A'")
+    List<Usuario> findUsuariosRegularesActivos();
+    
+    // Buscar usuarios inactivos (estados diferentes a 'A')
+    @Query("SELECT u FROM Usuario u WHERE u.estado != 'A'")
+    List<Usuario> findUsuariosInactivos();
+    
+    // Métodos adicionales para estadísticas (usando String en lugar de enum para mayor flexibilidad)
+    @Query("SELECT COUNT(u) FROM Usuario u WHERE u.perfilUsuario = :perfil AND u.estado = :estado")
+    long countByPerfilUsuarioStringAndEstado(@Param("perfil") String perfil, @Param("estado") String estado);
+    
+    @Query("SELECT u FROM Usuario u WHERE u.perfilUsuario = :perfil AND u.estado = :estado")
+    List<Usuario> findByPerfilUsuarioStringAndEstado(@Param("perfil") String perfil, @Param("estado") String estado);
 }

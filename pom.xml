@@ -81,7 +81,13 @@
 			<version>5.2.4</version>
 		</dependency>
 		
-		<!-- Jakarta Mail for email functionality -->
+		<!-- Spring Boot Starter Mail (reemplaza Jakarta Mail standalone) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		
+		<!-- Jakarta Mail for email functionality (mantener para compatibilidad) -->
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>jakarta.mail</artifactId>
