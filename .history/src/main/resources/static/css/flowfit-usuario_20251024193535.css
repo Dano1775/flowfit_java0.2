@@ -1,0 +1,223 @@
+/* ===== FLOWFIT VIP - USUARIO SPECIFIC CSS ===== */
+
+/* Variables específicas del Usuario */
+:root {
+    --usuario-primary: #22c55e;      /* Verde principal consistente */
+    --usuario-primary-light: #4ade80; /* Verde claro */
+    --usuario-primary-dark: #16a34a;  /* Verde oscuro */
+    --usuario-gradient: linear-gradient(135deg, #22c55e 0%, #4ade80 50%, #10b981 100%);
+    --usuario-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+}
+
+/* Sidebar específico del usuario */
+.sidebar-usuario {
+    background: linear-gradient(180deg, 
+        rgba(34, 197, 94, 0.95) 0%, 
+        rgba(74, 222, 128, 0.85) 40%,
+        rgba(15, 23, 42, 0.95) 100%);
+}
+
+/* Logo específico */
+.sidebar-usuario .brand-text {
+    background: linear-gradient(135deg, #ffffff 0%, #bbf7d0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Enlaces activos del usuario */
+.sidebar-usuario .nav-pills .nav-link-usuario.active {
+    background: var(--usuario-gradient) !important;
+    color: white !important;
+    box-shadow: var(--usuario-shadow);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-usuario .nav-pills .nav-link-usuario:hover {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+/* Botón toggle específico */
+.sidebar-toggle-usuario {
+    background: var(--usuario-gradient);
+    box-shadow: var(--usuario-shadow);
+}
+
+/* Stats cards del usuario */
+.stat-card-usuario {
+    position: relative;
+}
+
+.stat-card-usuario::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--usuario-gradient);
+    border-radius: 16px 16px 0 0;
+}
+
+.stat-card-usuario:hover::before {
+    height: 6px;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.5);
+}
+
+/* Botones específicos del usuario */
+.btn-usuario-primary {
+    background: var(--usuario-gradient);
+    box-shadow: var(--usuario-shadow);
+}
+
+.btn-usuario-primary:hover {
+    box-shadow: 0 12px 35px rgba(16, 185, 129, 0.6);
+    filter: brightness(1.1);
+}
+
+.btn-usuario-outline {
+    border-color: var(--usuario-primary);
+    color: var(--usuario-primary);
+}
+
+.btn-usuario-outline:hover {
+    background: var(--usuario-gradient);
+    border-color: var(--usuario-primary-light);
+    color: white;
+    box-shadow: var(--usuario-shadow);
+}
+
+/* Cards específicas del usuario */
+.card-usuario .card-header h5 {
+    background: var(--usuario-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Iconos específicos del usuario */
+.icon-usuario {
+    color: var(--usuario-primary);
+    filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3));
+}
+
+/* Efectos hover específicos */
+.stat-card-usuario:hover {
+    box-shadow: var(--flowfit-shadow-lg), var(--usuario-shadow);
+}
+
+.card-usuario:hover {
+    border-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+/* Progress bars específicas del usuario */
+.progress-usuario {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    height: 12px;
+    overflow: hidden;
+}
+
+.progress-usuario .progress-bar {
+    background: var(--usuario-gradient);
+    border-radius: 12px;
+    transition: var(--flowfit-transition);
+}
+
+/* Estados de rutina */
+.estado-completado {
+    color: var(--flowfit-success);
+    font-weight: 600;
+}
+
+.estado-en-progreso {
+    color: var(--flowfit-warning);
+    font-weight: 600;
+}
+
+.estado-pendiente {
+    color: var(--flowfit-info);
+    font-weight: 600;
+}
+
+/* Calendario específico del usuario */
+.calendar-usuario {
+    background: var(--flowfit-glass-bg);
+    border: 1px solid var(--flowfit-glass-border);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.calendar-usuario .day {
+    padding: 12px;
+    border-radius: 8px;
+    transition: var(--flowfit-transition);
+    cursor: pointer;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.calendar-usuario .day:hover {
+    background: rgba(34, 197, 94, 0.2);
+    color: white;
+}
+
+.calendar-usuario .day.active {
+    background: var(--usuario-gradient);
+    color: white;
+    box-shadow: var(--usuario-shadow);
+}
+
+.calendar-usuario .day.has-routine {
+    position: relative;
+}
+
+.calendar-usuario .day.has-routine::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background: var(--usuario-primary);
+    border-radius: 50%;
+}
+
+/* Métricas del usuario */
+.metric-card-usuario {
+    text-align: center;
+    padding: 24px 16px;
+}
+
+.metric-card-usuario .metric-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: var(--usuario-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.metric-card-usuario .metric-label {
+    color: var(--flowfit-text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.metric-card-usuario .metric-change {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.metric-card-usuario .metric-change.positive {
+    color: var(--flowfit-success);
+}
+
+.metric-card-usuario .metric-change.negative {
+    color: var(--flowfit-danger);
+}
