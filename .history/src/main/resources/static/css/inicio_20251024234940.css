@@ -1,4 +1,6 @@
-/* BASE & RESET */
+/* ============================================
+   BASE & RESET
+   ============================================ */
 * {
   margin: 0;
   padding: 0;
@@ -12,7 +14,9 @@ body {
   overflow: hidden;
 }
 
-/* ANIMATED BLOBS */
+/* ============================================
+   ANIMATED BLOBS
+   ============================================ */
 .blob {
   position: fixed;
   border-radius: 50%;
@@ -63,7 +67,9 @@ body {
   }
 }
 
-/* LOGIN BACKGROUND */
+/* ============================================
+   LOGIN BACKGROUND
+   ============================================ */
 .login-background {
   min-height: 100vh;
   height: 100vh;
@@ -76,7 +82,9 @@ body {
   overflow: hidden;
 }
 
-/* BACK TO HOME BUTTON */
+/* ============================================
+   BACK TO HOME BUTTON
+   ============================================ */
 .btn-home {
   position: fixed;
   top: 1.5rem;
@@ -108,35 +116,31 @@ body {
   font-size: 1.125rem;
 }
 
-/* FORM CONTAINER */
-.login-wrapper {
-  display: flex;
-  align-items: stretch;
-  gap: 2rem;
+/* ============================================
+   FORM CONTAINER
+   ============================================ */
+.form-container {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  padding: 2.5rem;
+  border-radius: 20px;
+  padding: 2rem 2rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   width: 100%;
-  max-width: 1000px;
+  max-width: 420px;
   position: relative;
   z-index: 10;
   margin: 0 auto;
 }
 
-/* LOGIN FORM SECTION (Left Side) */
-.login-form-section {
-  flex: 1;
-  min-width: 0;
-}
-
-/* LOGO & TITLE */
+/* ============================================
+   LOGO & TITLE
+   ============================================ */
 .logo-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 1.25rem;
 }
 
 .form-logo {
@@ -158,23 +162,30 @@ body {
   color: #cbd5e1;
   font-size: 0.9375rem;
   font-weight: 400;
-  margin-bottom: 0;
+  margin-bottom: 1.5rem;
   text-align: center;
 }
 
-/* FORM LABEL */
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+.form-group {
+  margin-bottom: 1rem;
+}
+
 .form-label {
   color: #cbd5e1;
   font-size: 0.875rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
 }
 
 .form-label i {
   color: #4ade80;
 }
 
-/* INPUT WRAPPER */
 .input-wrapper {
   position: relative;
   display: flex;
@@ -195,7 +206,6 @@ body {
   color: #4ade80;
 }
 
-/* INPUT GLASS */
 .input-glass {
   background-color: rgba(255, 255, 255, 0.05);
   border: 1.5px solid rgba(255, 255, 255, 0.1);
@@ -220,16 +230,18 @@ body {
   font-weight: 400;
 }
 
-/* BUTTON FLOWFIT */
+/* ============================================
+   BUTTONS
+   ============================================ */
 .btn-flowfit {
   background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
   border: none;
   color: #0f172a;
   width: 100%;
-  padding: 0.875rem 1.5rem;
+  padding: 1rem 1.5rem;
   border-radius: 12px;
   font-weight: 700;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -250,10 +262,12 @@ body {
 }
 
 .btn-flowfit i {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
 }
 
-/* DIVIDER */
+/* ============================================
+   DIVIDER
+   ============================================ */
 .divider {
   display: flex;
   align-items: center;
@@ -275,198 +289,9 @@ body {
   padding: 0 1rem;
 }
 
-/* VERTICAL DIVIDER (Between Login and Register) */
-.vertical-divider {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  padding: 0 1rem;
-}
-
-.divider-line {
-  flex: 1;
-  width: 1px;
-  background: linear-gradient(to bottom, 
-    rgba(255, 255, 255, 0),
-    rgba(255, 255, 255, 0.2) 50%,
-    rgba(255, 255, 255, 0)
-  );
-}
-
-.divider-text {
-  padding: 0.75rem 0;
-  color: #64748b;
-  font-size: 0.875rem;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0.5rem 0;
-}
-
-/* REGISTER SECTION (Right Side) */
-.register-section {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.register-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.register-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 0.5rem;
-  letter-spacing: -0.5px;
-}
-
-.register-subtitle {
-  color: #cbd5e1;
-  font-size: 0.875rem;
-  font-weight: 400;
-  margin: 0;
-}
-
-.register-options {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  flex: 1;
-}
-
-/* REGISTER CARDS */
-.register-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.register-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.05) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.register-card:hover::before {
-  opacity: 1;
-}
-
-.register-card-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-}
-
-.register-card-user .register-card-icon {
-  background: rgba(74, 222, 128, 0.1);
-  border: 1px solid rgba(74, 222, 128, 0.2);
-  color: #4ade80;
-}
-
-.register-card-trainer .register-card-icon {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-}
-
-.register-card-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.register-card-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #e2e8f0;
-  margin: 0 0 0.25rem 0;
-}
-
-.register-card-description {
-  font-size: 0.8125rem;
-  color: #94a3b8;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.register-card-arrow {
-  font-size: 1.25rem;
-  color: #64748b;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-}
-
-.register-card:hover .register-card-arrow {
-  transform: translateX(5px);
-}
-
-/* User Card Hover */
-.register-card-user:hover {
-  background: rgba(74, 222, 128, 0.08);
-  border-color: rgba(74, 222, 128, 0.3);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(74, 222, 128, 0.2);
-}
-
-.register-card-user:hover .register-card-icon {
-  background: rgba(74, 222, 128, 0.2);
-  transform: scale(1.1);
-}
-
-.register-card-user:hover .register-card-arrow {
-  color: #4ade80;
-}
-
-/* Trainer Card Hover */
-.register-card-trainer:hover {
-  background: rgba(59, 130, 246, 0.08);
-  border-color: rgba(59, 130, 246, 0.3);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.2);
-}
-
-.register-card-trainer:hover .register-card-icon {
-  background: rgba(59, 130, 246, 0.2);
-  transform: scale(1.1);
-}
-
-.register-card-trainer:hover .register-card-arrow {
-  color: #60a5fa;
-}
-
-/* OLD STYLES - Keep for compatibility */
-/* REGISTER LINKS */
+/* ============================================
+   REGISTER LINKS
+   ============================================ */
 .register-links {
   display: flex;
   flex-direction: column;
@@ -490,7 +315,7 @@ body {
 }
 
 .btn-register i {
-  font-size: 1rem;
+  font-size: 1.125rem;
 }
 
 .btn-register-user:hover {
@@ -509,17 +334,17 @@ body {
   box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
 }
 
-/* ALERTS */
+/* ============================================
+   ALERTS
+   ============================================ */
 .alert {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
   border-radius: 12px;
-  padding: 0.875rem 1rem;
+  padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   border: 1.5px solid;
-  font-weight: 500;
 }
 
 .alert i {
@@ -539,8 +364,10 @@ body {
   color: #86efac;
 }
 
-/* ANIMATIONS */
-.login-wrapper {
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+.form-container {
   animation: zoomIn 0.5s ease-out;
 }
 
@@ -555,66 +382,35 @@ body {
   }
 }
 
-/* RESPONSIVE DESIGN */
-@media (max-width: 992px) {
-  .login-wrapper {
-    flex-direction: column;
-    max-width: 600px;
-    padding: 2rem;
+/* Pulse animation for login button */
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(74, 222, 128, 0.3);
   }
-
-  .vertical-divider {
-    flex-direction: row;
-    padding: 1rem 0;
-    width: 100%;
-  }
-
-  .divider-line {
-    width: auto;
-    height: 1px;
-    flex: 1;
-    background: linear-gradient(to right, 
-      rgba(255, 255, 255, 0),
-      rgba(255, 255, 255, 0.2) 50%,
-      rgba(255, 255, 255, 0)
-    );
-  }
-
-  .divider-text {
-    margin: 0 0.5rem;
-  }
-
-  .register-header {
-    margin-bottom: 1.5rem;
-  }
-
-  .register-title {
-    font-size: 1.375rem;
+  50% {
+    box-shadow: 0 8px 32px rgba(74, 222, 128, 0.5);
   }
 }
 
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
 @media (max-width: 768px) {
-  .login-wrapper {
-    padding: 1.5rem;
+  .login-background {
+    padding: 0.75rem;
+  }
+
+  .form-container {
+    padding: 2rem 1.75rem;
     max-width: 90%;
-  }
-
-  .register-header {
-    margin-bottom: 1.25rem;
-  }
-
-  .register-card {
-    padding: 1.25rem;
-  }
-
-  .register-card-icon {
-    width: 45px;
-    height: 45px;
-    font-size: 1.25rem;
   }
 }
 
 @media (max-width: 576px) {
+  .login-background {
+    padding: 0.5rem;
+  }
+
   .btn-home {
     top: 1rem;
     left: 1rem;
@@ -633,75 +429,82 @@ body {
     height: 300px;
   }
 
-  .login-wrapper {
-    padding: 1.5rem 1.25rem;
+  .form-container {
+    padding: 1.75rem 1.5rem;
+    border-radius: 20px;
     max-width: 95%;
   }
 
   .form-logo {
-    height: 55px;
+    height: 56px;
+  }
+
+  .login-title {
+    font-size: 1.75rem;
+  }
+
+  .login-subtitle {
+    font-size: 0.9375rem;
+  }
+
+  .input-glass {
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    font-size: 0.875rem;
+  }
+
+  .btn-flowfit {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.9375rem;
+  }
+
+  .btn-register {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .login-background {
+    padding: 0.25rem;
+  }
+
+  .form-container {
+    padding: 1.5rem 1rem;
+    max-width: 98%;
   }
 
   .login-title {
     font-size: 1.5rem;
   }
-
-  .login-subtitle {
-    font-size: 0.8125rem;
-  }
-
-  .register-title {
-    font-size: 1.25rem;
-  }
-
-  .register-subtitle {
-    font-size: 0.8125rem;
-  }
-
-  .register-card {
-    padding: 1rem;
-    gap: 0.75rem;
-  }
-
-  .register-card-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 1.125rem;
-  }
-
-  .register-card-title {
-    font-size: 0.9375rem;
-  }
-
-  .register-card-description {
-    font-size: 0.75rem;
-  }
-
-  .register-card-arrow {
-    font-size: 1.125rem;
-  }
 }
 
-@media (max-width: 400px) {
-  .login-wrapper {
-    padding: 1.25rem 1rem;
-    max-width: 98%;
-  }
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+.text-center {
+  text-align: center;
+}
 
-  .login-title {
-    font-size: 1.375rem;
-  }
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
 
-  .register-title {
-    font-size: 1.125rem;
-  }
+.mb-3 {
+  margin-bottom: 1rem;
+}
 
-  .register-card {
-    flex-direction: column;
-    text-align: center;
-  }
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
 
-  .register-card-arrow {
-    display: none;
-  }
+.mt-3 {
+  margin-top: 1rem;
+}
+
+.me-2 {
+  margin-right: 0.5rem;
+}
+
+.ms-2 {
+  margin-left: 0.5rem;
 }

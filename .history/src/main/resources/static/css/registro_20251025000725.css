@@ -550,8 +550,8 @@ body {
 }
 
 .back-link {
-  margin-top: 1rem;
-  padding-top: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -560,10 +560,10 @@ body {
   background: rgba(255, 255, 255, 0.03);
   border: 1.5px solid rgba(255, 255, 255, 0.1);
   color: #cbd5e1;
-  padding: 0.6875rem 1.25rem;
+  padding: 0.875rem 1.5rem;
   border-radius: 12px;
   font-weight: 600;
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -580,7 +580,7 @@ body {
 }
 
 .btn-back i {
-  font-size: 0.9375rem;
+  font-size: 1.125rem;
 }
 
 /* Page wrapper for entrenador page */
