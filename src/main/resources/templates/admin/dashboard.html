@@ -237,6 +237,17 @@
         <div class="card-body">
           <div class="row g-3">
             <div class="col-lg-3 col-md-6">
+              <form action="/admin/registro_masivo" method="post" enctype="multipart/form-data" class="text-center border rounded p-3" style="background: rgba(0,0,0,0.2);">
+                <h6 class="text-light mb-3">
+                  <i class="bi bi-upload fs-3 d-block mb-2"></i>
+                  Registro Masivo
+                </h6>
+                <input type="file" name="file" accept=".csv" required class="form-control mb-3 text-light bg-dark border-secondary">
+                <button type="submit" class="btn btn-outline-info w-100">Subir CSV</button>
+              </form>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
               <a th:href="@{/admin/usuarios-pendientes}" class="btn-flowfit-outline btn-admin-outline w-100 text-center" style="padding: 24px 16px;">
                 <i class="bi bi-person-plus fs-3 d-block mb-2"></i> 
                 <span class="fw-bold">Aprobar Usuarios</span>
