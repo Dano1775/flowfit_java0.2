@@ -2,7 +2,12 @@ package com.example.flowfit.service;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import java.util.Properties;
 
 @Service
@@ -10,9 +15,58 @@ public class EmailService {
 
     private static final String REMITENTE = "0flowfit0@gmail.com";
     private static final String PASSWORD = "pbvg igyq ticm xqgq";
+    
+    @Autowired
+    private JavaMailSender mailSender;
+    
+    @Autowired
+    private TemplateEngine templateEngine;
 
     /**
-     * Envía correo de bienvenida al usuario registrado
+     * Envía correo de bienvenida usando plantillas Thymeleaf
+     * @param destinatario Email del destinatario
+     * @param nombreUsuario Nombre del usuario registrado
+     * @param correo Correo del usuario (para mostrar en el email)
+     * @param tipoUsuario "ENTRENADOR" o "USUARIO"
+     * @return true si el correo se envió exitosamente
+     */
+    public boolean enviarCorreoBienvenidaConPlantilla(String destinatario, String nombreUsuario, String correo, String tipoUsuario) {
+        try {
+            // Seleccionar template basado en tipo de usuario
+            String templateName = tipoUsuario.equalsIgnoreCase("ENTRENADOR") 
+                ? "email/welcome-entrenador" 
+                : "email/welcome-usuario";
+            
+            // Crear contexto con variables para el template
+            Context context = new Context();
+            context.setVariable("nombre", nombreUsuario);
+            context.setVariable("correo", correo);
+            context.setVariable("urlDashboard", "http://localhost:8080/login");
+            
+            // Procesar el template
+            String htmlContent = templateEngine.process(templateName, context);
+            
+            // Crear y enviar el mensaje
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            
+            helper.setFrom(REMITENTE);
+            helper.setTo(destinatario);
+            helper.setSubject("¡Bienvenido a FlowFit! 💪");
+            helper.setText(htmlContent, true); // true = HTML
+            
+            mailSender.send(message);
+            return true;
+            
+        } catch (Exception e) {
+            System.err.println("Error al enviar correo de bienvenida: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Envía correo de bienvenida al usuario registrado (Método original mantenido para compatibilidad)
      */
     public boolean enviarCorreoBienvenida(String destinatario, String nombreUsuario, String tipoUsuario) {
         Properties props = new Properties();

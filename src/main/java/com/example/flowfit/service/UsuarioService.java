@@ -17,6 +17,9 @@ public class UsuarioService {
 
     @Autowired
     private EjercicioCatalogoRepository ejercicioCatalogoRepository;
+    
+    @Autowired
+    private EmailService emailService;
 
     /**
      * Autenticar inicio de sesión del usuario - misma lógica que login_controller de PHP
@@ -86,6 +89,20 @@ public class UsuarioService {
 
             // Guardar usuario
             Usuario savedUser = usuarioRepository.save(usuario);
+            
+            // Enviar correo de bienvenida basado en el perfil
+            try {
+                String tipoUsuario = perfilUsuario == Usuario.PerfilUsuario.Entrenador ? "ENTRENADOR" : "USUARIO";
+                emailService.enviarCorreoBienvenidaConPlantilla(
+                    correo, 
+                    nombre, 
+                    correo, 
+                    tipoUsuario
+                );
+            } catch (Exception e) {
+                // Si falla el correo, continuar igual (no interrumpir el registro)
+                System.err.println("Error al enviar correo de bienvenida: " + e.getMessage());
+            }
             
             return new RegistrationResult(true, "Registro exitoso", savedUser);
             

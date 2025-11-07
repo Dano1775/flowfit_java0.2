@@ -1,4 +1,4 @@
-/* ===== FLOWFIT VIP - USUARIO SPECIFIC CSS ===== */
+/* ===== FLOWFIT - USUARIO SPECIFIC CSS ===== */
 
 /* Variables específicas del Usuario - Estilo Elegante Oscuro */
 :root {
@@ -16,14 +16,101 @@
     --usuario-bg-dark: #0f172a;
     --usuario-bg-card: rgba(15, 23, 42, 0.8);
     --usuario-bg-accent: rgba(16, 185, 129, 0.1);
+    
+    /* Sidebar */
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 80px;
+}
+
+/* ===== SIDEBAR COLAPSABLE ===== */
+.sidebar-base {
+    width: var(--sidebar-width);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-base.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+.sidebar-base.collapsed .brand-text,
+.sidebar-base.collapsed .nav-text {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.sidebar-base.collapsed .navbar-brand {
+    justify-content: center;
+}
+
+.sidebar-base.collapsed .logo-flowfit {
+    margin-right: 0 !important;
+}
+
+.sidebar-base.collapsed .nav-link-base {
+    justify-content: center;
+}
+
+.sidebar-base.collapsed .nav-link-base i {
+    margin-right: 0 !important;
+}
+
+.sidebar-base.collapsed .profile-icon-base {
+    justify-content: center;
+    padding: 12px 4px;
+}
+
+.sidebar-base.collapsed .profile-icon-base .flex-grow-1,
+.sidebar-base.collapsed .profile-icon-base .bi-chevron-down {
+    display: none;
+}
+
+/* Botón de colapsar sidebar */
+.sidebar-collapse-btn {
+    position: fixed;
+    left: calc(var(--sidebar-width) - 20px);
+    top: 20px;
+    z-index: 1002;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--usuario-gradient);
+    border: 3px solid rgba(15, 23, 42, 0.95);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--usuario-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-collapse-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 35px rgba(16, 185, 129, 0.6);
+}
+
+.sidebar-collapse-btn.collapsed {
+    left: calc(var(--sidebar-collapsed-width) - 20px);
+}
+
+/* Main content ajuste */
+.main-content-base {
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-content-base.sidebar-collapsed {
+    margin-left: var(--sidebar-collapsed-width);
 }
 
 /* Sidebar específico del usuario - Estilo Elegante */
 .sidebar-usuario {
     background: linear-gradient(180deg, 
-        var(--usuario-bg-dark) 0%, 
-        rgba(15, 23, 42, 0.98) 40%,
-        rgba(30, 41, 59, 0.95) 100%);
+        rgba(16, 185, 129, 0.95) 0%, 
+        rgba(5, 150, 105, 0.85) 40%,
+        rgba(15, 23, 42, 0.95) 100%);
     border-right: 2px solid var(--usuario-border);
     box-shadow: 4px 0 20px rgba(16, 185, 129, 0.1);
 }
@@ -693,4 +780,123 @@
 .badge-primary-usuario {
     background: var(--usuario-gradient);
     color: white;
+}
+
+/* ===== DROPDOWN MENU DEL PERFIL ===== */
+.sidebar-base .dropdown-menu {
+    background: rgba(15, 23, 42, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    border-radius: 12px !important;
+    padding: 8px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(16, 185, 129, 0.2) !important;
+    margin-top: 8px !important;
+    min-width: 200px !important;
+}
+
+.sidebar-base .dropdown-menu .dropdown-item {
+    color: rgba(255, 255, 255, 0.9) !important;
+    padding: 10px 16px !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    font-weight: 500 !important;
+    margin: 2px 0 !important;
+}
+
+.sidebar-base .dropdown-menu .dropdown-item:hover {
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: white !important;
+    transform: translateX(4px);
+}
+
+.sidebar-base .dropdown-menu .dropdown-item.text-success {
+    color: #34d399 !important;
+}
+
+.sidebar-base .dropdown-menu .dropdown-item.text-success:hover {
+    background: rgba(52, 211, 153, 0.15) !important;
+    color: #6ee7b7 !important;
+}
+
+.sidebar-base .dropdown-divider {
+    border-color: rgba(16, 185, 129, 0.2) !important;
+    margin: 8px 0 !important;
+    opacity: 1 !important;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 767.98px) {
+    .sidebar-collapse-btn {
+        display: none;
+    }
+    
+    .main-content-base {
+        margin-left: 0;
+    }
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Scrollbar personalizado */
+.sidebar-base::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-base::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-base::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.5);
+    border-radius: 3px;
+}
+
+.sidebar-base::-webkit-scrollbar-thumb:hover {
+    background: rgba(16, 185, 129, 0.7);
+}
+
+/* Tooltip para sidebar colapsado */
+.sidebar-base.collapsed .nav-link-base {
+    position: relative;
+}
+
+.sidebar-base.collapsed .nav-link-base::after {
+    content: attr(title);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(15, 23, 42, 0.95);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    margin-left: 10px;
+    font-size: 0.85rem;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-base.collapsed .nav-link-base:hover::after {
+    opacity: 1;
+    visibility: visible;
 }

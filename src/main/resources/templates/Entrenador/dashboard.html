@@ -12,11 +12,16 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- FlowFit VIP CSS System -->
+  <!-- FlowFit CSS System -->
   <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
   <link th:href="@{/css/flowfit-entrenador.css}" rel="stylesheet">
 </head>
 <body>
+
+  <!-- Desktop Toggle (for collapse) -->
+  <button class="sidebar-collapse-btn d-none d-md-flex" id="sidebarCollapseBtn" title="Contraer/Expandir Sidebar">
+    <i class="bi bi-chevron-left"></i>
+  </button>
 
   <!-- Mobile Toggle -->
   <button class="sidebar-toggle-base sidebar-toggle-entrenador d-md-none" id="sidebarToggle">
@@ -26,44 +31,50 @@
   <!-- Sidebar Overlay for Mobile -->
   <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
 
-  <!-- FlowFit VIP Sidebar -->
+  <!-- FlowFit Sidebar -->
   <nav class="sidebar-base sidebar-entrenador d-flex flex-column" id="sidebar">
     <!-- Brand -->
     <a th:href="@{/entrenador/dashboard}" class="navbar-brand d-flex align-items-center text-decoration-none">
-      <img src="/assets/logo_flowfit.png" alt="FlowFit VIP" height="40" class="me-3 logo-flowfit">
-      <span class="brand-text">FlowFit VIP</span>
+      <img src="/assets/logo_flowfit.png" alt="FlowFit" height="40" class="me-3 logo-flowfit">
+      <span class="brand-text">FlowFit</span>
     </a>
 
     <!-- Navigation -->
     <ul class="nav nav-pills flex-column mb-auto">
       <li class="nav-item">
-        <a th:href="@{/entrenador/dashboard}" class="nav-link-base nav-link-entrenador active">
-          <i class="bi bi-speedometer2 me-3"></i> Dashboard
+        <a th:href="@{/entrenador/dashboard}" class="nav-link-base nav-link-entrenador active" title="Dashboard">
+          <i class="bi bi-speedometer2 me-3"></i> 
+          <span class="nav-text">Dashboard</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/entrenador/mis-usuarios}" class="nav-link-base nav-link-entrenador">
-          <i class="bi bi-people me-3"></i> Mis Usuarios
+        <a th:href="@{/entrenador/mis-usuarios}" class="nav-link-base nav-link-entrenador" title="Mis Usuarios">
+          <i class="bi bi-people me-3"></i> 
+          <span class="nav-text">Mis Usuarios</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/entrenador/rutinas/crear}" class="nav-link-base nav-link-entrenador">
-          <i class="bi bi-plus-circle me-3"></i> Crear Rutinas
+        <a th:href="@{/entrenador/rutinas/crear}" class="nav-link-base nav-link-entrenador" title="Crear Rutinas">
+          <i class="bi bi-plus-circle me-3"></i> 
+          <span class="nav-text">Crear Rutinas</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/entrenador/rutinas}" class="nav-link-base nav-link-entrenador">
-          <i class="bi bi-list-check me-3"></i> Ver Rutinas
+        <a th:href="@{/entrenador/rutinas}" class="nav-link-base nav-link-entrenador" title="Ver Rutinas">
+          <i class="bi bi-list-check me-3"></i> 
+          <span class="nav-text">Ver Rutinas</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/entrenador/asignar-rutinas}" class="nav-link-base nav-link-entrenador">
-          <i class="bi bi-person-plus-fill me-3"></i> Asignar Rutinas
+        <a th:href="@{/entrenador/asignar-rutinas}" class="nav-link-base nav-link-entrenador" title="Asignar Rutinas">
+          <i class="bi bi-person-plus-fill me-3"></i> 
+          <span class="nav-text">Asignar Rutinas</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/entrenador/progreso}" class="nav-link-base nav-link-entrenador">
-          <i class="bi bi-graph-up me-3"></i> Progreso de Usuarios
+        <a th:href="@{/entrenador/progreso}" class="nav-link-base nav-link-entrenador" title="Progreso de Usuarios">
+          <i class="bi bi-graph-up me-3"></i> 
+          <span class="nav-text">Progreso de Usuarios</span>
         </a>
       </li>
     </ul>
@@ -75,14 +86,14 @@
           <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-base me-2" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
           <div class="flex-grow-1">
             <div class="small fw-bold text-white" th:text="${entrenador != null ? #strings.substringBefore(entrenador.nombre, ' ') : 'Entrenador'}">Entrenador</div>
-            <div class="small text-muted-flowfit">FlowFit VIP Coach</div>
+            <div class="small text-muted-flowfit">FlowFit Coach</div>
           </div>
           <i class="bi bi-chevron-down text-white"></i>
         </div>
         <ul class="dropdown-menu" aria-labelledby="profileDropdownEntrenador">
           <li><a class="dropdown-item" th:href="@{/entrenador/perfil}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+          <li><a class="dropdown-item text-primary" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
         </ul>
       </div>
     </div>
@@ -91,74 +102,115 @@
   <!-- Main Content -->
   <main class="main-content-base fade-in-up">
     <div class="container-fluid">
-      <!-- Welcome Header -->
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-        <div class="d-flex align-items-center mb-3 mb-md-0">
-          <div class="user-avatar me-3">
-            <img src="/assets/perfil_default.png" alt="Avatar" class="rounded-circle profile-image-base" style="width: 60px; height: 60px; object-fit: cover;">
+      <!-- Welcome Header - Mejorado -->
+      <div class="welcome-header-enhanced mb-4">
+        <div class="row align-items-center">
+          <div class="col-lg-8 mb-3 mb-lg-0">
+            <div class="d-flex align-items-center">
+              <div class="user-avatar-enhanced me-3">
+                <img src="/assets/perfil_default.png" alt="Avatar" class="rounded-circle profile-image-base">
+                <div class="status-indicator"></div>
+              </div>
+              <div class="flex-grow-1">
+                <h1 class="display-6 mb-2 text-white fw-bold">
+                  ¡Bienvenido, <span th:text="${entrenador != null ? #strings.substringBefore(entrenador.nombre, ' ') : 'Entrenador'}" class="text-gradient-blue">Entrenador</span>! 💪
+                </h1>
+                <p class="lead mb-2 text-white-50">Tu centro de entrenamiento FlowFit</p>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                  <small class="text-muted-flowfit d-flex align-items-center">
+                    <i class="bi bi-calendar3 me-2"></i>
+                    <span th:text="${#dates.format(#dates.createNow(), 'EEEE, dd MMMM yyyy')}">Fecha actual</span>
+                  </small>
+                  <small class="text-muted-flowfit d-flex align-items-center">
+                    <i class="bi bi-clock me-2"></i>
+                    <span id="currentTime">00:00</span>
+                  </small>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <h1 class="h3 mb-1 text-white">¡Hola, <span th:text="${entrenador != null ? #strings.substringBefore(entrenador.nombre, ' ') : 'Entrenador'}" class="icon-entrenador">Entrenador</span>! �</h1>
-            <p class="lead mb-1 text-white">Tu centro de entrenamiento FlowFit VIP</p>
-            <small class="text-muted-flowfit">
-              <i class="bi bi-calendar3 me-1"></i>
-              <span th:text="${#dates.format(#dates.createNow(), 'EEEE, dd MMMM yyyy')}">Fecha actual</span>
-            </small>
+          <div class="col-lg-4">
+            <div class="d-flex flex-column gap-2">
+              <a href="/entrenador/rutinas/crear" class="btn-flowfit-primary btn-entrenador-primary btn-enhanced">
+                <i class="bi bi-plus-circle me-2"></i>
+                <span>Crear Rutina</span>
+              </a>
+              <a href="/entrenador/mis-usuarios" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced">
+                <i class="bi bi-people me-2"></i>
+                <span>Mis Usuarios</span>
+              </a>
+            </div>
           </div>
-        </div>
-        <div class="d-flex flex-column flex-sm-row gap-2">
-          <a href="/entrenador/rutinas/crear" class="btn-flowfit-primary btn-entrenador-primary">
-            <i class="bi bi-plus-circle"></i>Crear Rutina
-          </a>
-          <a href="/entrenador/mis-usuarios" class="btn-flowfit-outline btn-entrenador-outline">
-            <i class="bi bi-people"></i>Mis Usuarios
-          </a>
         </div>
       </div>
 
-      <!-- Statistics Cards -->
-      <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-          <div class="stat-card-base stat-card-entrenador">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h4 th:text="${totalUsuarios ?: 0}">0</h4>
-                <div class="stat-label">Usuarios Activos</div>
-              </div>
-              <i class="bi bi-people fs-1 icon-entrenador"></i>
+      <!-- Statistics Cards - Mejoradas -->
+      <div class="row mb-4 g-3">
+        <div class="col-xl-3 col-md-6">
+          <div class="stat-card-enhanced stat-card-entrenador stat-card-hover">
+            <div class="stat-icon-wrapper">
+              <i class="bi bi-people stat-icon icon-entrenador"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number counter" th:attr="data-target=${totalUsuarios ?: 0}">0</h3>
+              <p class="stat-label mb-0">Usuarios Activos</p>
+              <small class="stat-trend text-success">
+                <i class="bi bi-arrow-up"></i> +12% este mes
+              </small>
+            </div>
+            <div class="stat-progress">
+              <div class="progress-bar bg-primary" style="width: 75%"></div>
             </div>
           </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-4">
-          <div class="stat-card-base stat-card-entrenador">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h4 th:text="${totalRutinasCreadas ?: 0}">0</h4>
-                <div class="stat-label">Rutinas Creadas</div>
-              </div>
-              <i class="bi bi-list-check fs-1" style="color: var(--flowfit-success);"></i>
+        <div class="col-xl-3 col-md-6">
+          <div class="stat-card-enhanced stat-card-entrenador stat-card-hover">
+            <div class="stat-icon-wrapper bg-success-subtle">
+              <i class="bi bi-list-check stat-icon text-success"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number counter" th:attr="data-target=${totalRutinasCreadas ?: 0}">0</h3>
+              <p class="stat-label mb-0">Rutinas Creadas</p>
+              <small class="stat-trend text-success">
+                <i class="bi bi-arrow-up"></i> +8% este mes
+              </small>
+            </div>
+            <div class="stat-progress">
+              <div class="progress-bar bg-success" style="width: 60%"></div>
             </div>
           </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-4">
-          <div class="stat-card-base stat-card-entrenador">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h4 th:text="${totalAsignacionesActivas ?: 0}">0</h4>
-                <div class="stat-label">Rutinas Asignadas</div>
-              </div>
-              <i class="bi bi-calendar-check fs-1" style="color: var(--flowfit-info);"></i>
+        <div class="col-xl-3 col-md-6">
+          <div class="stat-card-enhanced stat-card-entrenador stat-card-hover">
+            <div class="stat-icon-wrapper bg-info-subtle">
+              <i class="bi bi-calendar-check stat-icon text-info"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number counter" th:attr="data-target=${totalAsignacionesActivas ?: 0}">0</h3>
+              <p class="stat-label mb-0">Rutinas Asignadas</p>
+              <small class="stat-trend text-success">
+                <i class="bi bi-arrow-up"></i> +15% este mes
+              </small>
+            </div>
+            <div class="stat-progress">
+              <div class="progress-bar bg-info" style="width: 85%"></div>
             </div>
           </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-4">
-          <div class="stat-card-base stat-card-entrenador">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h4 th:text="${totalEjerciciosPersonalizados ?: 0}">0</h4>
-                <div class="stat-label">Ejercicios Creados</div>
-              </div>
-              <i class="bi bi-activity fs-1" style="color: var(--flowfit-warning);"></i>
+        <div class="col-xl-3 col-md-6">
+          <div class="stat-card-enhanced stat-card-entrenador stat-card-hover">
+            <div class="stat-icon-wrapper bg-warning-subtle">
+              <i class="bi bi-activity stat-icon text-warning"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number counter" th:attr="data-target=${totalEjerciciosPersonalizados ?: 0}">0</h3>
+              <p class="stat-label mb-0">Ejercicios Creados</p>
+              <small class="stat-trend text-success">
+                <i class="bi bi-arrow-up"></i> +5% este mes
+              </small>
+            </div>
+            <div class="stat-progress">
+              <div class="progress-bar bg-warning" style="width: 45%"></div>
             </div>
           </div>
         </div>
@@ -184,7 +236,7 @@
               <div th:if="${!#lists.isEmpty(rutinasRecientes)}">
                 <div class="row g-3">
                   <div th:each="rutina : ${rutinasRecientes}" class="col-12">
-                    <div class="d-flex align-items-center p-3 rounded-3" style="background: rgba(225, 29, 72, 0.1); border: 1px solid var(--flowfit-glass-border);">
+                    <div class="d-flex align-items-center p-3 rounded-3" style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3);">
                       <div class="me-3">
                         <div class="rounded-circle d-flex align-items-center justify-content-center icon-entrenador" 
                              style="width: 48px; height: 48px; color: var(--entrenador-primary);">
@@ -214,16 +266,16 @@
             </div>
             <div class="card-body">
               <div class="d-grid gap-3">
-              <a href="/entrenador/rutinas/crear" class="btn-entrenador-primary w-100">
-                <i class="bi bi-plus-circle me-2"></i>Crear Nueva Rutina
-              </a>
-                <a href="/entrenador/asignar-rutinas" class="btn-flowfit-outline btn-entrenador-outline w-100">
+                <a href="/entrenador/rutinas/crear" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced w-100">
+                  <i class="bi bi-plus-circle me-2"></i>Crear Nueva Rutina
+                </a>
+                <a href="/entrenador/asignar-rutinas" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced w-100">
                   <i class="bi bi-person-check me-2"></i>Asignar Rutina
                 </a>
-                <a href="/entrenador/ejercicios" class="btn-flowfit-outline btn-entrenador-outline w-100">
+                <a href="/entrenador/ejercicios" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced w-100">
                   <i class="bi bi-activity me-2"></i>Gestionar Ejercicios
                 </a>
-                <a href="/entrenador/mis-usuarios" class="btn-flowfit-outline btn-entrenador-outline w-100">
+                <a href="/entrenador/mis-usuarios" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced w-100">
                   <i class="bi bi-people me-2"></i>Ver Usuarios
                 </a>
               </div>
@@ -243,7 +295,7 @@
               <div th:if="${usuariosRecientes != null and not #lists.isEmpty(usuariosRecientes)}">
                 <div class="row g-3">
                   <div th:each="usuario : ${usuariosRecientes}" class="col-lg-4 col-md-6">
-                    <div class="d-flex align-items-center p-3 rounded-3" style="background: rgba(225, 29, 72, 0.1); border: 1px solid var(--flowfit-glass-border);">
+                    <div class="d-flex align-items-center p-3 rounded-3" style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3);">
                       <img src="/assets/perfil_default.png" alt="Usuario" class="rounded-circle me-3 profile-image-base" style="width: 50px; height: 50px; object-fit: cover;">
                       <div class="flex-grow-1">
                         <h6 class="mb-1 text-white" th:text="${usuario.nombre}">Usuario</h6>
@@ -272,7 +324,7 @@
 
       <!-- Footer -->
       <footer class="footer-base">
-        © 2025 FlowFit VIP - Panel de Entrenador. Todos los derechos reservados.
+        © 2025 FlowFit - Panel de Entrenador. Todos los derechos reservados.
       </footer>
     </div>
   </main>
@@ -280,14 +332,17 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- FlowFit VIP Entrenador Dashboard Script -->
+  <!-- FlowFit Entrenador Dashboard Script -->
   <script>
     // Mobile Sidebar Toggle
     document.addEventListener('DOMContentLoaded', function() {
       const sidebarToggle = document.getElementById('sidebarToggle');
       const sidebar = document.getElementById('sidebar');
       const sidebarOverlay = document.getElementById('sidebarOverlay');
+      const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+      const mainContent = document.querySelector('.main-content-base');
 
+      // Mobile toggle
       function toggleSidebar() {
         sidebar.classList.toggle('show');
         sidebarOverlay.classList.toggle('show');
@@ -300,6 +355,24 @@
 
       sidebarToggle?.addEventListener('click', toggleSidebar);
       sidebarOverlay?.addEventListener('click', closeSidebar);
+
+      // Desktop collapse toggle
+      sidebarCollapseBtn?.addEventListener('click', function() {
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('sidebar-collapsed');
+        
+        // Cambiar el ícono
+        const icon = this.querySelector('i');
+        if (sidebar.classList.contains('collapsed')) {
+          icon.classList.remove('bi-chevron-left');
+          icon.classList.add('bi-chevron-right');
+          this.classList.add('collapsed');
+        } else {
+          icon.classList.remove('bi-chevron-right');
+          icon.classList.add('bi-chevron-left');
+          this.classList.remove('collapsed');
+        }
+      });
 
       // Close sidebar on escape key
       document.addEventListener('keydown', function(e) {
@@ -317,7 +390,45 @@
         }
       });
 
-      console.log('FlowFit VIP Entrenador Dashboard loaded successfully! 🔥');
+      // Animated counter for stats
+      function animateCounter(element) {
+        const target = parseInt(element.getAttribute('data-target'));
+        const duration = 2000;
+        const increment = target / (duration / 16);
+        let current = 0;
+
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            element.textContent = target;
+            clearInterval(timer);
+          } else {
+            element.textContent = Math.floor(current);
+          }
+        }, 16);
+      }
+
+      // Animate all counters
+      document.querySelectorAll('.counter').forEach(counter => {
+        animateCounter(counter);
+      });
+
+      // Update current time
+      function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('es-ES', { 
+          hour: '2-digit', 
+          minute: '2-digit'
+        });
+        const timeElement = document.getElementById('currentTime');
+        if (timeElement) {
+          timeElement.textContent = timeString;
+        }
+      }
+      updateTime();
+      setInterval(updateTime, 1000);
+
+      console.log('FlowFit Entrenador Dashboard loaded successfully! 🔥');
     });
   </script>
 </body>
