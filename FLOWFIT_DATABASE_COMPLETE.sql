@@ -28,6 +28,27 @@ CREATE TABLE usuario (
 );
 
 -- =============================================
+-- TABLA DE TOKENS DE RECUPERACIÓN DE CONTRASEÑA
+-- (NUEVA - Para sistema de reset de password)
+-- =============================================
+CREATE TABLE password_reset_token (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(100) NOT NULL UNIQUE,
+    usuario_id INT NOT NULL,
+    fecha_expiracion DATETIME NOT NULL,
+    fecha_creacion DATETIME NOT NULL,
+    usado BOOLEAN NOT NULL DEFAULT FALSE,
+    INDEX idx_token (token),
+    INDEX idx_usuario_id (usuario_id),
+    INDEX idx_fecha_expiracion (fecha_expiracion),
+    CONSTRAINT fk_password_reset_usuario 
+        FOREIGN KEY (usuario_id) 
+        REFERENCES usuario(id) 
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tokens temporales para recuperación de contraseña (válidos 15 minutos)';
+
+-- =============================================
 -- TABLA DE EJERCICIOS CATÁLOGO
 -- =============================================
 CREATE TABLE ejercicio_catalogo (
@@ -373,6 +394,8 @@ ORDER BY fecha DESC;
 -- =============================================
 SELECT 'USUARIOS' as tabla, COUNT(*) as registros FROM usuario
 UNION ALL
+SELECT 'PASSWORD_TOKENS' as tabla, COUNT(*) as registros FROM password_reset_token
+UNION ALL
 SELECT 'EJERCICIOS' as tabla, COUNT(*) as registros FROM ejercicio_catalogo
 UNION ALL
 SELECT 'RUTINAS' as tabla, COUNT(*) as registros FROM rutina
@@ -392,4 +415,6 @@ SELECT id, numero_documento, nombre, correo, perfil_usuario, estado FROM usuario
 -- Verificar boletines creados
 SELECT id, asunto, tipo_destinatario, estado_envio, total_destinatarios, creado_por FROM boletin_informativo;
 
-SELECT 'Base de datos FlowFit creada exitosamente con todas las tablas y datos de prueba' as resultado;
+-- =============================================
+-- FIN DEL SCRIPT
+-- =============================================

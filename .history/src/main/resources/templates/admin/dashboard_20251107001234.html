@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowFit - Dashboard Administrador</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- FlowFit CSS System -->
+  <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
+  <link th:href="@{/css/flowfit-admin.css}" rel="stylesheet">
+  
+  <style>
+    /* Estilos inline para header mejorado */
+    .time-display {
+      font-size: 2rem;
+      font-weight: 700;
+      background: var(--admin-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+    }
+    
+    .date-display {
+      color: rgba(203, 213, 225, 0.9);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Collapse Button (Desktop) -->
+  <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Colapsar Sidebar">
+    <i class="bi bi-chevron-left"></i>
+  </button>
+
+  <!-- Mobile Toggle -->
+  <button class="sidebar-toggle-base sidebar-toggle-admin d-md-none" id="sidebarToggle">
+    <i class="bi bi-list fs-4"></i>
+  </button>
+
+  <!-- Sidebar Overlay for Mobile -->
+  <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
+
+  <!-- FlowFit Sidebar -->
+  <nav class="sidebar-base sidebar-admin d-flex flex-column" id="sidebar">
+    <!-- Brand -->
+    <a th:href="@{/admin/dashboard}" class="navbar-brand d-flex align-items-center text-decoration-none">
+      <img src="/assets/logo_flowfit_admin.png" alt="FlowFit" height="40" class="me-3 logo-flowfit">
+      <span class="brand-text">FlowFit</span>
+    </a>
+
+    <!-- Navigation -->
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a th:href="@{/admin/dashboard}" class="nav-link-base nav-link-admin active" title="Dashboard">
+          <i class="bi bi-speedometer2 me-3"></i> <span class="nav-text">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/usuarios-pendientes}" class="nav-link-base nav-link-admin" title="Usuarios Pendientes">
+          <i class="bi bi-people me-3"></i> <span class="nav-text">Usuarios Pendientes</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/usuarios}" class="nav-link-base nav-link-admin" title="Gestión Usuarios">
+          <i class="bi bi-person-badge me-3"></i> <span class="nav-text">Gestión Usuarios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/ejercicios}" class="nav-link-base nav-link-admin" title="Ejercicios">
+          <i class="bi bi-activity me-3"></i> <span class="nav-text">Ejercicios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/correos}" class="nav-link-base nav-link-admin" title="Envío Masivo">
+          <i class="fas fa-paper-plane me-3"></i> <span class="nav-text">Envío Masivo</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Profile Section -->
+    <div class="border-top pt-3 mt-auto">
+      <div class="dropdown profile-dropdown-base">
+        <div class="profile-icon-base d-flex align-items-center w-100" id="profileDropdownAdmin" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-base me-2" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+          <div class="flex-grow-1">
+            <div class="small fw-bold text-white" th:text="${usuario.nombre}">Administrador</div>
+            <div class="small text-muted-flowfit">Admin Panel</div>
+          </div>
+          <i class="bi bi-chevron-down text-white"></i>
+        </div>
+        <ul class="dropdown-menu" aria-labelledby="profileDropdownAdmin">
+          <li><a class="dropdown-item" href="/admin/perfil"><i class="bi bi-person-gear me-2"></i>Mi Perfil</a></li>
+          <li><a class="dropdown-item" href="/configuracion"><i class="bi bi-gear me-2"></i>Configuración</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content-base fade-in-up">
+    <div class="container-fluid">
+      <!-- Welcome Header -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div class="d-flex align-items-center mb-3 mb-md-0">
+          <div class="user-avatar me-3">
+            <img src="/assets/perfil_default.png" alt="Avatar" class="rounded-circle profile-image-base" style="width: 60px; height: 60px; object-fit: cover;">
+          </div>
+          <div>
+            <h1 class="h3 mb-1 text-white">¡Bienvenido, <span th:text="${#strings.substringBefore(usuario.nombre, ' ')}" class="icon-admin">Admin</span>!</h1>
+            <p class="lead mb-1 text-white">Panel de control del gimnasio FlowFit VIP</p>
+            <small class="text-muted-flowfit">
+              <i class="bi bi-calendar3 me-1"></i>
+              <span th:text="${#dates.format(#dates.createNow(), 'EEEE, dd MMMM yyyy')}">Fecha actual</span>
+            </small>
+          </div>
+        </div>
+        <div class="d-flex flex-column flex-sm-row gap-2">
+          <a href="/admin/usuarios-pendientes" class="btn-flowfit-primary btn-admin-primary">
+            <i class="bi bi-people"></i>Usuarios Pendientes
+          </a>
+          <a href="/admin/ejercicios" class="btn-flowfit-outline btn-admin-outline">
+            <i class="bi bi-activity"></i>Ejercicios
+          </a>
+        </div>
+      </div>
+
+      <!-- Statistics Cards -->
+      <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="stat-card-base stat-card-admin">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h4 th:text="${totalUsuarios ?: 0}">0</h4>
+                <div class="stat-label">Total Usuarios</div>
+              </div>
+              <i class="bi bi-people fs-1 icon-admin"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="stat-card-base stat-card-admin">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h4 th:text="${usuariosPendientes ?: 0}">0</h4>
+                <div class="stat-label">Usuarios Pendientes</div>
+              </div>
+              <i class="bi bi-person-check fs-1" style="color: var(--flowfit-warning);"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="stat-card-base stat-card-admin">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h4 th:text="${totalEjercicios ?: 0}">0</h4>
+                <div class="stat-label">Total Ejercicios</div>
+              </div>
+              <i class="bi bi-activity fs-1" style="color: var(--flowfit-danger);"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="stat-card-base stat-card-admin">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h4>24</h4>
+                <div class="stat-label">Usuarios Activos</div>
+              </div>
+              <i class="bi bi-person-badge fs-1" style="color: var(--flowfit-success);"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- Analytics & Activity -->
+      <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+          <div class="card-base card-admin">
+            <div class="card-header">
+              <h5><i class="bi bi-pie-chart me-2"></i> Estado de Usuarios</h5>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" style="height: 300px;">
+                <canvas id="userChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+          <div class="card-base card-admin">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5><i class="bi bi-clock-history me-2"></i> Actividad Reciente</h5>
+              <div>
+                <a th:href="@{/admin/exportar-historial-excel}" class="btn btn-sm btn-flowfit-outline btn-admin-outline me-2" title="Exportar a Excel">
+                  <i class="bi bi-file-earmark-excel"></i>
+                </a>
+                <a th:href="@{/admin/historial-aprobaciones}" class="btn btn-sm btn-flowfit-primary btn-admin-primary">Ver todo</a>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="list-group list-group-flush">
+                <!-- Show message if no recent activity -->
+                <div th:if="${actividadReciente == null or actividadReciente.isEmpty()}" class="text-center py-4">
+                  <i class="bi bi-inbox-fill fs-2 text-muted-flowfit mb-3"></i>
+                  <p class="text-muted-flowfit mb-0">No hay actividad reciente</p>
+                </div>
+                
+                <!-- Show recent activity -->
+                <div th:each="actividad : ${actividadReciente}" th:if="${actividadReciente != null}" class="border-0 px-0 py-2">
+                  <div class="d-flex align-items-center">
+                    <!-- Icon based on action -->
+                    <i th:if="${actividad.accion.toString() == 'Aprobado'}" class="bi bi-check-circle-fill fs-4 me-3" style="color: var(--flowfit-success);"></i>
+                    <i th:if="${actividad.accion.toString() == 'Rechazado'}" class="bi bi-x-circle-fill fs-4 me-3" style="color: var(--flowfit-danger);"></i>
+                    
+                    <div class="flex-grow-1">
+                      <!-- Action description -->
+                      <h6 class="mb-1 text-white" th:if="${actividad.accion.toString() == 'Aprobado'}">Usuario Aprobado</h6>
+                      <h6 class="mb-1 text-white" th:if="${actividad.accion.toString() == 'Rechazado'}">Usuario Rechazado</h6>
+                      <p class="small text-muted-flowfit mb-0">
+                        <span th:text="${actividad.usuario.nombre}">Usuario</span> 
+                        (<span th:text="${actividad.usuario.perfilUsuario}">Perfil</span>) 
+                        <span th:if="${actividad.accion.toString() == 'Aprobado'}">fue aprobado</span>
+                        <span th:if="${actividad.accion.toString() == 'Rechazado'}">fue rechazado</span>
+                        por <span th:text="${actividad.admin.nombre}">Admin</span>
+                      </p>
+                    </div>
+                    <!-- Time ago -->
+                    <div class="text-end">
+                      <span class="small text-muted-flowfit" th:text="${#temporals.format(actividad.fecha, 'dd/MM')}">01/01</span><br>
+                      <small class="text-muted-flowfit" th:text="${#temporals.format(actividad.fecha, 'HH:mm')}">10:30</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card-base card-admin">
+        <div class="card-header">
+          <h5><i class="bi bi-lightning me-2"></i> Acciones Rápidas</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-lg-3 col-md-6">
+              <form action="/admin/registro_masivo" method="post" enctype="multipart/form-data" class="text-center border rounded p-3" style="background: rgba(0,0,0,0.2);">
+                <h6 class="text-light mb-3">
+                  <i class="bi bi-upload fs-3 d-block mb-2"></i>
+                  Registro Masivo
+                </h6>
+                <input type="file" name="file" accept=".csv" required class="form-control mb-3 text-light bg-dark border-secondary">
+                <button type="submit" class="btn btn-outline-info w-100">Subir CSV</button>
+              </form>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+              <a th:href="@{/admin/usuarios-pendientes}" class="btn-flowfit-outline btn-admin-outline w-100 text-center" style="padding: 24px 16px;">
+                <i class="bi bi-person-plus fs-3 d-block mb-2"></i> 
+                <span class="fw-bold">Aprobar Usuarios</span>
+              </a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <a th:href="@{/admin/usuarios}" class="btn-flowfit-outline btn-admin-outline w-100 text-center" style="padding: 24px 16px;">
+                <i class="bi bi-person-badge fs-3 d-block mb-2"></i> 
+                <span class="fw-bold">Gestionar Usuarios</span>
+              </a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <a th:href="@{/admin/ejercicios}" class="btn-flowfit-outline btn-admin-outline w-100 text-center" style="padding: 24px 16px;">
+                <i class="bi bi-activity fs-3 d-block mb-2"></i> 
+                <span class="fw-bold">Gestionar Ejercicios</span>
+              </a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <a th:href="@{/admin/correos}" class="btn-flowfit-outline btn-admin-outline w-100 text-center" style="padding: 24px 16px;">
+                <i class="fas fa-paper-plane fs-3 d-block mb-2"></i> 
+                <span class="fw-bold">Envío Masivo</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer-base">
+        © 2025 FlowFit VIP. Todos los derechos reservados.
+      </footer>
+    </div>
+  </main>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- FlowFit VIP Admin Dashboard Script -->
+  <script>
+    // Mobile Sidebar Toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const sidebar = document.getElementById('sidebar');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+      function toggleSidebar() {
+        sidebar.classList.toggle('show');
+        sidebarOverlay.classList.toggle('show');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove('show');
+        sidebarOverlay.classList.remove('show');
+      }
+
+      sidebarToggle?.addEventListener('click', toggleSidebar);
+      sidebarOverlay?.addEventListener('click', closeSidebar);
+
+      // Close sidebar on escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeSidebar();
+      });
+
+      // Admin Dashboard Chart
+      const ctx = document.getElementById('userChart')?.getContext('2d');
+      if (ctx) {
+        new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Usuarios', 'Entrenadores', 'Nutricionistas', 'Administradores'],
+            datasets: [{
+              data: [
+                /*[[${totalUsuarios - usuariosPendientes}]]*/ 24,
+                8, 
+                4,
+                /*[[${usuariosPendientes}]]*/ 3
+              ],
+              backgroundColor: [
+                '#10b981',  // Verde para Usuarios
+                '#e11d48',  // Rosa para Entrenadores  
+                '#f59e0b',  // Amarillo para Nutricionistas
+                '#3b82f6'   // Azul para Administradores
+              ],
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              borderWidth: 2,
+              hoverOffset: 8,
+              hoverBorderColor: 'white',
+              hoverBorderWidth: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { 
+                  color: 'rgba(255, 255, 255, 0.9)', 
+                  padding: 20, 
+                  usePointStyle: true,
+                  pointStyle: 'circle',
+                  font: { size: 14, weight: '600' }
+                }
+              },
+              tooltip: {
+                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                titleColor: 'white',
+                bodyColor: 'white',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                borderWidth: 1,
+                cornerRadius: 12,
+                displayColors: true,
+                callbacks: {
+                  labelColor: function(context) {
+                    return {
+                      borderColor: context.dataset.backgroundColor[context.dataIndex],
+                      backgroundColor: context.dataset.backgroundColor[context.dataIndex]
+                    };
+                  }
+                }
+              }
+            },
+            interaction: {
+              intersect: false,
+              mode: 'nearest'
+            },
+            animation: {
+              duration: 1000,
+              easing: 'easeOutQuart'
+            }
+          }
+        });
+      }
+
+      console.log('FlowFit VIP Admin Dashboard loaded successfully! 🚀');
+    });
+  </script>
+</body>
+</html>
