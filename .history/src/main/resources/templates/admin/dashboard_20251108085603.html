@@ -138,57 +138,6 @@
         </div>
       </div>
 
-      <!-- JS for Registro Masivo UX: show selected filename and submitting state -->
-      <script>
-        (function(){
-          // Ensure DOM is ready
-          function ready(fn){
-            if (document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn);
-          }
-
-          ready(function(){
-            // If there are server-rendered flash alerts (from redirect), scroll to them so user sees confirmation immediately
-            try {
-              var serverAlert = document.querySelector('.row.mb-3 .alert');
-              if (serverAlert) {
-                serverAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                serverAlert.tabIndex = -1;
-                serverAlert.focus();
-              }
-            } catch(e) { }
-
-            var fileInput = document.getElementById('registroMasivoFile');
-            var fileNameEl = document.getElementById('registroMasivoFileName');
-            var form = fileInput ? fileInput.closest('form') : null;
-            var submitBtn = document.getElementById('registroMasivoSubmit');
-            var submitText = document.getElementById('registroMasivoSubmitText');
-            var submittingEl = document.getElementById('registroMasivoSubmitting');
-
-            if (fileInput && fileNameEl) {
-              fileInput.addEventListener('change', function(e){
-                var f = fileInput.files && fileInput.files[0];
-                if (f && f.name) {
-                  fileNameEl.textContent = 'Archivo seleccionado: ' + f.name;
-                } else {
-                  fileNameEl.textContent = 'No se ha seleccionado ningún archivo';
-                }
-              });
-            }
-
-            if (form && submitBtn) {
-              form.addEventListener('submit', function(e){
-                // immediate UX feedback: disable submit and show submitting state
-                try {
-                  submitBtn.disabled = true;
-                  if (submitText) submitText.classList.add('d-none');
-                  if (submittingEl) submittingEl.classList.remove('d-none');
-                } catch(err){ /* ignore */ }
-              });
-            }
-          });
-        })();
-      </script>
-
       <!-- Statistics Cards - Tarjetas de Estadísticas -->
       <div class="row mb-4 g-3">
         <!-- Tarjeta 1: Total Usuarios -->
@@ -344,86 +293,6 @@
         </div>
       </div>
 
-      <!-- Client-side AJAX handling for registro masivo -->
-      <script>
-        (function(){
-          function ready(fn){
-            if (document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn);
-          }
-
-          ready(function(){
-            var form = document.getElementById('registroMasivoForm');
-            var fileInput = document.getElementById('registroMasivoFile');
-            var fileNameEl = document.getElementById('registroMasivoFileName');
-            var submitBtn = document.getElementById('registroMasivoSubmit');
-            var submitText = document.getElementById('registroMasivoSubmitText');
-            var submittingEl = document.getElementById('registroMasivoSubmitting');
-
-            function showClientAlert(type, title, message, archivo){
-              // type: 'success'|'danger'
-              var container = document.createElement('div');
-              container.className = 'row mb-3';
-              var col = document.createElement('div'); col.className='col-12'; container.appendChild(col);
-              var alert = document.createElement('div');
-              alert.className = 'alert alert-' + type + ' alert-dismissible fade show';
-              alert.role = 'alert';
-              var strong = document.createElement('strong');
-              if (archivo) { strong.textContent = 'Archivo: '; alert.appendChild(strong); var sp = document.createElement('span'); sp.textContent = archivo; alert.appendChild(sp); }
-              var br = document.createElement('div'); br.textContent = message; alert.appendChild(br);
-              var btn = document.createElement('button'); btn.type='button'; btn.className='btn-close'; btn.setAttribute('data-bs-dismiss','alert'); btn.setAttribute('aria-label','Close'); alert.appendChild(btn);
-              col.appendChild(alert);
-              // Insert at top of main container
-              var mainContainer = document.querySelector('.container-fluid');
-              if (mainContainer) mainContainer.insertBefore(container, mainContainer.firstChild);
-              // Ensure the alert is visible to the user (scroll into view)
-              try {
-                alert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                alert.tabIndex = -1; // make focusable
-                alert.focus();
-              } catch(e) { /* ignore scrolling errors */ }
-              // Auto-dismiss after 8s
-              setTimeout(function(){ try { alert.classList.remove('show'); alert.classList.add('hide'); if (alert.parentNode) alert.parentNode.remove(); } catch(e){} }, 8000);
-            }
-
-            if (!form) return;
-
-            form.addEventListener('submit', function(e){
-              e.preventDefault();
-              if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-                showClientAlert('danger','Error','No se ha seleccionado ningún archivo.');
-                return;
-              }
-
-              var fd = new FormData(form);
-
-              // UX: disable button and show submitting state
-              try { submitBtn.disabled = true; if (submitText) submitText.classList.add('d-none'); if (submittingEl) submittingEl.classList.remove('d-none'); } catch(e){}
-
-              fetch('/admin/registro_masivo_ajax', {
-                method: 'POST',
-                body: fd,
-                credentials: 'same-origin'
-              }).then(function(resp){
-                return resp.json();
-              }).then(function(json){
-                if (json && json.success) {
-                  showClientAlert('success','Éxito', json.mensaje, json.archivo || null);
-                  // update filename text to reflect upload
-                  if (fileNameEl && json.archivo) fileNameEl.textContent = 'Archivo subido: ' + json.archivo;
-                } else {
-                  var err = (json && json.error) ? json.error : 'Error desconocido en el servidor.';
-                  showClientAlert('danger','Error', err, (json && json.archivo) ? json.archivo : null);
-                }
-              }).catch(function(err){
-                showClientAlert('danger','Error','No se pudo subir el archivo: ' + (err && err.message ? err.message : err));
-              }).finally(function(){
-                try { submitBtn.disabled = false; if (submitText) submitText.classList.remove('d-none'); if (submittingEl) submittingEl.classList.add('d-none'); } catch(e){}
-              });
-            });
-          });
-        })();
-      </script>
-
       <!-- Analytics Chart -->
       <div class="row mb-4">
         <div class="col-12">
@@ -441,22 +310,6 @@
       </div>
 
       <!-- Quick Actions con Registro Masivo -->
-      <!-- Mensajes flash tras acciones (subida CSV, errores, etc) -->
-      <div th:if="${mensaje} or ${error}" class="row mb-3">
-        <div class="col-12">
-          <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong th:if="${archivo}">Archivo:</strong> <span th:if="${archivo}" th:text="${archivo}"></span>
-            <div th:text="${mensaje}"></div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-
-          <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong th:if="${archivo}">Archivo:</strong> <span th:if="${archivo}" th:text="${archivo}"></span>
-            <div th:text="${error}"></div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        </div>
-      </div>
       <div class="card-base card-admin mb-4">
         <div class="card-header">
           <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Acciones Rápidas</h5>
@@ -465,22 +318,18 @@
           <div class="row g-3">
             <!-- Registro Masivo CSV -->
             <div class="col-lg-3 col-md-6">
-              <form id="registroMasivoForm" action="/admin/registro_masivo" method="post" enctype="multipart/form-data" class="text-center border rounded-3 p-3" style="background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.3) !important; height: 100%;">
+              <form action="/admin/registro_masivo" method="post" enctype="multipart/form-data" class="text-center border rounded-3 p-3" style="background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.3) !important; height: 100%;">
                 <h6 class="text-white mb-3">
                   <i class="bi bi-upload fs-3 d-block mb-2 text-danger"></i>
                   Registro Masivo
                 </h6>
-                <div class="mb-2">
-                  <input id="registroMasivoFile" type="file" name="file" accept=".csv" required class="form-control mb-2 bg-dark text-white border-secondary">
-                  <div class="small text-muted mt-1" id="registroMasivoFileName" aria-live="polite">No se ha seleccionado ningún archivo</div>
-                </div>
+                <input type="file" name="file" accept=".csv" required class="form-control mb-3 bg-dark text-white border-secondary">
                 <div class="d-grid gap-2">
                   <a href="/assets/registro_masivo_template.csv" download class="btn btn-outline-light btn-admin-outline w-100 mb-2">
                     <i class="bi bi-download me-2"></i>Descargar plantilla CSV
                   </a>
-                  <button id="registroMasivoSubmit" type="submit" class="btn btn-flowfit-primary btn-admin-primary w-100">
-                    <span id="registroMasivoSubmitText"><i class="bi bi-cloud-upload me-2"></i>Subir CSV</span>
-                    <span id="registroMasivoSubmitting" class="d-none"><i class="bi bi-hourglass-split me-2"></i>Subiendo...</span>
+                  <button type="submit" class="btn btn-flowfit-primary btn-admin-primary w-100">
+                    <i class="bi bi-cloud-upload me-2"></i>Subir CSV
                   </button>
                 </div>
               </form>

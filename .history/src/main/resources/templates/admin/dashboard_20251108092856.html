@@ -147,16 +147,6 @@
           }
 
           ready(function(){
-            // If there are server-rendered flash alerts (from redirect), scroll to them so user sees confirmation immediately
-            try {
-              var serverAlert = document.querySelector('.row.mb-3 .alert');
-              if (serverAlert) {
-                serverAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                serverAlert.tabIndex = -1;
-                serverAlert.focus();
-              }
-            } catch(e) { }
-
             var fileInput = document.getElementById('registroMasivoFile');
             var fileNameEl = document.getElementById('registroMasivoFileName');
             var form = fileInput ? fileInput.closest('form') : null;

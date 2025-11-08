@@ -147,16 +147,6 @@
           }
 
           ready(function(){
-            // If there are server-rendered flash alerts (from redirect), scroll to them so user sees confirmation immediately
-            try {
-              var serverAlert = document.querySelector('.row.mb-3 .alert');
-              if (serverAlert) {
-                serverAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                serverAlert.tabIndex = -1;
-                serverAlert.focus();
-              }
-            } catch(e) { }
-
             var fileInput = document.getElementById('registroMasivoFile');
             var fileNameEl = document.getElementById('registroMasivoFileName');
             var form = fileInput ? fileInput.closest('form') : null;
@@ -343,86 +333,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Client-side AJAX handling for registro masivo -->
-      <script>
-        (function(){
-          function ready(fn){
-            if (document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn);
-          }
-
-          ready(function(){
-            var form = document.getElementById('registroMasivoForm');
-            var fileInput = document.getElementById('registroMasivoFile');
-            var fileNameEl = document.getElementById('registroMasivoFileName');
-            var submitBtn = document.getElementById('registroMasivoSubmit');
-            var submitText = document.getElementById('registroMasivoSubmitText');
-            var submittingEl = document.getElementById('registroMasivoSubmitting');
-
-            function showClientAlert(type, title, message, archivo){
-              // type: 'success'|'danger'
-              var container = document.createElement('div');
-              container.className = 'row mb-3';
-              var col = document.createElement('div'); col.className='col-12'; container.appendChild(col);
-              var alert = document.createElement('div');
-              alert.className = 'alert alert-' + type + ' alert-dismissible fade show';
-              alert.role = 'alert';
-              var strong = document.createElement('strong');
-              if (archivo) { strong.textContent = 'Archivo: '; alert.appendChild(strong); var sp = document.createElement('span'); sp.textContent = archivo; alert.appendChild(sp); }
-              var br = document.createElement('div'); br.textContent = message; alert.appendChild(br);
-              var btn = document.createElement('button'); btn.type='button'; btn.className='btn-close'; btn.setAttribute('data-bs-dismiss','alert'); btn.setAttribute('aria-label','Close'); alert.appendChild(btn);
-              col.appendChild(alert);
-              // Insert at top of main container
-              var mainContainer = document.querySelector('.container-fluid');
-              if (mainContainer) mainContainer.insertBefore(container, mainContainer.firstChild);
-              // Ensure the alert is visible to the user (scroll into view)
-              try {
-                alert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                alert.tabIndex = -1; // make focusable
-                alert.focus();
-              } catch(e) { /* ignore scrolling errors */ }
-              // Auto-dismiss after 8s
-              setTimeout(function(){ try { alert.classList.remove('show'); alert.classList.add('hide'); if (alert.parentNode) alert.parentNode.remove(); } catch(e){} }, 8000);
-            }
-
-            if (!form) return;
-
-            form.addEventListener('submit', function(e){
-              e.preventDefault();
-              if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-                showClientAlert('danger','Error','No se ha seleccionado ningún archivo.');
-                return;
-              }
-
-              var fd = new FormData(form);
-
-              // UX: disable button and show submitting state
-              try { submitBtn.disabled = true; if (submitText) submitText.classList.add('d-none'); if (submittingEl) submittingEl.classList.remove('d-none'); } catch(e){}
-
-              fetch('/admin/registro_masivo_ajax', {
-                method: 'POST',
-                body: fd,
-                credentials: 'same-origin'
-              }).then(function(resp){
-                return resp.json();
-              }).then(function(json){
-                if (json && json.success) {
-                  showClientAlert('success','Éxito', json.mensaje, json.archivo || null);
-                  // update filename text to reflect upload
-                  if (fileNameEl && json.archivo) fileNameEl.textContent = 'Archivo subido: ' + json.archivo;
-                } else {
-                  var err = (json && json.error) ? json.error : 'Error desconocido en el servidor.';
-                  showClientAlert('danger','Error', err, (json && json.archivo) ? json.archivo : null);
-                }
-              }).catch(function(err){
-                showClientAlert('danger','Error','No se pudo subir el archivo: ' + (err && err.message ? err.message : err));
-              }).finally(function(){
-                try { submitBtn.disabled = false; if (submitText) submitText.classList.remove('d-none'); if (submittingEl) submittingEl.classList.add('d-none'); } catch(e){}
-              });
-            });
-          });
-        })();
-      </script>
 
       <!-- Analytics Chart -->
       <div class="row mb-4">

@@ -147,16 +147,6 @@
           }
 
           ready(function(){
-            // If there are server-rendered flash alerts (from redirect), scroll to them so user sees confirmation immediately
-            try {
-              var serverAlert = document.querySelector('.row.mb-3 .alert');
-              if (serverAlert) {
-                serverAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                serverAlert.tabIndex = -1;
-                serverAlert.focus();
-              }
-            } catch(e) { }
-
             var fileInput = document.getElementById('registroMasivoFile');
             var fileNameEl = document.getElementById('registroMasivoFileName');
             var form = fileInput ? fileInput.closest('form') : null;
@@ -375,12 +365,6 @@
               // Insert at top of main container
               var mainContainer = document.querySelector('.container-fluid');
               if (mainContainer) mainContainer.insertBefore(container, mainContainer.firstChild);
-              // Ensure the alert is visible to the user (scroll into view)
-              try {
-                alert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                alert.tabIndex = -1; // make focusable
-                alert.focus();
-              } catch(e) { /* ignore scrolling errors */ }
               // Auto-dismiss after 8s
               setTimeout(function(){ try { alert.classList.remove('show'); alert.classList.add('hide'); if (alert.parentNode) alert.parentNode.remove(); } catch(e){} }, 8000);
             }
