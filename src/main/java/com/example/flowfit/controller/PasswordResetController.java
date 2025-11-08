@@ -50,7 +50,7 @@ public class PasswordResetController {
             response.put("message", "Ocurrió un error. Por favor, intenta nuevamente.");
             return ResponseEntity.status(500).body(response);
         }
-    }
+            }
     
     /**
      * GET /api/password-reset/validate/{token}

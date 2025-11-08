@@ -2,6 +2,7 @@ package com.example.flowfit.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -20,5 +21,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .exposedHeaders("*")
                 .allowCredentials(false)
                 .maxAge(3600);
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // Registrar el interceptor de roles para proteger rutas /admin/**
+        registry.addInterceptor(new RoleInterceptor())
+                .addPathPatterns("/admin/**");
     }
 }

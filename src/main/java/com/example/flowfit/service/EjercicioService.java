@@ -39,17 +39,6 @@ public class EjercicioService {
         return ejercicioRepository.findAll(pageable);
     }
 
-    // Get all exercises as list
-    public List<EjercicioCatalogo> getAllEjercicios() {
-        return ejercicioRepository.findAll(Sort.by(Sort.Direction.ASC, "nombre"));
-    }
-
-    // Get global exercises (created by admin)
-    public List<EjercicioCatalogo> getGlobalExercicios() {
-        return ejercicioRepository.findByCreadoPorIsNull();
-    }
-    
-    // Métodos para entrenadores
     public List<EjercicioCatalogo> obtenerEjerciciosGlobales() {
         return ejercicioRepository.findByCreadoPorIsNull();
     }
@@ -66,100 +55,22 @@ public class EjercicioService {
         return ejercicioRepository.countByCreadoPor(creador);
     }
 
-    // Get exercises created by a specific trainer
-    public List<EjercicioCatalogo> getEjerciciosByTrainer(Usuario trainer) {
-        return ejercicioRepository.findByCreadoPor(trainer);
+    public EjercicioCatalogo obtenerEjercicioPorId(Integer id) {
+        return ejercicioRepository.findById(id.longValue())
+            .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
     }
 
-    // Search exercises
-    public List<EjercicioCatalogo> searchEjercicios(String searchTerm) {
-        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            return getAllEjercicios();
-        }
-        return ejercicioRepository.searchByNameOrDescription(searchTerm.trim());
+    public void guardarEjercicio(EjercicioCatalogo ejercicio) {
+        ejercicioRepository.save(ejercicio);
     }
 
-    // Find exercise by ID
-    public Optional<EjercicioCatalogo> findById(Long id) {
-        return ejercicioRepository.findById(id);
-    }
-
-    // Create global exercise (admin only)
-    public EjercicioCatalogo createGlobalExercise(String nombre, String descripcion, MultipartFile imagen) throws IOException {
-        String imageName = saveImage(imagen, false);
-        
-        EjercicioCatalogo ejercicio = new EjercicioCatalogo();
-        ejercicio.setNombre(nombre);
-        ejercicio.setDescripcion(descripcion);
-        ejercicio.setImagen(imageName);
-        ejercicio.setCreadoPor(null); // Global exercise
-        
-        return ejercicioRepository.save(ejercicio);
-    }
-
-    // Create trainer exercise (simplified - same folder as global)
-    public EjercicioCatalogo createTrainerExercise(String nombre, String descripcion, MultipartFile imagen, Usuario trainer) throws IOException {
-        String imageName = saveImage(imagen, false); // Use same folder for simplicity
-        
-        EjercicioCatalogo ejercicio = new EjercicioCatalogo();
-        ejercicio.setNombre(nombre);
-        ejercicio.setDescripcion(descripcion);
-        ejercicio.setImagen(imageName);
-        ejercicio.setCreadoPor(trainer);
-        
-        return ejercicioRepository.save(ejercicio);
-    }
-
-    // Update exercise
-    public EjercicioCatalogo updateExercise(Long id, String nombre, String descripcion, String tipo, MultipartFile imagen) throws IOException {
-        Optional<EjercicioCatalogo> ejercicioOpt = ejercicioRepository.findById(id);
-        if (ejercicioOpt.isEmpty()) {
-            throw new RuntimeException("Ejercicio no encontrado");
-        }
-        
-        EjercicioCatalogo ejercicio = ejercicioOpt.get();
-        ejercicio.setNombre(nombre);
-        ejercicio.setDescripcion(descripcion);
-        
-        // Note: tipo field is not part of the current EjercicioCatalogo model
-        // Skipping tipo update for now
-        
-        if (imagen != null && !imagen.isEmpty()) {
-            // Delete old image if exists
+    public void eliminarEjercicio(Integer id) {
+        EjercicioCatalogo ejercicio = obtenerEjercicioPorId(id);
+        // Delete associated image
+        if (ejercicio.getImagen() != null) {
             deleteImage(ejercicio.getImagen(), false);
-            
-            // Save new image (all in same folder for simplicity)
-            String imageName = saveImage(imagen, false);
-            ejercicio.setImagen(imageName);
         }
-        
-        return ejercicioRepository.save(ejercicio);
-    }
-
-    // Delete exercise
-    public void deleteExercise(Long id) {
-        Optional<EjercicioCatalogo> ejercicioOpt = ejercicioRepository.findById(id);
-        if (ejercicioOpt.isPresent()) {
-            EjercicioCatalogo ejercicio = ejercicioOpt.get();
-            // Delete associated image
-            deleteImage(ejercicio.getImagen(), false);
-            ejercicioRepository.deleteById(id);
-        }
-    }
-
-    // Count total exercises
-    public long countTotalEjercicios() {
-        return ejercicioRepository.count();
-    }
-
-    // Count global exercises
-    public long countGlobalEjercicios() {
-        return ejercicioRepository.findByCreadoPorIsNull().size();
-    }
-
-    // Count trainer exercises
-    public long countTrainerEjercicios() {
-        return ejercicioRepository.count() - countGlobalEjercicios();
+        ejercicioRepository.deleteById(id.longValue());
     }
 
     // Private helper methods

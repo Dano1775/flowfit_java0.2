@@ -33,6 +33,7 @@ $primerNombre = explode(' ', $_SESSION["nombre"] ?? "Usuario")[0];
         <li><a class="dropdown-item" href="../editarperfil/editar_perfil.php">Editar perfil</a></li>
         <li><a class="dropdown-item" href="rutina.php">Gestión de Rutinas</a></li>
         <li><a class="dropdown-item" href="ejercicios_entrenador.php">Ejercicios</a></li>
+        <li><a class="dropdown-item" href="mis_usuarios.php">Mis Usuarios</a></li>
         <li><a class="dropdown-item" href="historial_asignaciones.php">Historial de asignaciones</a></li>
         <li><hr class="dropdown-divider my-2"></li>
         <li><a class="dropdown-item text-danger" href="../index/index.html">Cerrar sesión</a></li>
@@ -58,7 +59,7 @@ $primerNombre = explode(' ', $_SESSION["nombre"] ?? "Usuario")[0];
   <div class="row g-4 justify-content-center">
 
     <!-- Ejercicios -->
-    <div class="col-md-4 col-sm-6">
+    <div class="col-md-3 col-sm-6">
       <div class="card text-center p-4">
         <i class="bi bi-bicycle fs-1 text-primary mb-3"></i>
         <h5>Ejercicios</h5>
@@ -68,7 +69,7 @@ $primerNombre = explode(' ', $_SESSION["nombre"] ?? "Usuario")[0];
     </div>
 
     <!-- Gestión de Rutinas -->
-    <div class="col-md-4 col-sm-6">
+    <div class="col-md-3 col-sm-6">
       <div class="card text-center p-4">
         <i class="bi bi-clipboard-data fs-1 text-blue mb-3"></i>
         <h5>Gestión de Rutinas</h5>
@@ -77,8 +78,18 @@ $primerNombre = explode(' ', $_SESSION["nombre"] ?? "Usuario")[0];
       </div>
     </div>
 
+    <!-- Mis Usuarios -->
+    <div class="col-md-3 col-sm-6">
+      <div class="card text-center p-4">
+        <i class="bi bi-people-fill fs-1 text-success mb-3"></i>
+        <h5>Mis Usuarios</h5>
+        <p>Gestiona los usuarios asignados a tus rutinas.</p>
+        <a href="mis_usuarios.php" class="btn btn-blue mt-2">Ver Usuarios</a>
+      </div>
+    </div>
+
     <!-- Historial -->
-    <div class="col-md-4 col-sm-6">
+    <div class="col-md-3 col-sm-6">
       <div class="card text-center p-4">
         <i class="bi bi-journal-text fs-1 text-info mb-3"></i>
         <h5>Historial</h5>

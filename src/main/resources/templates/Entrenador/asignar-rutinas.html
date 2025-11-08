@@ -38,37 +38,37 @@
         <!-- Navigation Menu -->
         <ul class="sidebar-nav list-unstyled">
             <li class="nav-item">
-                <a href="/entrenador/dashboard" class="nav-link-flowfit">
+                <a th:href="@{/entrenador/dashboard}" class="nav-link-flowfit">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/entrenador/rutinas" class="nav-link-flowfit">
+                <a th:href="@{/entrenador/rutinas}" class="nav-link-flowfit">
                     <i class="bi bi-journal-text"></i>
                     <span>Mis Rutinas</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/entrenador/rutinas/crear" class="nav-link-flowfit">
+                <a th:href="@{/entrenador/rutinas/crear}" class="nav-link-flowfit">
                     <i class="bi bi-plus-circle"></i>
                     <span>Crear Rutina</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/entrenador/asignar-rutinas" class="nav-link-flowfit active">
+                <a th:href="@{/entrenador/asignar-rutinas}" class="nav-link-flowfit active">
                     <i class="bi bi-person-check"></i>
                     <span>Asignar Rutinas</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/entrenador/ejercicios" class="nav-link-flowfit">
+                <a th:href="@{/entrenador/ejercicios}" class="nav-link-flowfit">
                     <i class="bi bi-activity"></i>
                     <span>Ejercicios</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/entrenador/historial-asignaciones" class="nav-link-flowfit">
+                <a th:href="@{/entrenador/historial-asignaciones}" class="nav-link-flowfit">
                     <i class="bi bi-clock-history"></i>
                     <span>Historial</span>
                 </a>
@@ -84,7 +84,7 @@
                     <small th:text="${entrenador.correo}">correo@entrenador.com</small>
                 </div>
             </div>
-            <a href="/logout" class="btn-logout">
+            <a th:href="@{/logout}" class="btn-logout">
                 <i class="bi bi-box-arrow-right me-1"></i>
                 Cerrar Sesión
             </a>
@@ -133,14 +133,14 @@
                                 <span th:if="${#lists.isEmpty(rutinas)}">No tienes rutinas creadas. </span>
                                 <span th:if="${#lists.isEmpty(usuarios)}">No hay usuarios registrados. </span>
                             </p>
-                            <a th:if="${#lists.isEmpty(rutinas)}" href="/entrenador/rutinas/crear" class="btn-flowfit">
+                            <a th:if="${#lists.isEmpty(rutinas)}" th:href="@{/entrenador/rutinas/crear}" class="btn-flowfit">
                                 <i class="bi bi-plus-circle"></i>
                                 Crear Primera Rutina
                             </a>
                         </div>
 
                         <form th:if="${!#lists.isEmpty(rutinas) and !#lists.isEmpty(usuarios)}" 
-                              method="post" action="/entrenador/asignar-rutina">
+                              method="post" th:action="@{/entrenador/asignar-rutina}">
                             <div class="mb-3">
                                 <label class="form-label-flowfit">Seleccionar Rutina *</label>
                                 <select name="rutinaId" class="form-control form-control-flowfit" required>
@@ -232,7 +232,7 @@
                                 <i class="bi bi-clock-history me-2"></i>
                                 Asignaciones Recientes
                             </h4>
-                            <a href="/entrenador/historial-asignaciones" class="btn-flowfit-outline btn-sm">
+                            <a th:href="@{/entrenador/historial-asignaciones}" class="btn-flowfit-outline btn-sm">
                                 <i class="bi bi-arrow-right"></i>
                                 Ver Todo el Historial
                             </a>
@@ -285,7 +285,7 @@
                                                     <i class="bi bi-eye"></i>
                                                 </a>
                                                 <button type="button" class="btn btn-danger-flowfit"
-                                                        th:onclick="'confirmarDesasignacion(' + ${asignacion.rutinaId} + ', ' + ${asignacion.usuarioId} + ', \'' + ${asignacion.usuario?.nombre} + '\', \'' + ${asignacion.rutina?.nombre} + '\')'">
+                                                        th:attr="onclick=|confirmarDesasignacion(${asignacion.rutinaId}, ${asignacion.usuarioId}, '${asignacion.usuario?.nombre}', '${asignacion.rutina?.nombre}')|">
                                                     <i class="bi bi-x"></i>
                                                 </button>
                                             </div>
@@ -320,7 +320,7 @@
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid var(--flowfit-glass-border);">
                     <button type="button" class="btn-flowfit-outline" data-bs-dismiss="modal">Cancelar</button>
-                    <form id="desasignarForm" method="post" action="/entrenador/desasignar-rutina" style="display: inline;">
+                    <form id="desasignarForm" method="post" th:action="@{/entrenador/desasignar-rutina}" style="display: inline;">
                         <input type="hidden" name="rutinaId" id="rutinaIdDesasignar">
                         <input type="hidden" name="usuarioId" id="usuarioIdDesasignar">
                         <button type="submit" class="btn-danger-flowfit">

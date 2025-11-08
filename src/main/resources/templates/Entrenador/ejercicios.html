@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicios - FlowFit</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/Entrenador/entrenador-dashboard.css}">
+</head>
+<body>
+    <!-- Include Sidebar -->
+    <div th:replace="~{Entrenador/fragments/sidebar :: sidebar('ejercicios')}"></div>
+    
+    <!-- Include Mobile Toggle -->
+    <div th:replace="~{Entrenador/fragments/sidebar :: mobileToggle}"></div>
+    
+    <!-- Include Sidebar Overlay -->
+    <div th:replace="~{Entrenador/fragments/sidebar :: sidebarOverlay}"></div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Page Header -->
+        <div class="page-header fade-in-up">
+            <h1 class="page-title">
+                <i class="bi bi-activity me-2"></i>
+                Ejercicios
+            </h1>
+            <p class="page-subtitle">
+                Gestiona y crea ejercicios personalizados para tus rutinas
+            </p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert-flowfit alert-success-flowfit fade-in-up">
+            <i class="bi bi-check-circle me-2"></i>
+            <span th:text="${successMessage}"></span>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert-flowfit alert-error-flowfit fade-in-up">
+            <i class="bi bi-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Tabs for Ejercicios -->
+        <div class="card-flowfit fade-in-up">
+            <div class="card-body">
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#ejercicios-globales" type="button">
+                            <i class="bi bi-globe me-2"></i>
+                            Ejercicios Globales
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#mis-ejercicios" type="button">
+                            <i class="bi bi-person me-2"></i>
+                            Mis Ejercicios
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- Ejercicios Globales -->
+                    <div class="tab-pane fade show active" id="ejercicios-globales">
+                        <div class="row g-4">
+                            <div th:each="ejercicio : ${ejerciciosGlobales}" class="col-md-6 col-xl-4">
+                                <div class="ejercicio-card">
+                                    <div class="ejercicio-header">
+                                        <img th:if="${ejercicio.imagen}" 
+                                             th:src="@{'/ejercicio_image_uploads/' + ${ejercicio.imagen}}"
+                                             alt="Imagen del ejercicio" 
+                                             class="ejercicio-imagen">
+                                        <img th:unless="${ejercicio.imagen}"
+                                             th:src="@{/assets/ejercicio-default.png}"
+                                             alt="Imagen por defecto"
+                                             class="ejercicio-imagen">
+                                        <span class="badge global-badge">
+                                            <i class="bi bi-globe"></i>
+                                            Global
+                                        </span>
+                                    </div>
+                                    <div class="ejercicio-body">
+                                        <h5 th:text="${ejercicio.nombre}">Nombre del Ejercicio</h5>
+                                        <p class="text-muted" th:text="${ejercicio.descripcion}">Descripción del ejercicio...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mis Ejercicios -->
+                    <div class="tab-pane fade" id="mis-ejercicios">
+                        <!-- Botón para crear nuevo ejercicio -->
+                        <div class="text-end mb-4">
+                            <button type="button" class="btn-flowfit" data-bs-toggle="modal" data-bs-target="#crearEjercicioModal">
+                                <i class="bi bi-plus-circle"></i>
+                                Nuevo Ejercicio
+                            </button>
+                        </div>
+
+                        <!-- Lista de ejercicios personales -->
+                        <div class="row g-4">
+                            <div th:if="${#lists.isEmpty(ejerciciosPersonales)}" class="col-12">
+                                <div class="text-center py-5">
+                                    <i class="bi bi-activity text-muted" style="font-size: 3rem;"></i>
+                                    <h4 class="mt-3">No tienes ejercicios personalizados</h4>
+                                    <p class="text-muted">Comienza creando tu primer ejercicio personalizado</p>
+                                    <button class="btn-flowfit mt-3" data-bs-toggle="modal" data-bs-target="#crearEjercicioModal">
+                                        <i class="bi bi-plus-circle"></i>
+                                        Crear Mi Primer Ejercicio
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div th:each="ejercicio : ${ejerciciosPersonales}" class="col-md-6 col-xl-4">
+                                <div class="ejercicio-card">
+                                    <div class="ejercicio-header">
+                                        <img th:if="${ejercicio.imagen}" 
+                                             th:src="@{'/ejercicio_image_uploads/' + ${ejercicio.imagen}}"
+                                             alt="Imagen del ejercicio" 
+                                             class="ejercicio-imagen">
+                                        <img th:unless="${ejercicio.imagen}"
+                                             th:src="@{/assets/ejercicio-default.png}"
+                                             alt="Imagen por defecto"
+                                             class="ejercicio-imagen">
+                                        <div class="ejercicio-actions">
+                                            <button class="btn btn-sm btn-edit" 
+                                                    th:onclick="'editarEjercicio(' + ${ejercicio.id} + ')'">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-delete" 
+                                                    th:onclick="'confirmarEliminar(' + ${ejercicio.id} + ', \'' + ${ejercicio.nombre} + '\')'">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="ejercicio-body">
+                                        <h5 th:text="${ejercicio.nombre}">Nombre del Ejercicio</h5>
+                                        <p class="text-muted" th:text="${ejercicio.descripcion}">Descripción del ejercicio...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Crear Ejercicio -->
+    <div class="modal fade" id="crearEjercicioModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background: var(--flowfit-glass); backdrop-filter: blur(20px); border: 1px solid var(--flowfit-glass-border);">
+                <div class="modal-header">
+                    <h5 class="modal-title text-light">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Crear Nuevo Ejercicio
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/entrenador/ejercicios/crear}" method="post" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label text-light">Nombre del Ejercicio *</label>
+                            <input type="text" name="nombre" class="form-control form-control-flowfit" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light">Descripción *</label>
+                            <textarea name="descripcion" class="form-control form-control-flowfit" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light">Imagen</label>
+                            <input type="file" name="imagen" class="form-control form-control-flowfit" accept="image/*">
+                            <small class="text-muted d-block mt-1">Formatos aceptados: JPG, PNG. Máx. 5MB</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-flowfit-outline" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn-flowfit">Crear Ejercicio</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Eliminar Ejercicio -->
+    <div class="modal fade" id="eliminarModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background: var(--flowfit-glass); backdrop-filter: blur(20px); border: 1px solid var(--flowfit-glass-border);">
+                <div class="modal-header">
+                    <h5 class="modal-title text-light">
+                        <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                        Confirmar Eliminación
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-light">
+                    <p>¿Estás seguro de que deseas eliminar el ejercicio <strong id="ejercicioEliminarNombre"></strong>?</p>
+                    <p class="text-warning small mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Esta acción no se puede deshacer.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-flowfit-outline" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="eliminarForm" method="post" style="display: inline;">
+                        <button type="submit" class="btn-danger-flowfit">
+                            <i class="bi bi-trash me-1"></i>
+                            Eliminar Ejercicio
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Include Sidebar Scripts -->
+    <div th:replace="~{Entrenador/fragments/sidebar :: sidebarScript}"></div>
+    
+    <!-- Modal Scripts -->
+    <script>
+        // Confirmar eliminación
+        function confirmarEliminar(ejercicioId, ejercicioNombre) {
+            document.getElementById('ejercicioEliminarNombre').textContent = ejercicioNombre;
+            document.getElementById('eliminarForm').action = /*[[@{/entrenador/ejercicios/}]]*/ '' + ejercicioId + '/eliminar';
+            
+            const modal = new bootstrap.Modal(document.getElementById('eliminarModal'));
+            modal.show();
+        }
+    </script>
+</body>
+</html>
