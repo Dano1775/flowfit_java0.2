@@ -1,0 +1,8 @@
+numero_documento,nombre,telefono,correo,clave,perfilUsuario
+10000001,Test Usuario,300000001,test.user1@example.com,Pass1234,Usuario
+10000002,Test Entrenador,300000002,test.trainer@example.com,Pass1234,Entrenador
+
+# Notas:
+# - Mantén el archivo en UTF-8.
+# - El encabezado es opcional; si está presente debe contener 'numero_documento'.
+# - Valores válidos para perfilUsuario: Usuario, Administrador, Entrenador, Nutricionista
