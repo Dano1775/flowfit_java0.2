@@ -253,7 +253,6 @@ public class UsuarioController {
      * Permite ver y editar información personal, objetivos y preferencias
      * TEMPORALMENTE DESHABILITADO
      */
-    /*
     @GetMapping("/perfil")
     public String perfil(Model model, HttpSession session) {
         try {
@@ -273,6 +272,7 @@ public class UsuarioController {
             model.addAttribute("rutinasActivas", rutinasActivas);
             model.addAttribute("rutinasCompletadas", rutinasCompletadas);
             
+            System.out.println("📄 Cargando página de perfil para usuario: " + usuario.getNombre() + " (ID: " + usuario.getId() + ")");
             return "usuario/perfil";
         } catch (Exception e) {
             e.printStackTrace();
@@ -280,7 +280,6 @@ public class UsuarioController {
             return "usuario/dashboard";
         }
     }
-    */
     
     // ===== ENDPOINTS PARA ACCIONES DE RUTINAS =====
     
