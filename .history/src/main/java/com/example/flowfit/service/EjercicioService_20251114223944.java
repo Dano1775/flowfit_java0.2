@@ -43,18 +43,6 @@ public class EjercicioService {
         return ejercicioRepository.findByCreadoPorIsNull();
     }
     
-    public List<EjercicioCatalogo> searchEjercicios(String searchTerm) {
-        return ejercicioRepository.searchByNameOrDescription(searchTerm);
-    }
-    
-    public List<EjercicioCatalogo> getGlobalExercicios() {
-        return ejercicioRepository.findByCreadoPorIsNull();
-    }
-    
-    public List<EjercicioCatalogo> getAllEjercicios() {
-        return ejercicioRepository.findAll();
-    }
-    
     public List<EjercicioCatalogo> obtenerEjerciciosPorCreador(Integer creadorId) {
         Usuario creador = new Usuario();
         creador.setId(creadorId);
@@ -70,57 +58,13 @@ public class EjercicioService {
     public long countTotalEjercicios() {
         return ejercicioRepository.count();
     }
-    
-    public long countGlobalEjercicios() {
-        return ejercicioRepository.countByCreadoPorIsNull();
-    }
-    
-    public long countTrainerEjercicios() {
-        return ejercicioRepository.count() - ejercicioRepository.countByCreadoPorIsNull();
-    }
 
     public EjercicioCatalogo obtenerEjercicioPorId(Integer id) {
         return ejercicioRepository.findById(id.longValue())
             .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
     }
-    
-    public Optional<EjercicioCatalogo> findById(Long id) {
-        return ejercicioRepository.findById(id);
-    }
 
     public void guardarEjercicio(EjercicioCatalogo ejercicio) {
-        ejercicioRepository.save(ejercicio);
-    }
-    
-    public EjercicioCatalogo createGlobalExercise(String nombre, String descripcion, MultipartFile imagen) throws IOException {
-        EjercicioCatalogo ejercicio = new EjercicioCatalogo();
-        ejercicio.setNombre(nombre);
-        ejercicio.setDescripcion(descripcion);
-        ejercicio.setCreadoPor(null);
-        
-        if (imagen != null && !imagen.isEmpty()) {
-            String imageName = saveImage(imagen, false);
-            ejercicio.setImagen(imageName);
-        }
-        
-        return ejercicioRepository.save(ejercicio);
-    }
-    
-    public void updateExercise(Long id, String nombre, String descripcion, String tipo, MultipartFile imagen) throws IOException {
-        EjercicioCatalogo ejercicio = ejercicioRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
-        
-        ejercicio.setNombre(nombre);
-        ejercicio.setDescripcion(descripcion);
-        
-        if (imagen != null && !imagen.isEmpty()) {
-            if (ejercicio.getImagen() != null) {
-                deleteImage(ejercicio.getImagen(), ejercicio.getCreadoPor() != null);
-            }
-            String imageName = saveImage(imagen, ejercicio.getCreadoPor() != null);
-            ejercicio.setImagen(imageName);
-        }
-        
         ejercicioRepository.save(ejercicio);
     }
 
@@ -131,17 +75,6 @@ public class EjercicioService {
             deleteImage(ejercicio.getImagen(), false);
         }
         ejercicioRepository.deleteById(id.longValue());
-    }
-    
-    public void deleteExercise(Long id) {
-        EjercicioCatalogo ejercicio = ejercicioRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
-        
-        if (ejercicio.getImagen() != null) {
-            deleteImage(ejercicio.getImagen(), ejercicio.getCreadoPor() != null);
-        }
-        
-        ejercicioRepository.deleteById(id);
     }
 
     // Private helper methods
