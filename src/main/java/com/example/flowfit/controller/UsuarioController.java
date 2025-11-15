@@ -102,6 +102,58 @@ public class UsuarioController {
     }
 
     /**
+     * Endpoint AJAX para obtener datos del gráfico de progreso
+     */
+    @GetMapping("/dashboard-chart-data")
+    @ResponseBody
+    public Map<String, Object> getDashboardChartData(HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) {
+            return Map.of("error", "Unauthorized");
+        }
+
+        try {
+            // Obtener datos del usuario actualizado
+            usuario = usuarioService.findById(usuario.getId()).orElse(usuario);
+            
+            // Obtener rutinas asignadas
+            List<RutinaAsignada> rutinasAsignadas = rutinaService.obtenerRutinasAsignadas(usuario.getId());
+            
+            // Contar rutinas por estado
+            long rutinasCompletadas = rutinasAsignadas.stream()
+                .filter(r -> r.getEstado() == RutinaAsignada.EstadoRutina.COMPLETADA)
+                .count();
+            long rutinasEnProgreso = rutinasAsignadas.stream()
+                .filter(r -> r.getEstado() == RutinaAsignada.EstadoRutina.ACTIVA)
+                .count();
+            long rutinasPendientes = rutinasAsignadas.stream()
+                .filter(r -> r.getEstado() == RutinaAsignada.EstadoRutina.PAUSADA)
+                .count();
+
+            // Preparar datos para el gráfico
+            Map<String, Object> chartData = new HashMap<>();
+            java.util.Arrays.asList("Rutinas Completadas", "En Progreso", "Pendientes");
+            java.util.Arrays.asList(
+                (int) rutinasCompletadas,
+                (int) rutinasEnProgreso,
+                (int) rutinasPendientes
+            );
+            
+            chartData.put("labels", java.util.Arrays.asList("Rutinas Completadas", "En Progreso", "Pendientes"));
+            chartData.put("data", java.util.Arrays.asList(
+                (int) rutinasCompletadas,
+                (int) rutinasEnProgreso,
+                (int) rutinasPendientes
+            ));
+            
+            return chartData;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Map.of("error", "Error al obtener datos del gráfico", "data", java.util.Arrays.asList(0, 0, 0));
+        }
+    }
+
+    /**
      * Página de rutinas del usuario
      * Muestra rutinas asignadas, completadas y disponibles
      */

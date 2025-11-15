@@ -23,6 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
 import jakarta.servlet.http.HttpSession;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -88,6 +90,53 @@ public class EntrenadorController {
         model.addAttribute("progresoPromedio", asignacionesActivas.size() > 0 ? "85%" : "0%");
 
         return "Entrenador/dashboard";
+    }
+
+    /**
+     * Endpoint AJAX para obtener datos del gráfico (datos globales del sistema)
+     */
+    @GetMapping("/dashboard-chart-data")
+    @ResponseBody
+    public Map<String, Object> getDashboardChartData(HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return Map.of("error", "Unauthorized");
+        }
+
+        // Obtener datos globales del sistema (como en admin dashboard)
+        List<Usuario> todosLosUsuarios = usuarioService.obtenerTodosLosUsuarios();
+        
+        // Contar usuarios por perfil (estados aprobados: "A")
+        long totalUsuarios = todosLosUsuarios.stream()
+                .filter(u -> Usuario.PerfilUsuario.Usuario.equals(u.getPerfilUsuario()) && "A".equals(u.getEstado()))
+                .count();
+        
+        long totalEntrenadores = todosLosUsuarios.stream()
+                .filter(u -> Usuario.PerfilUsuario.Entrenador.equals(u.getPerfilUsuario()) && "A".equals(u.getEstado()))
+                .count();
+        
+        long totalNutricionistas = todosLosUsuarios.stream()
+                .filter(u -> Usuario.PerfilUsuario.Nutricionista.equals(u.getPerfilUsuario()) && "A".equals(u.getEstado()))
+                .count();
+        
+        long totalPendientes = todosLosUsuarios.stream()
+                .filter(u -> "I".equals(u.getEstado()))
+                .count();
+
+        // Preparar datos para el gráfico (igual a admin dashboard)
+        Map<String, Object> chartData = new HashMap<>();
+        List<String> labels = Arrays.asList("Usuarios", "Entrenadores", "Nutricionistas", "Pendientes");
+        List<Integer> data = Arrays.asList(
+                (int) totalUsuarios,
+                (int) totalEntrenadores,
+                (int) totalNutricionistas,
+                (int) totalPendientes
+        );
+        
+        chartData.put("labels", labels);
+        chartData.put("data", data);
+        
+        return chartData;
     }
 
     /**

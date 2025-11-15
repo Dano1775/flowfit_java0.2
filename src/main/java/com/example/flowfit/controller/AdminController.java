@@ -26,6 +26,10 @@ import org.springframework.http.MediaType;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import java.util.Optional;
 import java.io.ByteArrayOutputStream;
@@ -101,6 +105,53 @@ public class AdminController {
         model.addAttribute("actividadReciente", actividadReciente);
 
         return "admin/dashboard";
+    }
+
+    /**
+     * Endpoint AJAX para obtener datos del gráfico (datos globales)
+     */
+    @GetMapping("/dashboard-chart-data")
+    @ResponseBody
+    public Map<String, Object> getDashboardChartData(HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null || !usuario.getPerfilUsuario().toString().equals("Administrador")) {
+            return Map.of("error", "Unauthorized");
+        }
+
+        // Obtener datos globales del sistema
+        List<Usuario> todosLosUsuarios = usuarioService.obtenerTodosLosUsuarios();
+        
+        // Contar usuarios por perfil (aprobados)
+        long totalUsuarios = todosLosUsuarios.stream()
+                .filter(u -> Usuario.PerfilUsuario.Usuario.equals(u.getPerfilUsuario()) && "A".equals(u.getEstado()))
+                .count();
+        
+        long totalEntrenadores = todosLosUsuarios.stream()
+                .filter(u -> Usuario.PerfilUsuario.Entrenador.equals(u.getPerfilUsuario()) && "A".equals(u.getEstado()))
+                .count();
+        
+        long totalNutricionistas = todosLosUsuarios.stream()
+                .filter(u -> Usuario.PerfilUsuario.Nutricionista.equals(u.getPerfilUsuario()) && "A".equals(u.getEstado()))
+                .count();
+        
+        long totalPendientes = todosLosUsuarios.stream()
+                .filter(u -> "I".equals(u.getEstado()))
+                .count();
+
+        // Preparar datos para el gráfico
+        Map<String, Object> chartData = new HashMap<>();
+        List<String> labels = Arrays.asList("Usuarios", "Entrenadores", "Nutricionistas", "Pendientes");
+        List<Integer> data = Arrays.asList(
+                (int) totalUsuarios,
+                (int) totalEntrenadores,
+                (int) totalNutricionistas,
+                (int) totalPendientes
+        );
+        
+        chartData.put("labels", labels);
+        chartData.put("data", data);
+        
+        return chartData;
     }
     
     @GetMapping("/usuarios-pendientes")

@@ -329,6 +329,22 @@
         </div>
       </div>
 
+      <!-- Analytics Chart -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card-base card-entrenador">
+            <div class="card-header">
+              <h5><i class="bi bi-pie-chart me-2"></i>Resumen de Actividad</h5>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" style="height: 300px;">
+                <canvas id="userChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Footer -->
       <footer class="footer-base">
         © 2025 FlowFit - Panel de Entrenador. Todos los derechos reservados.
@@ -434,6 +450,84 @@
       }
       updateTime();
       setInterval(updateTime, 1000);
+
+      // Fetch chart data from backend
+      fetch('/entrenador/dashboard-chart-data')
+        .then(response => response.json())
+        .then(data => {
+          const ctx = document.getElementById('userChart')?.getContext('2d');
+          if (ctx) {
+            new Chart(ctx, {
+              type: 'doughnut',
+              data: {
+                labels: data.labels || ['Usuarios', 'Entrenadores', 'Nutricionistas', 'Pendientes'],
+                datasets: [{
+                  data: data.data || [0, 0, 0, 0],
+                  backgroundColor: [
+                    '#10b981',  // Verde para Usuarios
+                    '#3b82f6',  // Azul para Entrenadores (cambiado de rojo para entrenador)
+                    '#f59e0b',  // Amarillo para Nutricionistas
+                    '#ec4899'   // Rosa para Pendientes
+                  ],
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                  borderWidth: 2,
+                  hoverOffset: 8,
+                  hoverBorderColor: 'white',
+                  hoverBorderWidth: 3
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                  legend: {
+                    position: 'bottom',
+                    labels: { 
+                      color: 'rgba(255, 255, 255, 0.9)', 
+                      padding: 20, 
+                      usePointStyle: true,
+                      pointStyle: 'circle',
+                      font: { size: 14, weight: '600' }
+                    }
+                  },
+                  tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    cornerRadius: 12,
+                    displayColors: true
+                  }
+                },
+                animation: {
+                  duration: 1000,
+                  easing: 'easeOutQuart'
+                }
+              }
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching chart data:', error);
+          // Fallback: mostrar gráfico con datos vacíos
+          const ctx = document.getElementById('userChart')?.getContext('2d');
+          if (ctx) {
+            new Chart(ctx, {
+              type: 'doughnut',
+              data: {
+                labels: ['Sin datos', 'Disponibles'],
+                datasets: [{
+                  data: [0, 0],
+                  backgroundColor: ['rgba(59, 130, 246, 0.2)', 'rgba(59, 130, 246, 0.4)'],
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                  borderWidth: 2
+                }]
+              }
+            });
+          }
+        });
 
       console.log('FlowFit Entrenador Dashboard loaded successfully! 🔥');
     });
