@@ -14,176 +14,32 @@
     <link th:href="@{/css/flowfit-entrenador.css}" rel="stylesheet">
     
     <style>
-        /* Rutina Cards con efectos mejorados */
+        /* Rutina Cards */
         .rutina-card {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .rutina-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            pointer-events: none;
+            transition: all 0.3s ease;
         }
         
         .rutina-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2);
-        }
-        
-        .rutina-card:hover::before {
-            opacity: 1;
-        }
-        
-        /* Botones con animaciones suaves */
-        .rutina-card .btn-outline-entrenador,
-        .rutina-card .btn-primary-entrenador {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .rutina-card .btn-outline-entrenador::before,
-        .rutina-card .btn-primary-entrenador::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        
-        .rutina-card .btn-outline-entrenador:hover::before,
-        .rutina-card .btn-primary-entrenador:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        .rutina-card:hover .btn-outline-entrenador {
-            transform: translateX(-4px);
-            box-shadow: -4px 4px 12px rgba(59, 130, 246, 0.3);
-        }
-        
-        .rutina-card:hover .btn-primary-entrenador {
-            transform: translateX(4px);
-            box-shadow: 4px 4px 12px rgba(59, 130, 246, 0.4);
-        }
-        
-        /* Header del card con efecto brillante */
-        .rutina-card .card-body h5 {
-            background: linear-gradient(135deg, #fff 0%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            transition: all 0.3s ease;
-        }
-        
-        .rutina-card:hover .card-body h5 {
-            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            transform: translateX(4px);
-        }
-        
-        /* Badge animations */
-        .rutina-card .badge {
-            transition: all 0.3s ease;
-        }
-        
-        .rutina-card:hover .badge {
-            transform: scale(1.05);
-        }
-        
-        /* Dropdown button pulse effect */
-        .rutina-card .dropdown button {
-            transition: all 0.3s ease;
-        }
-        
-        .rutina-card:hover .dropdown button {
-            transform: rotate(90deg) scale(1.1);
-            color: #3b82f6 !important;
-        }
-        
-        /* Botón Nueva Rutina mejorado */
-        .btn-primary-entrenador.btn-new-rutina {
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .btn-primary-entrenador.btn-new-rutina::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-        
-        .btn-primary-entrenador.btn-new-rutina:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
-        }
-        
-        .btn-primary-entrenador.btn-new-rutina:hover::before {
-            left: 100%;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.2);
         }
         
         /* Dropdown custom */
         .dropdown-menu {
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            animation: dropdownSlideIn 0.3s ease;
-        }
-        
-        @keyframes dropdownSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
         
         .dropdown-item {
             color: #cbd5e1;
             transition: all 0.3s ease;
-            padding: 0.75rem 1.25rem;
         }
         
         .dropdown-item:hover {
             background: rgba(59, 130, 246, 0.2);
             color: white;
-            padding-left: 1.5rem;
-        }
-        
-        .dropdown-item i {
-            transition: transform 0.3s ease;
-        }
-        
-        .dropdown-item:hover i {
-            transform: scale(1.2) rotate(5deg);
         }
         
         /* Animation */
@@ -201,18 +57,6 @@
         .fade-in-up {
             animation: fadeInUp 0.5s ease-out;
         }
-        
-        /* Stagger animation para cards */
-        .rutina-card {
-            animation: fadeInUp 0.6s ease-out backwards;
-        }
-        
-        .rutina-card:nth-child(1) { animation-delay: 0.1s; }
-        .rutina-card:nth-child(2) { animation-delay: 0.2s; }
-        .rutina-card:nth-child(3) { animation-delay: 0.3s; }
-        .rutina-card:nth-child(4) { animation-delay: 0.4s; }
-        .rutina-card:nth-child(5) { animation-delay: 0.5s; }
-        .rutina-card:nth-child(6) { animation-delay: 0.6s; }
     </style>
 </head>
 <body>
@@ -246,9 +90,9 @@
             <h3 class="text-white fw-semibold mb-1">Mis Rutinas</h3>
             <p class="text-muted-flowfit mb-0 small">Administra y gestiona todas tus rutinas de entrenamiento</p>
           </div>
-          <a th:href="@{/entrenador/rutinas/crear}" class="btn-primary-entrenador btn-new-rutina">
-            <i class="bi bi-plus-circle me-2"></i>
-            <span>Nueva Rutina</span>
+          <a th:href="@{/entrenador/rutinas/crear}" class="btn-primary-entrenador">
+            <i class="bi bi-plus-circle"></i>
+            Nueva Rutina
           </a>
         </div>
 
@@ -281,11 +125,11 @@
       </div>
 
       <div th:if="${!#lists.isEmpty(rutinas)}" class="row g-4">
-        <div class="col-lg-6 col-xl-4" th:each="rutina, iterStat : ${rutinas}">
+        <div class="col-lg-6 col-xl-4" th:each="rutina : ${rutinas}">
           <div class="card-base card-entrenador h-100 rutina-card">
             <div class="card-body p-4">
               <div class="d-flex justify-content-between align-items-start mb-3">
-                <h5 class="fw-bold mb-0 flex-grow-1" th:text="${rutina.nombre}">Nombre de la Rutina</h5>
+                <h5 class="text-white fw-semibold mb-0" th:text="${rutina.nombre}">Nombre de la Rutina</h5>
                 <div class="dropdown">
                   <button class="btn btn-sm p-1" style="background: none; border: none; color: #94a3b8;" 
                           data-bs-toggle="dropdown">
@@ -317,7 +161,7 @@
                 Descripción de la rutina...
               </p>
               
-              <div class="d-flex flex-wrap gap-2 mb-4">
+              <div class="d-flex flex-wrap gap-2 mb-3">
                 <span class="badge badge-primary-entrenador">
                   <i class="bi bi-activity me-1"></i>
                   <span th:text="${rutina.ejercicios?.size() ?: 0}">0</span> ejercicios
@@ -331,13 +175,13 @@
               <div class="d-flex gap-2">
                 <a th:href="@{/entrenador/rutinas/{id}(id=${rutina.id})}" 
                    class="btn-outline-entrenador flex-fill text-center">
-                  <i class="bi bi-eye me-1"></i>
-                  <span>Ver</span>
+                  <i class="bi bi-eye"></i>
+                  Ver
                 </a>
                 <a th:href="@{/entrenador/asignar-rutinas(rutina=${rutina.id})}" 
                    class="btn-primary-entrenador flex-fill text-center">
-                  <i class="bi bi-person-plus me-1"></i>
-                  <span>Asignar</span>
+                  <i class="bi bi-person-plus"></i>
+                  Asignar
                 </a>
               </div>
             </div>

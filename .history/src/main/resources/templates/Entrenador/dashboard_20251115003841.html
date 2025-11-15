@@ -36,43 +36,34 @@
 
   <!-- Main Content -->
   <main class="main-content-base fade-in-up">
-    <div class="container-fluid p-4">
-      <!-- Welcome Header with Avatar -->
-      <div class="welcome-header-enhanced mb-4">
+    <div class="container-fluid">
+      <!-- Welcome Header -->
+      <div class="mb-4">
         <div class="row align-items-center">
           <div class="col-lg-8 mb-3 mb-lg-0">
-            <div class="d-flex align-items-center">
-              <div class="user-avatar-enhanced me-3">
-                <img src="/assets/perfil_default.png" alt="Avatar" class="rounded-circle profile-image-base">
-                <div class="status-indicator-entrenador"></div>
-              </div>
-              <div class="flex-grow-1">
-                <h1 class="display-6 mb-2 text-white fw-bold">
-                  ¡Bienvenido, <span th:text="${entrenador != null ? #strings.substringBefore(entrenador.nombre, ' ') : 'Entrenador'}" class="text-gradient-blue">Entrenador</span>! 💪
-                </h1>
-                <p class="lead mb-2 text-white">Tu centro de entrenamiento FlowFit</p>
-                <div class="d-flex align-items-center gap-3 flex-wrap">
-                  <small class="text-muted-flowfit d-flex align-items-center">
-                    <i class="bi bi-calendar3 me-2"></i>
-                    <span th:text="${#dates.format(#dates.createNow(), 'EEEE, dd MMMM yyyy')}">Fecha actual</span>
-                  </small>
-                  <small class="text-muted-flowfit d-flex align-items-center">
-                    <i class="bi bi-clock me-2"></i>
-                    <span id="currentTime">00:00</span>
-                  </small>
-                </div>
-              </div>
+            <h1 class="text-white mb-1">
+              <i class="bi bi-speedometer2 me-2" style="color: var(--entrenador-primary);"></i>
+              Dashboard de Entrenador
+            </h1>
+            <p class="text-muted-flowfit mb-2">¡Bienvenido, <span th:text="${entrenador != null ? #strings.substringBefore(entrenador.nombre, ' ') : 'Entrenador'}" class="text-white fw-semibold">Entrenador</span>! Tu centro de entrenamiento FlowFit</p>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+              <small class="text-muted-flowfit d-flex align-items-center">
+                <i class="bi bi-calendar3 me-2"></i>
+                <span th:text="${#dates.format(#dates.createNow(), 'EEEE, dd MMMM yyyy')}">Fecha actual</span>
+              </small>
+              <small class="text-muted-flowfit d-flex align-items-center">
+                <i class="bi bi-clock me-2"></i>
+                <span id="currentTime">00:00</span>
+              </small>
             </div>
           </div>
           <div class="col-lg-4">
             <div class="d-flex flex-column gap-2">
-              <a href="/entrenador/rutinas/crear" class="btn-flowfit-primary btn-entrenador-primary btn-enhanced">
-                <i class="bi bi-plus-circle me-2"></i>
-                <span>Crear Rutina</span>
+              <a href="/entrenador/rutinas/crear" class="btn btn-light">
+                <i class="bi bi-plus-circle me-2"></i>Crear Rutina
               </a>
-              <a href="/entrenador/mis-usuarios" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced">
-                <i class="bi bi-people me-2"></i>
-                <span>Mis Usuarios</span>
+              <a href="/entrenador/mis-usuarios" class="btn btn-flowfit-outline btn-entrenador-outline">
+                <i class="bi bi-people me-2"></i>Mis Usuarios
               </a>
             </div>
           </div>
@@ -82,7 +73,7 @@
       <!-- Statistics Cards -->
       <div class="row mb-4 g-3">
         <div class="col-xl-3 col-md-6">
-          <div class="card-base card-entrenador" style="min-height: 120px;">
+          <div class="card-base card-entrenador">
             <div class="card-body d-flex align-items-center">
               <div class="flex-shrink-0 me-3">
                 <div style="width: 48px; height: 48px;" class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center">
@@ -97,7 +88,7 @@
           </div>
         </div>
         <div class="col-xl-3 col-md-6">
-          <div class="card-base card-entrenador" style="min-height: 120px;">
+          <div class="card-base card-entrenador">
             <div class="card-body d-flex align-items-center">
               <div class="flex-shrink-0 me-3">
                 <div style="width: 48px; height: 48px;" class="bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center">
@@ -112,7 +103,7 @@
           </div>
         </div>
         <div class="col-xl-3 col-md-6">
-          <div class="card-base card-entrenador" style="min-height: 120px;">
+          <div class="card-base card-entrenador">
             <div class="card-body d-flex align-items-center">
               <div class="flex-shrink-0 me-3">
                 <div style="width: 48px; height: 48px;" class="bg-info-subtle text-info rounded-3 d-flex align-items-center justify-content-center">
@@ -127,7 +118,7 @@
           </div>
         </div>
         <div class="col-xl-3 col-md-6">
-          <div class="card-base card-entrenador" style="min-height: 120px;">
+          <div class="card-base card-entrenador">
             <div class="card-body d-flex align-items-center">
               <div class="flex-shrink-0 me-3">
                 <div style="width: 48px; height: 48px;" class="bg-warning-subtle text-warning rounded-3 d-flex align-items-center justify-content-center">
@@ -159,21 +150,25 @@
                 </a>
               </div>
 
-              <div th:if="${!#lists.isEmpty(rutinasRecientes)}" class="list-group list-group-flush">
-                <div th:each="rutina : ${rutinasRecientes}" class="list-group-item bg-transparent border-bottom border-secondary border-opacity-10 px-0 py-3">
-                  <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0 me-3">
-                      <div style="width: 48px; height: 48px;" class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-journal-text fs-4"></i>
+              <div th:if="${!#lists.isEmpty(rutinasRecientes)}">
+                <div class="row g-3">
+                  <div th:each="rutina : ${rutinasRecientes}" class="col-12">
+                    <div class="card-base card-entrenador">
+                      <div class="card-body d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                          <div style="width: 48px; height: 48px;" class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-journal-text fs-4"></i>
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <h6 class="text-white fw-bold mb-1" th:text="${rutina.nombre}">Rutina</h6>
+                          <p class="small text-muted-flowfit mb-0" th:text="${#strings.abbreviate(rutina.descripcion, 60)}">Descripción...</p>
+                        </div>
+                        <div class="text-end">
+                          <span class="badge bg-success-subtle text-success border border-success border-opacity-50 px-3 py-2 mb-2" th:text="${rutina.ejercicios?.size() ?: 0} + ' ejercicios'">0 ejercicios</span><br>
+                          <small class="text-muted-flowfit" th:text="${#temporals.format(rutina.fechaCreacion, 'dd/MM/yyyy')}">01/01/2025</small>
+                        </div>
                       </div>
-                    </div>
-                    <div class="flex-grow-1">
-                      <h6 class="text-white fw-semibold mb-1" th:text="${rutina.nombre}">Rutina</h6>
-                      <p class="small text-muted-flowfit mb-0" th:text="${#strings.abbreviate(rutina.descripcion, 60)}">Descripción...</p>
-                    </div>
-                    <div class="text-end">
-                      <span class="badge bg-success-subtle text-success border border-success border-opacity-50 px-3 py-2 mb-1" th:text="${rutina.ejercicios?.size() ?: 0} + ' ejercicios'">0 ejercicios</span><br>
-                      <small class="text-muted-flowfit" th:text="${#temporals.format(rutina.fechaCreacion, 'dd/MM/yyyy')}">01/01/2025</small>
                     </div>
                   </div>
                 </div>
@@ -212,15 +207,19 @@
             <div class="card-body p-4">
               <h5 class="text-white fw-bold mb-4"><i class="bi bi-people me-2"></i>Usuarios Activos</h5>
               
-              <div th:if="${usuariosRecientes != null and not #lists.isEmpty(usuariosRecientes)}" class="row g-3">
-                <div th:each="usuario : ${usuariosRecientes}" class="col-lg-4 col-md-6">
-                  <div class="d-flex align-items-center p-3 rounded-3" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
-                    <img src="/assets/perfil_default.png" alt="Usuario" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
-                    <div class="flex-grow-1">
-                      <h6 class="text-white fw-semibold mb-1" th:text="${usuario.nombre}">Usuario</h6>
-                      <p class="small text-muted-flowfit mb-0" th:text="${usuario.correo}">correo@ejemplo.com</p>
+              <div th:if="${usuariosRecientes != null and not #lists.isEmpty(usuariosRecientes)}">
+                <div class="row g-3">
+                  <div th:each="usuario : ${usuariosRecientes}" class="col-lg-4 col-md-6">
+                    <div class="card-base card-entrenador">
+                      <div class="card-body d-flex align-items-center">
+                        <img src="/assets/perfil_default.png" alt="Usuario" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                        <div class="flex-grow-1">
+                          <h6 class="text-white fw-bold mb-1" th:text="${usuario.nombre}">Usuario</h6>
+                          <p class="small text-muted-flowfit mb-0" th:text="${usuario.correo}">correo@ejemplo.com</p>
+                        </div>
+                        <span class="badge bg-success-subtle text-success border border-success border-opacity-50 px-3 py-2">Activo</span>
+                      </div>
                     </div>
-                    <span class="badge bg-success-subtle text-success border border-success border-opacity-50 px-3 py-2">Activo</span>
                   </div>
                 </div>
               </div>

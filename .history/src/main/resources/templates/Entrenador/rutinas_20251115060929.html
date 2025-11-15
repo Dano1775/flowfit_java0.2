@@ -281,11 +281,11 @@
       </div>
 
       <div th:if="${!#lists.isEmpty(rutinas)}" class="row g-4">
-        <div class="col-lg-6 col-xl-4" th:each="rutina, iterStat : ${rutinas}">
+        <div class="col-lg-6 col-xl-4" th:each="rutina : ${rutinas}">
           <div class="card-base card-entrenador h-100 rutina-card">
             <div class="card-body p-4">
               <div class="d-flex justify-content-between align-items-start mb-3">
-                <h5 class="fw-bold mb-0 flex-grow-1" th:text="${rutina.nombre}">Nombre de la Rutina</h5>
+                <h5 class="text-white fw-semibold mb-0" th:text="${rutina.nombre}">Nombre de la Rutina</h5>
                 <div class="dropdown">
                   <button class="btn btn-sm p-1" style="background: none; border: none; color: #94a3b8;" 
                           data-bs-toggle="dropdown">
@@ -317,7 +317,7 @@
                 Descripción de la rutina...
               </p>
               
-              <div class="d-flex flex-wrap gap-2 mb-4">
+              <div class="d-flex flex-wrap gap-2 mb-3">
                 <span class="badge badge-primary-entrenador">
                   <i class="bi bi-activity me-1"></i>
                   <span th:text="${rutina.ejercicios?.size() ?: 0}">0</span> ejercicios
@@ -331,13 +331,13 @@
               <div class="d-flex gap-2">
                 <a th:href="@{/entrenador/rutinas/{id}(id=${rutina.id})}" 
                    class="btn-outline-entrenador flex-fill text-center">
-                  <i class="bi bi-eye me-1"></i>
-                  <span>Ver</span>
+                  <i class="bi bi-eye"></i>
+                  Ver
                 </a>
                 <a th:href="@{/entrenador/asignar-rutinas(rutina=${rutina.id})}" 
                    class="btn-primary-entrenador flex-fill text-center">
-                  <i class="bi bi-person-plus me-1"></i>
-                  <span>Asignar</span>
+                  <i class="bi bi-person-plus"></i>
+                  Asignar
                 </a>
               </div>
             </div>

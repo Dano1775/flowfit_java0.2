@@ -531,103 +531,9 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Toast Container for notifications -->
-  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
-    <div id="notificationToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="d-flex">
-        <div class="toast-body d-flex align-items-center">
-          <i class="bi me-3 fs-4" id="toastIcon"></i>
-          <span id="toastMessage"></span>
-        </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-    </div>
-  </div>
-
-  <style>
-    .toast-container .toast {
-      backdrop-filter: blur(20px) saturate(180%);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      min-width: 350px;
-      animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    }
-
-    @keyframes slideInRight {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    .toast.toast-success {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 0.95) 100%);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-
-    .toast.toast-error {
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.95) 0%, rgba(220, 38, 38, 0.95) 100%);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    .toast.toast-warning {
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.95) 0%, rgba(217, 119, 6, 0.95) 100%);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-    }
-
-    .toast-body {
-      color: white;
-      font-weight: 500;
-      padding: 1rem 1.25rem;
-    }
-
-    .toast .btn-close {
-      opacity: 0.8;
-    }
-
-    .toast .btn-close:hover {
-      opacity: 1;
-    }
-  </style>
-
   <script>
     let solicitudSeleccionada = null;
     let asignacionRechazadaSeleccionada = null;
-
-    // Función para mostrar notificaciones modernas
-    function showNotification(message, type = 'success') {
-      const toastEl = document.getElementById('notificationToast');
-      const toastMessage = document.getElementById('toastMessage');
-      const toastIcon = document.getElementById('toastIcon');
-      
-      // Remover clases de tipo anteriores
-      toastEl.classList.remove('toast-success', 'toast-error', 'toast-warning');
-      
-      // Configurar según el tipo
-      if (type === 'success') {
-        toastEl.classList.add('toast-success');
-        toastIcon.className = 'bi bi-check-circle-fill me-3 fs-4';
-      } else if (type === 'error') {
-        toastEl.classList.add('toast-error');
-        toastIcon.className = 'bi bi-x-circle-fill me-3 fs-4';
-      } else if (type === 'warning') {
-        toastEl.classList.add('toast-warning');
-        toastIcon.className = 'bi bi-exclamation-triangle-fill me-3 fs-4';
-      }
-      
-      toastMessage.textContent = message;
-      
-      const toast = new bootstrap.Toast(toastEl, {
-        autohide: true,
-        delay: 4000
-      });
-      toast.show();
-    }
 
     document.addEventListener('DOMContentLoaded', function() {
       // Manejar clicks en botones de aceptar
@@ -693,15 +599,15 @@
           .then(response => response.json())
           .then(data => {
             if (data.success) {
-              showNotification(data.message, 'success');
-              setTimeout(() => location.reload(), 1500);
+              alert(data.message);
+              location.reload();
             } else {
-              showNotification('Error: ' + data.message, 'error');
+              alert('Error: ' + data.message);
             }
           })
           .catch(error => {
             console.error('Error:', error);
-            showNotification('Error de conexión. Por favor intenta de nuevo.', 'error');
+            alert('Error de conexión');
           })
           .finally(() => {
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalAceptarRechazado'));
@@ -726,15 +632,15 @@
           .then(response => response.json())
           .then(data => {
             if (data.success) {
-              showNotification(data.message, 'success');
-              setTimeout(() => location.reload(), 1500);
+              alert(data.message);
+              location.reload();
             } else {
-              showNotification('Error: ' + data.message, 'error');
+              alert('Error: ' + data.message);
             }
           })
           .catch(error => {
             console.error('Error:', error);
-            showNotification('Error de conexión. Por favor intenta de nuevo.', 'error');
+            alert('Error de conexión');
           })
           .finally(() => {
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminar'));
@@ -782,15 +688,15 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          showNotification(data.message, 'success');
-          setTimeout(() => location.reload(), 1500);
+          alert(data.message);
+          location.reload();
         } else {
-          showNotification('Error: ' + data.message, 'error');
+          alert('Error: ' + data.message);
         }
       })
       .catch(error => {
         console.error('Error:', error);
-        showNotification('Error de conexión. Por favor intenta de nuevo.', 'error');
+        alert('Error de conexión');
       })
       .finally(() => {
         // Cerrar modales

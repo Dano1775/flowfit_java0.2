@@ -38,52 +38,41 @@
   <main class="main-content-base fade-in-up">
     <div class="container-fluid p-4">
       <!-- Welcome Header with Avatar -->
-      <div class="welcome-header-enhanced mb-4">
-        <div class="row align-items-center">
-          <div class="col-lg-8 mb-3 mb-lg-0">
-            <div class="d-flex align-items-center">
-              <div class="user-avatar-enhanced me-3">
-                <img src="/assets/perfil_default.png" alt="Avatar" class="rounded-circle profile-image-base">
-                <div class="status-indicator-entrenador"></div>
-              </div>
-              <div class="flex-grow-1">
-                <h1 class="display-6 mb-2 text-white fw-bold">
-                  ¡Bienvenido, <span th:text="${entrenador != null ? #strings.substringBefore(entrenador.nombre, ' ') : 'Entrenador'}" class="text-gradient-blue">Entrenador</span>! 💪
-                </h1>
-                <p class="lead mb-2 text-white">Tu centro de entrenamiento FlowFit</p>
-                <div class="d-flex align-items-center gap-3 flex-wrap">
-                  <small class="text-muted-flowfit d-flex align-items-center">
-                    <i class="bi bi-calendar3 me-2"></i>
-                    <span th:text="${#dates.format(#dates.createNow(), 'EEEE, dd MMMM yyyy')}">Fecha actual</span>
-                  </small>
-                  <small class="text-muted-flowfit d-flex align-items-center">
-                    <i class="bi bi-clock me-2"></i>
-                    <span id="currentTime">00:00</span>
-                  </small>
-                </div>
-              </div>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+          <img src="/assets/perfil_default.png" alt="Avatar" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover; border: 3px solid var(--entrenador-primary); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+          <div>
+            <h1 class="text-white mb-1 fw-bold">
+              ¡Bienvenido, <span th:text="${entrenador != null ? #strings.substringBefore(entrenador.nombre, ' ') : 'Entrenador'}" style="color: var(--entrenador-primary);">Entrenador</span>! 💪
+            </h1>
+            <p class="text-muted-flowfit mb-0">Tu centro de entrenamiento FlowFit</p>
+            <div class="d-flex align-items-center gap-3 flex-wrap mt-1">
+              <small class="text-muted-flowfit d-flex align-items-center">
+                <i class="bi bi-calendar3 me-2"></i>
+                <span th:text="${#dates.format(#dates.createNow(), 'EEEE, dd MMMM yyyy')}">Fecha actual</span>
+              </small>
+              <small class="text-muted-flowfit d-flex align-items-center">
+                <i class="bi bi-clock me-2"></i>
+                <span id="currentTime">00:00</span>
+              </small>
             </div>
           </div>
-          <div class="col-lg-4">
-            <div class="d-flex flex-column gap-2">
-              <a href="/entrenador/rutinas/crear" class="btn-flowfit-primary btn-entrenador-primary btn-enhanced">
-                <i class="bi bi-plus-circle me-2"></i>
-                <span>Crear Rutina</span>
-              </a>
-              <a href="/entrenador/mis-usuarios" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced">
-                <i class="bi bi-people me-2"></i>
-                <span>Mis Usuarios</span>
-              </a>
-            </div>
-          </div>
+        </div>
+        <div class="d-flex flex-column gap-2">
+          <a href="/entrenador/rutinas/crear" class="btn btn-light">
+            <i class="bi bi-plus-circle me-2"></i>Crear Rutina
+          </a>
+          <a href="/entrenador/mis-usuarios" class="btn btn-flowfit-outline btn-entrenador-outline">
+            <i class="bi bi-people me-2"></i>Gestionar Ejercicios
+          </a>
         </div>
       </div>
 
       <!-- Statistics Cards -->
       <div class="row mb-4 g-3">
         <div class="col-xl-3 col-md-6">
-          <div class="card-base card-entrenador" style="min-height: 120px;">
-            <div class="card-body d-flex align-items-center">
+          <div class="card-base card-entrenador">
+            <div class="card-body d-flex align-items-center" style="min-height: 100px;">
               <div class="flex-shrink-0 me-3">
                 <div style="width: 48px; height: 48px;" class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center">
                   <i class="bi bi-people fs-4"></i>
@@ -97,8 +86,8 @@
           </div>
         </div>
         <div class="col-xl-3 col-md-6">
-          <div class="card-base card-entrenador" style="min-height: 120px;">
-            <div class="card-body d-flex align-items-center">
+          <div class="card-base card-entrenador">
+            <div class="card-body d-flex align-items-center" style="min-height: 100px;">
               <div class="flex-shrink-0 me-3">
                 <div style="width: 48px; height: 48px;" class="bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center">
                   <i class="bi bi-list-check fs-4"></i>
@@ -112,8 +101,8 @@
           </div>
         </div>
         <div class="col-xl-3 col-md-6">
-          <div class="card-base card-entrenador" style="min-height: 120px;">
-            <div class="card-body d-flex align-items-center">
+          <div class="card-base card-entrenador">
+            <div class="card-body d-flex align-items-center" style="min-height: 100px;">
               <div class="flex-shrink-0 me-3">
                 <div style="width: 48px; height: 48px;" class="bg-info-subtle text-info rounded-3 d-flex align-items-center justify-content-center">
                   <i class="bi bi-calendar-check fs-4"></i>
@@ -127,8 +116,8 @@
           </div>
         </div>
         <div class="col-xl-3 col-md-6">
-          <div class="card-base card-entrenador" style="min-height: 120px;">
-            <div class="card-body d-flex align-items-center">
+          <div class="card-base card-entrenador">
+            <div class="card-body d-flex align-items-center" style="min-height: 100px;">
               <div class="flex-shrink-0 me-3">
                 <div style="width: 48px; height: 48px;" class="bg-warning-subtle text-warning rounded-3 d-flex align-items-center justify-content-center">
                   <i class="bi bi-activity fs-4"></i>

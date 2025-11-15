@@ -92,28 +92,35 @@
 </head>
 <body>
 
-  <!-- Desktop Toggle (for collapse) -->
-  <button class="sidebar-collapse-btn d-none d-md-flex" id="sidebarCollapseBtn" title="Contraer/Expandir Sidebar">
-    <i class="bi bi-chevron-left"></i>
-  </button>
-
-  <!-- Mobile Toggle -->
-  <button class="sidebar-toggle-base sidebar-toggle-entrenador d-md-none" id="sidebarToggle">
-    <i class="bi bi-list fs-4"></i>
-  </button>
-
-  <!-- Sidebar Overlay for Mobile -->
-  <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
-
-  <!-- FlowFit Sidebar -->
+  <!-- Sidebar -->
   <div th:replace="~{fragments/sidebar-entrenador :: sidebar}"></div>
 
-  <!-- Main Content -->
-  <main class="main-content-base fade-in-up">
+  <!-- Main content -->
+  <div class="main-content">
     <div class="container-fluid p-4">
+      
+      <!-- Welcome Header -->
+      <div class="welcome-header-enhanced mb-4 fade-in-up">
+        <div class="row align-items-center">
+          <div class="col-lg-8">
+            <div class="d-flex align-items-center">
+              <div class="user-avatar-enhanced me-3">
+                <img th:src="@{/assets/perfil_default.png}" alt="Profile" class="rounded-circle profile-image-base">
+                <div class="status-indicator-entrenador"></div>
+              </div>
+              <div class="flex-grow-1">
+                <h1 class="display-6 mb-2 text-white fw-bold">
+                  Gestión de <span class="text-gradient-blue">Usuarios</span>
+                </h1>
+                <p class="lead mb-0 text-white">Administra solicitudes y usuarios asignados</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Solicitudes Pendientes Section -->
-      <div class="mb-5">
+      <div class="mb-5 fade-in-up">
         <div class="d-flex align-items-center mb-4">
           <div style="width: 48px; height: 48px;" class="bg-warning-subtle text-warning border border-warning border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3 px-3 py-2">
             <i class="bi bi-bell fs-4"></i>
@@ -204,7 +211,7 @@
       </div>
 
       <!-- Usuarios Asignados Section -->
-      <div>
+      <div class="fade-in-up">
         <div class="d-flex align-items-center mb-4">
           <div style="width: 48px; height: 48px;" class="bg-success-subtle text-success border border-success border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3 px-3 py-2">
             <i class="bi bi-people-fill fs-4"></i>
@@ -271,92 +278,9 @@
           <p class="text-muted-flowfit mb-0">Los usuarios aparecerán aquí una vez que aceptes sus solicitudes de entrenamiento.</p>
         </div>
       </div>
-
-      <!-- Usuarios Rechazados Section -->
-      <div th:if="${usuariosRechazados != null && !usuariosRechazados.empty}">
-        <div class="d-flex align-items-center mb-4">
-          <div style="width: 48px; height: 48px;" class="bg-danger-subtle text-danger border border-danger border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3 px-3 py-2">
-            <i class="bi bi-x-circle-fill fs-4"></i>
-          </div>
-          <div class="flex-grow-1">
-            <h3 class="text-white fw-semibold mb-1">Usuarios Rechazados</h3>
-            <p class="text-muted-flowfit mb-0 small">Solicitudes que has rechazado anteriormente</p>
-          </div>
-          <span class="badge bg-danger px-3 py-2 rounded-pill fs-6"
-                th:text="${usuariosRechazados.size()}">0</span>
-        </div>
-        
-        <div class="row g-4">
-          <div class="col-lg-6 col-xl-4" th:each="asignacion : ${usuariosRechazados}">
-            <div class="card-base card-entrenador usuario-card h-100" style="min-height: auto; border-left: 3px solid #dc2626;">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-start mb-3">
-                  <div class="user-avatar me-3" style="width: 48px; height: 48px; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);">
-                    <i class="bi bi-person-x" style="font-size: 1.5rem;"></i>
-                  </div>
-                  <div class="flex-grow-1">
-                    <h5 class="text-white fw-bold mb-2" th:text="${asignacion.usuario.nombre}">Nombre del Usuario</h5>
-                    <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-50 mb-2">
-                      <i class="bi bi-x-circle me-1"></i>Rechazado
-                    </span>
-                  </div>
-                </div>
-                
-                <div class="d-flex flex-column gap-2 mb-3">
-                  <div class="d-flex align-items-center text-muted-flowfit small">
-                    <i class="bi bi-envelope me-2"></i>
-                    <span th:text="${asignacion.usuario.correo}">correo@ejemplo.com</span>
-                  </div>
-                  <div class="d-flex align-items-center text-muted-flowfit small">
-                    <i class="bi bi-telephone me-2"></i>
-                    <span th:text="${asignacion.usuario.telefono}">123-456-7890</span>
-                  </div>
-                </div>
-                
-                <!-- Mensaje de solicitud si existe -->
-                <div th:if="${asignacion.mensajeSolicitud != null && !asignacion.mensajeSolicitud.empty}" 
-                     class="mb-3 p-3 rounded-3" 
-                     style="background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6;">
-                  <p class="text-white small mb-1 fw-semibold">
-                    <i class="bi bi-chat-left-text me-1"></i>Mensaje del usuario:
-                  </p>
-                  <p class="text-muted-flowfit small mb-0" th:text="${asignacion.mensajeSolicitud}">Mensaje...</p>
-                </div>
-                
-                <!-- Mensaje de respuesta si existe -->
-                <div th:if="${asignacion.mensajeRespuesta != null && !asignacion.mensajeRespuesta.empty}" 
-                     class="mb-3 p-3 rounded-3" 
-                     style="background: rgba(220, 38, 38, 0.1); border-left: 3px solid #dc2626;">
-                  <p class="text-white small mb-1 fw-semibold">
-                    <i class="bi bi-reply me-1"></i>Tu respuesta:
-                  </p>
-                  <p class="text-muted-flowfit small mb-0" th:text="${asignacion.mensajeRespuesta}">Respuesta...</p>
-                </div>
-                
-                <div class="d-flex gap-2">
-                  <button class="btn btn-flowfit-primary btn-entrenador-primary btn-enhanced flex-grow-1"
-                          onclick="aceptarRechazado(event)"
-                          th:data-id="${asignacion.id}"
-                          th:data-nombre="${asignacion.usuario.nombre}">
-                    <i class="bi bi-check-circle me-2"></i>
-                    Aceptar Ahora
-                  </button>
-                  <button class="btn btn-flowfit-outline btn-entrenador-outline btn-enhanced flex-grow-1"
-                          onclick="eliminarAsignacion(event)"
-                          th:data-id="${asignacion.id}"
-                          th:data-nombre="${asignacion.usuario.nombre}">
-                    <i class="bi bi-trash me-2"></i>
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       
     </div>
-  </main>
+  </div>
 
   <!-- Modal para aceptar solicitud -->
   <div class="modal fade" id="modalAceptar" tabindex="-1">
@@ -446,188 +370,11 @@
     </div>
   </div>
 
-  <!-- Modal para aceptar usuario rechazado -->
-  <div class="modal fade" id="modalAceptarRechazado" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark border border-primary border-opacity-25" style="border-radius: 16px; overflow: hidden;">
-        <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
-          <div class="d-flex align-items-center">
-            <div style="width: 48px; height: 48px;" class="bg-success-subtle text-success border border-success border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3">
-              <i class="bi bi-check-circle fs-4"></i>
-            </div>
-            <div>
-              <h5 class="modal-title text-white fw-bold mb-1">Aceptar Usuario</h5>
-              <p class="text-muted-flowfit small mb-0">Cambiar estado a aceptado</p>
-            </div>
-          </div>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <p class="text-white mb-3">¿Deseas aceptar a <strong id="nombreUsuarioAceptarRechazado" class="text-primary"></strong>?</p>
-          <p class="text-muted-flowfit small mb-3">Este usuario será agregado a tus usuarios asignados.</p>
-          <div class="mb-3">
-            <label for="mensajeAceptacionRechazado" class="form-label text-white fw-semibold small">
-              <i class="bi bi-chat-left-heart me-2 text-primary"></i>
-              Nuevo mensaje (opcional)
-            </label>
-            <textarea class="form-control bg-dark text-white border-secondary" 
-                      id="mensajeAceptacionRechazado" 
-                      rows="3" 
-                      placeholder="Escribe un mensaje de bienvenida..."
-                      style="resize: vertical;"></textarea>
-          </div>
-        </div>
-        <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-            <i class="bi bi-x-circle me-2"></i>
-            Cancelar
-          </button>
-          <button type="button" class="btn btn-flowfit-primary btn-entrenador-primary btn-enhanced" id="confirmarAceptacionRechazado">
-            <i class="bi bi-check-circle me-2"></i>
-            Aceptar Usuario
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal para eliminar asignación -->
-  <div class="modal fade" id="modalEliminar" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark border border-warning border-opacity-25" style="border-radius: 16px; overflow: hidden;">
-        <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
-          <div class="d-flex align-items-center">
-            <div style="width: 48px; height: 48px;" class="bg-warning-subtle text-warning border border-warning border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3">
-              <i class="bi bi-trash fs-4"></i>
-            </div>
-            <div>
-              <h5 class="modal-title text-white fw-bold mb-1">Eliminar Asignación</h5>
-              <p class="text-muted-flowfit small mb-0">Permitir nueva solicitud</p>
-            </div>
-          </div>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <p class="text-white mb-3">¿Estás seguro de eliminar la asignación de <strong id="nombreUsuarioEliminar" class="text-warning"></strong>?</p>
-          <div class="alert alert-warning bg-warning bg-opacity-10 border border-warning border-opacity-25 text-white">
-            <i class="bi bi-info-circle me-2"></i>
-            <strong>Nota:</strong> Al eliminar esta asignación, el usuario podrá volver a enviar una solicitud de entrenamiento.
-          </div>
-        </div>
-        <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-            <i class="bi bi-x-circle me-2"></i>
-            Cancelar
-          </button>
-          <button type="button" class="btn btn-warning btn-enhanced" id="confirmarEliminacion">
-            <i class="bi bi-trash me-2"></i>
-            Eliminar Asignación
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Toast Container for notifications -->
-  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
-    <div id="notificationToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="d-flex">
-        <div class="toast-body d-flex align-items-center">
-          <i class="bi me-3 fs-4" id="toastIcon"></i>
-          <span id="toastMessage"></span>
-        </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-    </div>
-  </div>
-
-  <style>
-    .toast-container .toast {
-      backdrop-filter: blur(20px) saturate(180%);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      min-width: 350px;
-      animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    }
-
-    @keyframes slideInRight {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    .toast.toast-success {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 0.95) 100%);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-
-    .toast.toast-error {
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.95) 0%, rgba(220, 38, 38, 0.95) 100%);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    .toast.toast-warning {
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.95) 0%, rgba(217, 119, 6, 0.95) 100%);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-    }
-
-    .toast-body {
-      color: white;
-      font-weight: 500;
-      padding: 1rem 1.25rem;
-    }
-
-    .toast .btn-close {
-      opacity: 0.8;
-    }
-
-    .toast .btn-close:hover {
-      opacity: 1;
-    }
-  </style>
-
   <script>
     let solicitudSeleccionada = null;
-    let asignacionRechazadaSeleccionada = null;
-
-    // Función para mostrar notificaciones modernas
-    function showNotification(message, type = 'success') {
-      const toastEl = document.getElementById('notificationToast');
-      const toastMessage = document.getElementById('toastMessage');
-      const toastIcon = document.getElementById('toastIcon');
-      
-      // Remover clases de tipo anteriores
-      toastEl.classList.remove('toast-success', 'toast-error', 'toast-warning');
-      
-      // Configurar según el tipo
-      if (type === 'success') {
-        toastEl.classList.add('toast-success');
-        toastIcon.className = 'bi bi-check-circle-fill me-3 fs-4';
-      } else if (type === 'error') {
-        toastEl.classList.add('toast-error');
-        toastIcon.className = 'bi bi-x-circle-fill me-3 fs-4';
-      } else if (type === 'warning') {
-        toastEl.classList.add('toast-warning');
-        toastIcon.className = 'bi bi-exclamation-triangle-fill me-3 fs-4';
-      }
-      
-      toastMessage.textContent = message;
-      
-      const toast = new bootstrap.Toast(toastEl, {
-        autohide: true,
-        delay: 4000
-      });
-      toast.show();
-    }
 
     document.addEventListener('DOMContentLoaded', function() {
       // Manejar clicks en botones de aceptar
@@ -673,100 +420,7 @@
         const mensaje = document.getElementById('mensajeRechazo').value;
         procesarSolicitud('rechazar', mensaje);
       });
-
-      // Confirmar aceptación de usuario rechazado
-      const btnAceptarRechazado = document.getElementById('confirmarAceptacionRechazado');
-      if (btnAceptarRechazado) {
-        btnAceptarRechazado.addEventListener('click', function() {
-          if (!asignacionRechazadaSeleccionada) return;
-          
-          const mensaje = document.getElementById('mensajeAceptacionRechazado').value;
-          
-          const formData = new FormData();
-          formData.append('asignacionId', asignacionRechazadaSeleccionada);
-          formData.append('mensaje', mensaje);
-          
-          fetch('/entrenador/aceptar-rechazado', {
-            method: 'POST',
-            body: formData
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              showNotification(data.message, 'success');
-              setTimeout(() => location.reload(), 1500);
-            } else {
-              showNotification('Error: ' + data.message, 'error');
-            }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            showNotification('Error de conexión. Por favor intenta de nuevo.', 'error');
-          })
-          .finally(() => {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('modalAceptarRechazado'));
-            if (modal) modal.hide();
-          });
-        });
-      }
-
-      // Confirmar eliminación de asignación
-      const btnEliminar = document.getElementById('confirmarEliminacion');
-      if (btnEliminar) {
-        btnEliminar.addEventListener('click', function() {
-          if (!asignacionRechazadaSeleccionada) return;
-          
-          const formData = new FormData();
-          formData.append('asignacionId', asignacionRechazadaSeleccionada);
-          
-          fetch('/entrenador/eliminar-asignacion', {
-            method: 'POST',
-            body: formData
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              showNotification(data.message, 'success');
-              setTimeout(() => location.reload(), 1500);
-            } else {
-              showNotification('Error: ' + data.message, 'error');
-            }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            showNotification('Error de conexión. Por favor intenta de nuevo.', 'error');
-          })
-          .finally(() => {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminar'));
-            if (modal) modal.hide();
-          });
-        });
-      }
     });
-
-    // Función para aceptar usuario rechazado
-    function aceptarRechazado(event) {
-      const button = event.target.closest('button');
-      asignacionRechazadaSeleccionada = button.getAttribute('data-id');
-      const nombreUsuario = button.getAttribute('data-nombre');
-      
-      document.getElementById('nombreUsuarioAceptarRechazado').textContent = nombreUsuario;
-      
-      const modal = new bootstrap.Modal(document.getElementById('modalAceptarRechazado'));
-      modal.show();
-    }
-
-    // Función para eliminar asignación
-    function eliminarAsignacion(event) {
-      const button = event.target.closest('button');
-      asignacionRechazadaSeleccionada = button.getAttribute('data-id');
-      const nombreUsuario = button.getAttribute('data-nombre');
-      
-      document.getElementById('nombreUsuarioEliminar').textContent = nombreUsuario;
-      
-      const modal = new bootstrap.Modal(document.getElementById('modalEliminar'));
-      modal.show();
-    }
 
     function procesarSolicitud(accion, mensaje) {
       const formData = new FormData();
@@ -782,15 +436,15 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          showNotification(data.message, 'success');
-          setTimeout(() => location.reload(), 1500);
+          alert(data.message);
+          location.reload();
         } else {
-          showNotification('Error: ' + data.message, 'error');
+          alert('Error: ' + data.message);
         }
       })
       .catch(error => {
         console.error('Error:', error);
-        showNotification('Error de conexión. Por favor intenta de nuevo.', 'error');
+        alert('Error de conexión');
       })
       .finally(() => {
         // Cerrar modales
@@ -801,40 +455,6 @@
         if (modalRechazar) modalRechazar.hide();
       });
     }
-
-    // ===== SIDEBAR TOGGLE FUNCTIONALITY =====
-    document.addEventListener('DOMContentLoaded', function() {
-      const sidebar = document.getElementById('sidebar');
-      const sidebarToggle = document.getElementById('sidebarToggle');
-      const sidebarOverlay = document.getElementById('sidebarOverlay');
-      const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
-
-      // Mobile Toggle
-      if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function() {
-          sidebar.classList.add('active');
-          sidebarOverlay.classList.add('active');
-        });
-      }
-
-      // Overlay Click
-      if (sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', function() {
-          sidebar.classList.remove('active');
-          sidebarOverlay.classList.remove('active');
-        });
-      }
-
-      // Desktop Collapse
-      if (sidebarCollapseBtn) {
-        sidebarCollapseBtn.addEventListener('click', function() {
-          sidebar.classList.toggle('collapsed');
-          const icon = this.querySelector('i');
-          icon.classList.toggle('bi-chevron-left');
-          icon.classList.toggle('bi-chevron-right');
-        });
-      }
-    });
   </script>
 </body>
 </html>

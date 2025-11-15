@@ -158,13 +158,10 @@
             <div class="card-base card-entrenador">
               <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                  <div>
-                    <h5 class="text-white fw-semibold mb-2">
-                      <i class="bi bi-activity me-2"></i>
-                      Ejercicios de la Rutina
-                    </h5>
-                    <p class="text-muted-flowfit small mb-0">Haz clic en el botón para seleccionar ejercicios</p>
-                  </div>
+                  <h5 class="text-white fw-semibold mb-0">
+                    <i class="bi bi-activity me-2"></i>
+                    Ejercicios Seleccionados
+                  </h5>
                   <button type="button" class="btn btn-flowfit-primary btn-entrenador-primary btn-enhanced" 
                           data-bs-toggle="modal" data-bs-target="#modalEjercicios">
                     <i class="bi bi-search me-2"></i>
@@ -258,7 +255,7 @@
               </div>
               <div class="col-md-6 col-lg-4 ejercicio-item" th:each="ejercicio : ${ejerciciosGlobales}" 
                    th:data-nombre="${ejercicio.nombre.toLowerCase()}">
-                <div class="card-base card-entrenador h-100 ejercicio-card" th:data-ejercicio-id="${ejercicio.id}">
+                <div class="card-base card-entrenador h-100 ejercicio-card">
                   <div class="card-body p-3">
                     <div class="form-check mb-3">
                       <input class="form-check-input ejercicio-checkbox" type="checkbox" 
@@ -266,31 +263,32 @@
                              th:data-id="${ejercicio.id}"
                              th:data-nombre="${ejercicio.nombre}"
                              th:data-descripcion="${ejercicio.descripcion}"
-                             th:data-tipo="'global'"
-                             onchange="toggleEjercicioInputs(this)">
+                             th:data-tipo="'global'">
                       <label class="form-check-label text-white fw-semibold" th:for="'ej_' + ${ejercicio.id}">
                         <span th:text="${ejercicio.nombre}">Nombre Ejercicio</span>
+                        <span class="badge badge-global ms-2 small">Global</span>
                       </label>
                     </div>
-                    <span class="badge badge-global mb-2 small">Global</span>
-                    <img th:if="${ejercicio.imagen != null}" 
-                         th:src="@{'/ejercicio_image_uploads/' + ${ejercicio.imagen}}" 
+                    <img th:if="${ejercicio.urlImagen != null}" 
+                         th:src="@{'/ejercicio_image_uploads/' + ${ejercicio.urlImagen}}" 
                          class="ejercicio-imagen mb-3" alt="Ejercicio">
-                    <img th:if="${ejercicio.imagen == null}" 
+                    <img th:if="${ejercicio.urlImagen == null}" 
                          th:src="@{/images/default-exercise.png}" 
                          class="ejercicio-imagen mb-3" alt="Ejercicio">
                     <p class="text-muted-flowfit small mb-3" th:text="${ejercicio.descripcion}">Descripción del ejercicio</p>
                     
-                    <div class="row g-2">
-                      <div class="col-6">
-                        <label class="form-label text-white small mb-1">Sets</label>
-                        <input type="number" class="form-control form-control-sm bg-dark text-white border-secondary input-sets" 
-                               th:id="'sets_' + ${ejercicio.id}" min="1" value="3" placeholder="Sets" disabled>
-                      </div>
-                      <div class="col-6">
-                        <label class="form-label text-white small mb-1">Reps</label>
-                        <input type="number" class="form-control form-control-sm bg-dark text-white border-secondary input-reps" 
-                               th:id="'reps_' + ${ejercicio.id}" min="1" value="12" placeholder="Reps" disabled>
+                    <div class="ejercicio-config" style="display: none;">
+                      <div class="row g-2">
+                        <div class="col-6">
+                          <label class="form-label text-white small mb-1">Sets</label>
+                          <input type="number" class="form-control form-control-sm bg-dark text-white border-secondary" 
+                                 th:id="'sets_' + ${ejercicio.id}" min="1" value="3" placeholder="Sets">
+                        </div>
+                        <div class="col-6">
+                          <label class="form-label text-white small mb-1">Reps</label>
+                          <input type="number" class="form-control form-control-sm bg-dark text-white border-secondary" 
+                                 th:id="'reps_' + ${ejercicio.id}" min="1" value="12" placeholder="Reps">
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -323,7 +321,7 @@
               </div>
               <div class="col-md-6 col-lg-4 ejercicio-item" th:each="ejercicio : ${ejerciciosPersonales}" 
                    th:data-nombre="${ejercicio.nombre.toLowerCase()}">
-                <div class="card-base card-entrenador h-100 ejercicio-card" th:data-ejercicio-id="${ejercicio.id}">
+                <div class="card-base card-entrenador h-100 ejercicio-card">
                   <div class="card-body p-3">
                     <div class="form-check mb-3">
                       <input class="form-check-input ejercicio-checkbox" type="checkbox" 
@@ -331,31 +329,32 @@
                              th:data-id="${ejercicio.id}"
                              th:data-nombre="${ejercicio.nombre}"
                              th:data-descripcion="${ejercicio.descripcion}"
-                             th:data-tipo="'personal'"
-                             onchange="toggleEjercicioInputs(this)">
+                             th:data-tipo="'personal'">
                       <label class="form-check-label text-white fw-semibold" th:for="'ejp_' + ${ejercicio.id}">
                         <span th:text="${ejercicio.nombre}">Nombre Ejercicio</span>
+                        <span class="badge badge-personal ms-2 small">Personal</span>
                       </label>
                     </div>
-                    <span class="badge badge-personal mb-2 small">Personal</span>
-                    <img th:if="${ejercicio.imagen != null}" 
-                         th:src="@{'/ejercicio_image_uploads/user_uploads/' + ${ejercicio.imagen}}" 
+                    <img th:if="${ejercicio.urlImagen != null}" 
+                         th:src="@{'/ejercicio_image_uploads/user_uploads/' + ${ejercicio.urlImagen}}" 
                          class="ejercicio-imagen mb-3" alt="Ejercicio">
-                    <img th:if="${ejercicio.imagen == null}" 
+                    <img th:if="${ejercicio.urlImagen == null}" 
                          th:src="@{/images/default-exercise.png}" 
                          class="ejercicio-imagen mb-3" alt="Ejercicio">
                     <p class="text-muted-flowfit small mb-3" th:text="${ejercicio.descripcion}">Descripción del ejercicio</p>
                     
-                    <div class="row g-2">
-                      <div class="col-6">
-                        <label class="form-label text-white small mb-1">Sets</label>
-                        <input type="number" class="form-control form-control-sm bg-dark text-white border-secondary input-sets" 
-                               th:id="'sets_' + ${ejercicio.id}" min="1" value="3" placeholder="Sets" disabled>
-                      </div>
-                      <div class="col-6">
-                        <label class="form-label text-white small mb-1">Reps</label>
-                        <input type="number" class="form-control form-control-sm bg-dark text-white border-secondary input-reps" 
-                               th:id="'reps_' + ${ejercicio.id}" min="1" value="12" placeholder="Reps" disabled>
+                    <div class="ejercicio-config" style="display: none;">
+                      <div class="row g-2">
+                        <div class="col-6">
+                          <label class="form-label text-white small mb-1">Sets</label>
+                          <input type="number" class="form-control form-control-sm bg-dark text-white border-secondary" 
+                                 th:id="'sets_' + ${ejercicio.id}" min="1" value="3" placeholder="Sets">
+                        </div>
+                        <div class="col-6">
+                          <label class="form-label text-white small mb-1">Reps</label>
+                          <input type="number" class="form-control form-control-sm bg-dark text-white border-secondary" 
+                                 th:id="'reps_' + ${ejercicio.id}" min="1" value="12" placeholder="Reps">
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -386,6 +385,173 @@
               </div>
             </div>
           </div>
+          
+          <!-- Selección de Ejercicios -->
+          <div class="col-12">
+            <div class="card-base card-entrenador">
+              <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                  <h5 class="text-white fw-semibold mb-0">
+                    <i class="bi bi-activity me-2"></i>
+                    Seleccionar Ejercicios
+                  </h5>
+                  <button type="button" class="btn btn-light btn-sm" onclick="limpiarSeleccion()">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>
+                    Limpiar
+                  </button>
+                </div>
+                
+                <!-- Tabs para categorías de ejercicios -->
+                <ul class="nav nav-tabs mb-4" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                  <li class="nav-item">
+                    <button class="nav-link active text-white" data-bs-toggle="tab" data-bs-target="#ejercicios-globales" type="button">
+                      <i class="bi bi-globe me-1"></i>
+                      Ejercicios Globales
+                    </button>
+                  </li>
+                  <li class="nav-item">
+                    <button class="nav-link text-white" data-bs-toggle="tab" data-bs-target="#ejercicios-personales" type="button">
+                      <i class="bi bi-person me-1"></i>
+                      Mis Ejercicios
+                    </button>
+                  </li>
+                </ul>
+
+                            <div class="tab-content">
+                                <!-- Ejercicios Globales -->
+                                <div class="tab-pane fade show active" id="ejercicios-globales">
+                                    <div th:if="${#lists.isEmpty(ejerciciosGlobales)}" class="text-center py-4">
+                                        <i class="bi bi-activity text-muted" style="font-size: 2rem;"></i>
+                                        <p class="text-muted mt-2">No hay ejercicios globales disponibles</p>
+                                    </div>
+                                    
+                                    <div th:if="${!#lists.isEmpty(ejerciciosGlobales)}" class="row g-3">
+                                        <div class="col-md-6 col-lg-4" th:each="ejercicio : ${ejerciciosGlobales}">
+                                            <div class="ejercicio-card" th:data-ejercicio-id="${ejercicio.id}">
+                                                <div class="form-check">
+                                                    <input class="form-check-input ejercicio-checkbox" type="checkbox" 
+                                                           th:name="ejercicios" th:value="${ejercicio.id}"
+                                                           th:id="'ejercicio-' + ${ejercicio.id}"
+                                                           onchange="toggleEjercicioConfig(this)">
+                                                    <label class="form-check-label w-100" th:for="'ejercicio-' + ${ejercicio.id}">
+                                                        <div class="ejercicio-info">
+                                                            <img th:src="@{'/ejercicio_image_uploads/' + ${ejercicio.imagen}}" 
+                                                                 alt="Ejercicio" class="ejercicio-imagen">
+                                                            <div class="ejercicio-details">
+                                                                <h6 th:text="${ejercicio.nombre}">Nombre del Ejercicio</h6>
+                                                                <p class="text-muted small mb-0" th:text="${ejercicio.descripcion}">Descripción del ejercicio</p>
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                                
+                                                <!-- Configuración de Sets y Reps (inicialmente oculto) -->
+                                                <div class="ejercicio-config mt-2" style="display: none;">
+                                                    <div class="row g-2">
+                                                        <div class="col-6">
+                                                            <label class="form-label-flowfit small">Sets</label>
+                                                            <input type="number" th:name="'sets_' + ${ejercicio.id}" 
+                                                                   class="form-control form-control-sm form-control-flowfit" 
+                                                                   value="3" min="1" max="10">
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label class="form-label-flowfit small">Reps</label>
+                                                            <input type="number" th:name="'reps_' + ${ejercicio.id}" 
+                                                                   class="form-control form-control-sm form-control-flowfit" 
+                                                                   value="12" min="1" max="50">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Ejercicios Personales -->
+                                <div class="tab-pane fade" id="ejercicios-personales">
+                                    <div th:if="${#lists.isEmpty(ejerciciosPersonales)}" class="text-center py-4">
+                                        <i class="bi bi-person-plus text-muted" style="font-size: 2rem;"></i>
+                                        <h5 class="mt-2 text-muted">No tienes ejercicios personalizados</h5>
+                                        <p class="text-muted">Crea tus propios ejercicios personalizados</p>
+                                        <a th:href="@{/entrenador/ejercicios}" class="btn-flowfit">
+                                            <i class="bi bi-plus-circle"></i>
+                                            Crear Ejercicio
+                                        </a>
+                                    </div>
+                                    
+                                    <div th:if="${!#lists.isEmpty(ejerciciosPersonales)}" class="row g-3">
+                                        <div class="col-md-6 col-lg-4" th:each="ejercicio : ${ejerciciosPersonales}">
+                                            <div class="ejercicio-card" th:data-ejercicio-id="${ejercicio.id}">
+                                                <div class="form-check">
+                                                    <input class="form-check-input ejercicio-checkbox" type="checkbox" 
+                                                           th:name="ejercicios" th:value="${ejercicio.id}"
+                                                           th:id="'ejercicio-p-' + ${ejercicio.id}"
+                                                           onchange="toggleEjercicioConfig(this)">
+                                                    <label class="form-check-label w-100" th:for="'ejercicio-p-' + ${ejercicio.id}">
+                                                        <div class="ejercicio-info">
+                                                            <img th:src="@{'/ejercicio_image_uploads/' + ${ejercicio.imagen}}" 
+                                                                 alt="Ejercicio" class="ejercicio-imagen">
+                                                            <div class="ejercicio-details">
+                                                                <h6 th:text="${ejercicio.nombre}">Nombre del Ejercicio</h6>
+                                                                <p class="text-muted small mb-0" th:text="${ejercicio.descripcion}">Descripción del ejercicio</p>
+                                                                <span class="badge mt-1" style="background: rgba(74, 222, 128, 0.2); color: var(--flowfit-primary); font-size: 0.65rem;">
+                                                                    <i class="bi bi-person me-1"></i>Personalizado
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                                
+                                                <!-- Configuración de Sets y Reps -->
+                                                <div class="ejercicio-config mt-2" style="display: none;">
+                                                    <div class="row g-2">
+                                                        <div class="col-6">
+                                                            <label class="form-label-flowfit small">Sets</label>
+                                                            <input type="number" th:name="'sets_' + ${ejercicio.id}" 
+                                                                   class="form-control form-control-sm form-control-flowfit" 
+                                                                   value="3" min="1" max="10">
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label class="form-label-flowfit small">Reps</label>
+                                                            <input type="number" th:name="'reps_' + ${ejercicio.id}" 
+                                                                   class="form-control form-control-sm form-control-flowfit" 
+                                                                   value="12" min="1" max="50">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Resumen de Ejercicios Seleccionados -->
+                            <div id="ejercicios-seleccionados" class="mt-4" style="display: none;">
+                                <div class="alert-flowfit alert-success-flowfit">
+                                    <h6>
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        Ejercicios Seleccionados (<span id="contador-ejercicios">0</span>)
+                                    </h6>
+                                    <div id="lista-ejercicios-seleccionados" class="mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="col-12">
+                    <div class="d-flex gap-3 justify-content-end">
+                        <a th:href="@{/entrenador/rutinas}" class="btn-flowfit-outline">
+                            <i class="bi bi-arrow-left"></i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn-flowfit" id="btn-crear-rutina">
+                            <i class="bi bi-check-circle"></i>
+                            Crear Rutina
+                        </button>
+                    </div>
+                </div>
             </div>
         </form>
     </main>
@@ -442,49 +608,70 @@
         });
       }
 
-      // Actualizar lista al cerrar modal
+      // Event listeners para checkboxes
+      const checkboxes = document.querySelectorAll('.ejercicio-checkbox');
+      checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+          const card = this.closest('.ejercicio-card');
+          const config = card.querySelector('.ejercicio-config');
+          
+          if (this.checked) {
+            config.style.display = 'block';
+            card.classList.add('selected');
+            agregarEjercicio(this);
+          } else {
+            config.style.display = 'none';
+            card.classList.remove('selected');
+            eliminarEjercicio(this.dataset.id);
+          }
+          
+          actualizarContador();
+          actualizarListaSeleccionados();
+        });
+      });
+
+      // Restaurar selección al abrir modal
       const modal = document.getElementById('modalEjercicios');
       if (modal) {
-        modal.addEventListener('hidden.bs.modal', function() {
-          actualizarListaSeleccionados();
+        modal.addEventListener('show.bs.modal', function() {
+          // Restaurar estado de checkboxes
+          ejerciciosSeleccionados.forEach((data, id) => {
+            const checkbox = document.querySelector(`.ejercicio-checkbox[data-id="${id}"]`);
+            if (checkbox && !checkbox.checked) {
+              checkbox.checked = true;
+              const card = checkbox.closest('.ejercicio-card');
+              const config = card.querySelector('.ejercicio-config');
+              config.style.display = 'block';
+              card.classList.add('selected');
+              
+              // Restaurar valores
+              const setsInput = document.getElementById(`sets_${id}`);
+              const repsInput = document.getElementById(`reps_${id}`);
+              if (setsInput) setsInput.value = data.sets;
+              if (repsInput) repsInput.value = data.reps;
+            }
+          });
         });
       }
     });
 
-    // Habilitar/Deshabilitar inputs cuando se marca/desmarca checkbox
-    function toggleEjercicioInputs(checkbox) {
-      const card = checkbox.closest('.ejercicio-card');
-      const setsInput = card.querySelector('.input-sets');
-      const repsInput = card.querySelector('.input-reps');
+    function agregarEjercicio(checkbox) {
+      const id = checkbox.dataset.id;
+      const nombre = checkbox.dataset.nombre;
+      const descripcion = checkbox.dataset.descripcion;
+      const tipo = checkbox.dataset.tipo;
       
-      if (checkbox.checked) {
-        setsInput.disabled = false;
-        repsInput.disabled = false;
-        card.classList.add('selected');
-        
-        // Agregar a seleccionados
-        const id = checkbox.dataset.id;
-        const nombre = checkbox.dataset.nombre;
-        const descripcion = checkbox.dataset.descripcion;
-        const tipo = checkbox.dataset.tipo;
-        
-        ejerciciosSeleccionados.set(id, {
-          nombre: nombre,
-          descripcion: descripcion,
-          tipo: tipo,
-          sets: setsInput.value,
-          reps: repsInput.value
-        });
-      } else {
-        setsInput.disabled = true;
-        repsInput.disabled = true;
-        card.classList.remove('selected');
-        
-        // Remover de seleccionados
-        ejerciciosSeleccionados.delete(checkbox.dataset.id);
-      }
-      
-      actualizarContador();
+      ejerciciosSeleccionados.set(id, {
+        nombre: nombre,
+        descripcion: descripcion,
+        tipo: tipo,
+        sets: 3,
+        reps: 12
+      });
+    }
+
+    function eliminarEjercicio(id) {
+      ejerciciosSeleccionados.delete(id);
     }
 
     function actualizarContador() {
@@ -533,16 +720,19 @@
                   </button>
                 </div>
                 <p class="text-muted-flowfit small mb-3">${data.descripcion}</p>
-                <div class="d-flex gap-2 align-items-center mb-2">
-                  <span class="text-white small"><i class="bi bi-repeat me-1"></i>Sets:</span>
-                  <strong class="text-primary">${sets}</strong>
-                  <span class="text-muted-flowfit mx-2">|</span>
-                  <span class="text-white small"><i class="bi bi-list-ol me-1"></i>Reps:</span>
-                  <strong class="text-primary">${reps}</strong>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <label class="form-label text-white small mb-1">Sets</label>
+                    <input type="number" name="sets_${id}" value="${sets}" min="1" 
+                           class="form-control form-control-sm bg-dark text-white border-secondary">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label text-white small mb-1">Reps</label>
+                    <input type="number" name="reps_${id}" value="${reps}" min="1" 
+                           class="form-control form-control-sm bg-dark text-white border-secondary">
+                  </div>
                 </div>
                 <input type="hidden" name="ejercicios" value="${id}">
-                <input type="hidden" name="sets_${id}" value="${sets}">
-                <input type="hidden" name="reps_${id}" value="${reps}">
               </div>
             </div>
           `;
@@ -556,8 +746,15 @@
       const checkbox = document.querySelector(`.ejercicio-checkbox[data-id="${id}"]`);
       if (checkbox) {
         checkbox.checked = false;
-        toggleEjercicioInputs(checkbox);
+        const card = checkbox.closest('.ejercicio-card');
+        const config = card.querySelector('.ejercicio-config');
+        config.style.display = 'none';
+        card.classList.remove('selected');
       }
+      
+      eliminarEjercicio(id);
+      actualizarContador();
+      actualizarListaSeleccionados();
     }
 
     function toggleSeccion(seccionId) {
@@ -580,8 +777,15 @@
       const checkboxes = document.querySelectorAll('.ejercicio-checkbox:checked');
       checkboxes.forEach(checkbox => {
         checkbox.checked = false;
-        toggleEjercicioInputs(checkbox);
+        const card = checkbox.closest('.ejercicio-card');
+        const config = card.querySelector('.ejercicio-config');
+        config.style.display = 'none';
+        card.classList.remove('selected');
       });
+      
+      ejerciciosSeleccionados.clear();
+      actualizarContador();
+      actualizarListaSeleccionados();
     }
 
     // Validación antes de enviar
@@ -589,48 +793,17 @@
       const nombreInput = document.getElementById('nombreRutina');
       if (!nombreInput.value.trim()) {
         e.preventDefault();
-        showNotification('Por favor ingresa un nombre para la rutina', 'warning');
+        alert('Por favor ingresa un nombre para la rutina');
         nombreInput.focus();
         return false;
       }
       
       if (ejerciciosSeleccionados.size === 0) {
         e.preventDefault();
-        showNotification('Por favor selecciona al menos un ejercicio', 'warning');
+        alert('Por favor selecciona al menos un ejercicio');
         return false;
       }
     });
-
-    // Sistema de notificaciones (si no existe)
-    function showNotification(message, type = 'success') {
-      // Verificar si existe el sistema de toast
-      const toastEl = document.getElementById('notificationToast');
-      if (toastEl) {
-        const toastMessage = document.getElementById('toastMessage');
-        const toastIcon = document.getElementById('toastIcon');
-        
-        toastEl.classList.remove('toast-success', 'toast-error', 'toast-warning');
-        
-        if (type === 'success') {
-          toastEl.classList.add('toast-success');
-          toastIcon.className = 'bi bi-check-circle-fill me-3 fs-4';
-        } else if (type === 'error') {
-          toastEl.classList.add('toast-error');
-          toastIcon.className = 'bi bi-x-circle-fill me-3 fs-4';
-        } else if (type === 'warning') {
-          toastEl.classList.add('toast-warning');
-          toastIcon.className = 'bi bi-exclamation-triangle-fill me-3 fs-4';
-        }
-        
-        toastMessage.textContent = message;
-        
-        const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 4000 });
-        toast.show();
-      } else {
-        // Fallback a alert si no hay sistema de toast
-        alert(message);
-      }
-    }
   </script>
 </body>
 </html>

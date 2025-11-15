@@ -386,6 +386,173 @@
               </div>
             </div>
           </div>
+          
+          <!-- Selección de Ejercicios -->
+          <div class="col-12">
+            <div class="card-base card-entrenador">
+              <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                  <h5 class="text-white fw-semibold mb-0">
+                    <i class="bi bi-activity me-2"></i>
+                    Seleccionar Ejercicios
+                  </h5>
+                  <button type="button" class="btn btn-light btn-sm" onclick="limpiarSeleccion()">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>
+                    Limpiar
+                  </button>
+                </div>
+                
+                <!-- Tabs para categorías de ejercicios -->
+                <ul class="nav nav-tabs mb-4" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                  <li class="nav-item">
+                    <button class="nav-link active text-white" data-bs-toggle="tab" data-bs-target="#ejercicios-globales" type="button">
+                      <i class="bi bi-globe me-1"></i>
+                      Ejercicios Globales
+                    </button>
+                  </li>
+                  <li class="nav-item">
+                    <button class="nav-link text-white" data-bs-toggle="tab" data-bs-target="#ejercicios-personales" type="button">
+                      <i class="bi bi-person me-1"></i>
+                      Mis Ejercicios
+                    </button>
+                  </li>
+                </ul>
+
+                            <div class="tab-content">
+                                <!-- Ejercicios Globales -->
+                                <div class="tab-pane fade show active" id="ejercicios-globales">
+                                    <div th:if="${#lists.isEmpty(ejerciciosGlobales)}" class="text-center py-4">
+                                        <i class="bi bi-activity text-muted" style="font-size: 2rem;"></i>
+                                        <p class="text-muted mt-2">No hay ejercicios globales disponibles</p>
+                                    </div>
+                                    
+                                    <div th:if="${!#lists.isEmpty(ejerciciosGlobales)}" class="row g-3">
+                                        <div class="col-md-6 col-lg-4" th:each="ejercicio : ${ejerciciosGlobales}">
+                                            <div class="ejercicio-card" th:data-ejercicio-id="${ejercicio.id}">
+                                                <div class="form-check">
+                                                    <input class="form-check-input ejercicio-checkbox" type="checkbox" 
+                                                           th:name="ejercicios" th:value="${ejercicio.id}"
+                                                           th:id="'ejercicio-' + ${ejercicio.id}"
+                                                           onchange="toggleEjercicioConfig(this)">
+                                                    <label class="form-check-label w-100" th:for="'ejercicio-' + ${ejercicio.id}">
+                                                        <div class="ejercicio-info">
+                                                            <img th:src="@{'/ejercicio_image_uploads/' + ${ejercicio.imagen}}" 
+                                                                 alt="Ejercicio" class="ejercicio-imagen">
+                                                            <div class="ejercicio-details">
+                                                                <h6 th:text="${ejercicio.nombre}">Nombre del Ejercicio</h6>
+                                                                <p class="text-muted small mb-0" th:text="${ejercicio.descripcion}">Descripción del ejercicio</p>
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                                
+                                                <!-- Configuración de Sets y Reps (inicialmente oculto) -->
+                                                <div class="ejercicio-config mt-2" style="display: none;">
+                                                    <div class="row g-2">
+                                                        <div class="col-6">
+                                                            <label class="form-label-flowfit small">Sets</label>
+                                                            <input type="number" th:name="'sets_' + ${ejercicio.id}" 
+                                                                   class="form-control form-control-sm form-control-flowfit" 
+                                                                   value="3" min="1" max="10">
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label class="form-label-flowfit small">Reps</label>
+                                                            <input type="number" th:name="'reps_' + ${ejercicio.id}" 
+                                                                   class="form-control form-control-sm form-control-flowfit" 
+                                                                   value="12" min="1" max="50">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Ejercicios Personales -->
+                                <div class="tab-pane fade" id="ejercicios-personales">
+                                    <div th:if="${#lists.isEmpty(ejerciciosPersonales)}" class="text-center py-4">
+                                        <i class="bi bi-person-plus text-muted" style="font-size: 2rem;"></i>
+                                        <h5 class="mt-2 text-muted">No tienes ejercicios personalizados</h5>
+                                        <p class="text-muted">Crea tus propios ejercicios personalizados</p>
+                                        <a th:href="@{/entrenador/ejercicios}" class="btn-flowfit">
+                                            <i class="bi bi-plus-circle"></i>
+                                            Crear Ejercicio
+                                        </a>
+                                    </div>
+                                    
+                                    <div th:if="${!#lists.isEmpty(ejerciciosPersonales)}" class="row g-3">
+                                        <div class="col-md-6 col-lg-4" th:each="ejercicio : ${ejerciciosPersonales}">
+                                            <div class="ejercicio-card" th:data-ejercicio-id="${ejercicio.id}">
+                                                <div class="form-check">
+                                                    <input class="form-check-input ejercicio-checkbox" type="checkbox" 
+                                                           th:name="ejercicios" th:value="${ejercicio.id}"
+                                                           th:id="'ejercicio-p-' + ${ejercicio.id}"
+                                                           onchange="toggleEjercicioConfig(this)">
+                                                    <label class="form-check-label w-100" th:for="'ejercicio-p-' + ${ejercicio.id}">
+                                                        <div class="ejercicio-info">
+                                                            <img th:src="@{'/ejercicio_image_uploads/' + ${ejercicio.imagen}}" 
+                                                                 alt="Ejercicio" class="ejercicio-imagen">
+                                                            <div class="ejercicio-details">
+                                                                <h6 th:text="${ejercicio.nombre}">Nombre del Ejercicio</h6>
+                                                                <p class="text-muted small mb-0" th:text="${ejercicio.descripcion}">Descripción del ejercicio</p>
+                                                                <span class="badge mt-1" style="background: rgba(74, 222, 128, 0.2); color: var(--flowfit-primary); font-size: 0.65rem;">
+                                                                    <i class="bi bi-person me-1"></i>Personalizado
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                                
+                                                <!-- Configuración de Sets y Reps -->
+                                                <div class="ejercicio-config mt-2" style="display: none;">
+                                                    <div class="row g-2">
+                                                        <div class="col-6">
+                                                            <label class="form-label-flowfit small">Sets</label>
+                                                            <input type="number" th:name="'sets_' + ${ejercicio.id}" 
+                                                                   class="form-control form-control-sm form-control-flowfit" 
+                                                                   value="3" min="1" max="10">
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label class="form-label-flowfit small">Reps</label>
+                                                            <input type="number" th:name="'reps_' + ${ejercicio.id}" 
+                                                                   class="form-control form-control-sm form-control-flowfit" 
+                                                                   value="12" min="1" max="50">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Resumen de Ejercicios Seleccionados -->
+                            <div id="ejercicios-seleccionados" class="mt-4" style="display: none;">
+                                <div class="alert-flowfit alert-success-flowfit">
+                                    <h6>
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        Ejercicios Seleccionados (<span id="contador-ejercicios">0</span>)
+                                    </h6>
+                                    <div id="lista-ejercicios-seleccionados" class="mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="col-12">
+                    <div class="d-flex gap-3 justify-content-end">
+                        <a th:href="@{/entrenador/rutinas}" class="btn-flowfit-outline">
+                            <i class="bi bi-arrow-left"></i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn-flowfit" id="btn-crear-rutina">
+                            <i class="bi bi-check-circle"></i>
+                            Crear Rutina
+                        </button>
+                    </div>
+                </div>
             </div>
         </form>
     </main>

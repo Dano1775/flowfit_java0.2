@@ -13,49 +13,37 @@
     <!-- Navegación Principal -->
     <ul class="nav nav-pills flex-column mb-auto">
       <li class="nav-item">
-        <a th:href="@{/entrenador/dashboard}" 
-           th:class="${currentPage == 'dashboard'} ? 'nav-link-base nav-link-entrenador active' : 'nav-link-base nav-link-entrenador'" 
-           title="Dashboard">
+        <a th:href="@{/entrenador/dashboard}" class="nav-link-base nav-link-entrenador active" title="Dashboard">
           <i class="bi bi-speedometer2 me-3"></i>
           <span class="nav-text">Dashboard</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/entrenador/mis-usuarios}" 
-           th:class="${currentPage == 'mis-usuarios'} ? 'nav-link-base nav-link-entrenador active' : 'nav-link-base nav-link-entrenador'" 
-           title="Mis Usuarios">
+        <a th:href="@{/entrenador/mis-usuarios}" class="nav-link-base nav-link-entrenador" title="Mis Usuarios">
           <i class="bi bi-people me-3"></i>
           <span class="nav-text">Mis Usuarios</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/entrenador/rutinas/crear}" 
-           th:class="${currentPage == 'crear-rutinas'} ? 'nav-link-base nav-link-entrenador active' : 'nav-link-base nav-link-entrenador'" 
-           title="Crear Rutinas">
+        <a th:href="@{/entrenador/rutinas/crear}" class="nav-link-base nav-link-entrenador" title="Crear Rutinas">
           <i class="bi bi-plus-circle me-3"></i>
           <span class="nav-text">Crear Rutinas</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/entrenador/rutinas}" 
-           th:class="${currentPage == 'ver-rutinas' or currentPage == 'rutinas'} ? 'nav-link-base nav-link-entrenador active' : 'nav-link-base nav-link-entrenador'" 
-           title="Ver Rutinas">
+        <a th:href="@{/entrenador/rutinas}" class="nav-link-base nav-link-entrenador" title="Ver Rutinas">
           <i class="bi bi-list-check me-3"></i>
           <span class="nav-text">Ver Rutinas</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/entrenador/asignar-rutinas}" 
-           th:class="${currentPage == 'asignar-rutinas'} ? 'nav-link-base nav-link-entrenador active' : 'nav-link-base nav-link-entrenador'" 
-           title="Asignar Rutinas">
+        <a th:href="@{/entrenador/asignar-rutinas}" class="nav-link-base nav-link-entrenador" title="Asignar Rutinas">
           <i class="bi bi-person-plus-fill me-3"></i>
           <span class="nav-text">Asignar Rutinas</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/entrenador/progreso}" 
-           th:class="${currentPage == 'progreso'} ? 'nav-link-base nav-link-entrenador active' : 'nav-link-base nav-link-entrenador'" 
-           title="Progreso">
+        <a th:href="@{/entrenador/progreso}" class="nav-link-base nav-link-entrenador" title="Progreso">
           <i class="bi bi-graph-up me-3"></i>
           <span class="nav-text">Progreso de Usuarios</span>
         </a>
