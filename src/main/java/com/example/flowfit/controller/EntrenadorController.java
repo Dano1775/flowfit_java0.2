@@ -1,38 +1,41 @@
 package com.example.flowfit.controller;
 
-import com.example.flowfit.model.Usuario;
-import com.example.flowfit.model.Rutina;
-import com.example.flowfit.model.RutinaAsignada;
-import com.example.flowfit.model.EjercicioCatalogo;
-import com.example.flowfit.model.RutinaEjercicio;
-import com.example.flowfit.service.UsuarioService;
-import com.example.flowfit.service.RutinaService;
-import com.example.flowfit.service.EjercicioService;
-import com.example.flowfit.service.AsignacionEntrenadorService;
-import com.example.flowfit.model.AsignacionEntrenador;
-import com.example.flowfit.repository.RutinaAsignadaRepository;
-import com.example.flowfit.dto.EjercicioRutinaSimpleDto;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.example.flowfit.dto.EjercicioRutinaSimpleDto;
+import com.example.flowfit.model.AsignacionEntrenador;
+import com.example.flowfit.model.EjercicioCatalogo;
+import com.example.flowfit.model.Rutina;
+import com.example.flowfit.model.RutinaAsignada;
+import com.example.flowfit.model.RutinaEjercicio;
+import com.example.flowfit.model.Usuario;
+import com.example.flowfit.repository.RutinaAsignadaRepository;
+import com.example.flowfit.service.AsignacionEntrenadorService;
+import com.example.flowfit.service.EjercicioService;
+import com.example.flowfit.service.RutinaService;
+import com.example.flowfit.service.UsuarioService;
 
 import jakarta.servlet.http.HttpSession;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.time.LocalDate;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/entrenador")
