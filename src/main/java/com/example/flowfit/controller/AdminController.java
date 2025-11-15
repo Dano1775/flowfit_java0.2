@@ -1,37 +1,45 @@
 package com.example.flowfit.controller;
 
-import com.example.flowfit.model.Usuario;
-import com.example.flowfit.model.RegistroAprobaciones;
-import com.example.flowfit.model.HistorialEdiciones;
-import com.example.flowfit.model.EjercicioCatalogo;
-import com.example.flowfit.service.UsuarioService;
-import com.example.flowfit.service.ExcelExportService;
-import com.example.flowfit.service.EjercicioService;
-import com.example.flowfit.service.EmailService;
-
-import com.example.flowfit.repository.UsuarioRepository;
-import com.example.flowfit.repository.RegistroAprobacionesRepository;
-import com.example.flowfit.repository.HistorialEdicionesRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import java.util.ArrayList;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-
-import jakarta.servlet.http.HttpSession;
-import java.util.List;
-
-import java.util.Optional;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.example.flowfit.model.EjercicioCatalogo;
+import com.example.flowfit.model.HistorialEdiciones;
+import com.example.flowfit.model.RegistroAprobaciones;
+import com.example.flowfit.model.Usuario;
+import com.example.flowfit.repository.HistorialEdicionesRepository;
+import com.example.flowfit.repository.RegistroAprobacionesRepository;
+import com.example.flowfit.repository.UsuarioRepository;
+import com.example.flowfit.service.EjercicioService;
+import com.example.flowfit.service.EmailService;
+import com.example.flowfit.service.ExcelExportService;
+import com.example.flowfit.service.UsuarioService;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/admin")
@@ -101,6 +109,53 @@ public class AdminController {
         model.addAttribute("actividadReciente", actividadReciente);
 
         return "admin/dashboard";
+    }
+
+    /**
+     * Endpoint AJAX para obtener datos del gráfico (datos globales)
+     */
+    @GetMapping("/dashboard-chart-data")
+    @ResponseBody
+    public Map<String, Object> getDashboardChartData(HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null || !usuario.getPerfilUsuario().toString().equals("Administrador")) {
+            return Map.of("error", "Unauthorized");
+        }
+
+        // Obtener datos globales del sistema
+        List<Usuario> todosLosUsuarios = usuarioService.obtenerTodosLosUsuarios();
+        
+        // Contar usuarios por perfil (aprobados)
+        long totalUsuarios = todosLosUsuarios.stream()
+                .filter(u -> Usuario.PerfilUsuario.Usuario.equals(u.getPerfilUsuario()) && "A".equals(u.getEstado()))
+                .count();
+        
+        long totalEntrenadores = todosLosUsuarios.stream()
+                .filter(u -> Usuario.PerfilUsuario.Entrenador.equals(u.getPerfilUsuario()) && "A".equals(u.getEstado()))
+                .count();
+        
+        long totalNutricionistas = todosLosUsuarios.stream()
+                .filter(u -> Usuario.PerfilUsuario.Nutricionista.equals(u.getPerfilUsuario()) && "A".equals(u.getEstado()))
+                .count();
+        
+        long totalPendientes = todosLosUsuarios.stream()
+                .filter(u -> "I".equals(u.getEstado()))
+                .count();
+
+        // Preparar datos para el gráfico
+        Map<String, Object> chartData = new HashMap<>();
+        List<String> labels = Arrays.asList("Usuarios", "Entrenadores", "Nutricionistas", "Pendientes");
+        List<Integer> data = Arrays.asList(
+                (int) totalUsuarios,
+                (int) totalEntrenadores,
+                (int) totalNutricionistas,
+                (int) totalPendientes
+        );
+        
+        chartData.put("labels", labels);
+        chartData.put("data", data);
+        
+        return chartData;
     }
     
     @GetMapping("/usuarios-pendientes")

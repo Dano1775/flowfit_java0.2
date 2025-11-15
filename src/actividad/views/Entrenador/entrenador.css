@@ -17,7 +17,7 @@ body {
 
 .navbar-brand {
   font-weight: bold;
-  color: #3b82f6 !important;
+  color: #3b82f6 !important; /* Azul para entrenador */
 }
 
 .navbar {
@@ -26,7 +26,7 @@ body {
 
 .hero-section {
   min-height: 50vh;
-  background: linear-gradient(to right, #1f2937, #3b82f6);
+  background: linear-gradient(to right, #1f2937, #3b82f6); /* degradado azul */
   color: white;
   padding: 60px 0 30px;
   text-align: center;
@@ -65,7 +65,7 @@ body {
 
 .card:hover {
   transform: scale(1.05);
-  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
 .card h5 {
@@ -102,15 +102,14 @@ body {
   color: white;
 }
 
-.btn-outline-blue {
-  border: 2px solid #3b82f6;
-  color: #3b82f6;
-  background: transparent;
+.btn-success {
+  background-color: #3b82f6;
+  border: none;
 }
 
-.btn-outline-blue:hover {
-  background-color: #3b82f6;
-  color: white;
+.btn-success:hover {
+  background-color: #2563eb;
+  transform: scale(1.05);
 }
 
 .btn-outline-light:hover {
@@ -139,7 +138,7 @@ input.form-control,
 textarea.form-control {
   background-color: #ffffff10;
   color: white;
-  border: 1px solid #3b82f6;
+  border: 1px solid #3b82f6; /* borde azul */
 }
 
 input.form-control::placeholder,
@@ -147,6 +146,7 @@ textarea.form-control::placeholder {
   color: #a0aec0;
 }
 
+/* Modal personalizado */
 .modal-content {
   background: rgba(255, 255, 255, 0.05);
   color: white;
@@ -156,6 +156,7 @@ textarea.form-control::placeholder {
 
 .modal-header {
   border-bottom: 1px solid #3b82f6;
+  background-color: rgba(59, 130, 246, 0.85);
 }
 
 .modal-footer {
@@ -227,10 +228,42 @@ textarea.form-control::placeholder {
   cursor: pointer;
   margin-top: 30px;
   font-weight: bold;
-  color: #3b82f6;
 }
 
-/* deshabilita inputs en los checkbocks que no han sido seleccionados */
+.btn-approbar {
+  background-color: #25f764;
+  border: none;
+  color: rgb(255, 255, 255);
+}
+
+.btn-approbar:hover {
+  background-color: #0d8631;
+  transform: scale(1.05);
+}
+
+.btn-editar-ejercicios {
+  background-color: rgba(59, 130, 246, 0.85);
+  border: 1px solid #3b82f6;
+  color: white;
+  font-weight: 500;
+  border-radius: 9999px;
+  padding: 6px 16px;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-editar-ejercicios:hover {
+  background-color: rgba(59, 130, 246, 0.85);
+  transform: scale(1.05);
+  color: white;
+}
+
+/* deshabilita inputs en los checkbocks que no ha sido seleccionados en la pagina rutinas_entrenador.php */
 input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
