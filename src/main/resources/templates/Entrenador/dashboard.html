@@ -32,7 +32,66 @@
   <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
 
   <!-- FlowFit Sidebar -->
-  <div th:replace="~{fragments/sidebar-entrenador :: sidebar}"></div>
+  <nav class="sidebar-base sidebar-entrenador d-flex flex-column" id="sidebar">
+    <!-- Brand -->
+    <a th:href="@{/entrenador/dashboard}" class="navbar-brand d-flex align-items-center text-decoration-none">
+      <img src="/assets/logo_flowfit.png" alt="FlowFit Entrenador" height="40" class="me-3 logo-flowfit">
+      <span class="brand-text">FlowFit</span>
+    </a>
+
+    <!-- Navigation -->
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a th:href="@{/entrenador/dashboard}" class="nav-link-base nav-link-entrenador active" title="Dashboard">
+          <i class="bi bi-speedometer2 me-3"></i> 
+          <span class="nav-text">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/rutinas}" class="nav-link-base nav-link-entrenador" title="Rutinas">
+          <i class="bi bi-clipboard-data me-3"></i> 
+          <span class="nav-text">Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/ejercicios}" class="nav-link-base nav-link-entrenador" title="Ejercicios">
+          <i class="bi bi-activity me-3"></i> 
+          <span class="nav-text">Ejercicios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/mis-usuarios}" class="nav-link-base nav-link-entrenador" title="Mis Usuarios">
+          <i class="bi bi-people me-3"></i> 
+          <span class="nav-text">Mis Usuarios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/asignar-rutinas}" class="nav-link-base nav-link-entrenador" title="Asignar Rutinas">
+          <i class="bi bi-person-check me-3"></i> 
+          <span class="nav-text">Asignar Rutinas</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Profile Section -->
+    <div class="border-top pt-3 mt-auto">
+      <div class="dropdown profile-dropdown-base">
+        <div class="profile-icon-base d-flex align-items-center w-100" id="profileDropdownEntrenador" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-base me-2" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+          <div class="flex-grow-1">
+            <div class="small fw-bold text-white" th:text="${entrenador != null ? #strings.substringBefore(entrenador.nombre, ' ') : 'Entrenador'}">Entrenador</div>
+            <div class="small text-muted-flowfit">Entrenador</div>
+          </div>
+          <i class="bi bi-chevron-down text-white"></i>
+        </div>
+        <ul class="dropdown-menu" aria-labelledby="profileDropdownEntrenador">
+          <li><a class="dropdown-item" th:href="@{/entrenador/perfil}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
   <!-- Main Content -->
   <main class="main-content-base fade-in-up">
@@ -79,12 +138,13 @@
         </div>
       </div>
 
-      <!-- Statistics Cards - Mejoradas -->
+      <!-- Statistics Cards - Tarjetas de Estadísticas -->
       <div class="row mb-4 g-3">
+        <!-- Tarjeta 1: Usuarios Activos -->
         <div class="col-xl-3 col-md-6">
           <div class="stat-card-enhanced stat-card-entrenador stat-card-hover">
-            <div class="stat-icon-wrapper">
-              <i class="bi bi-people stat-icon icon-entrenador"></i>
+            <div class="stat-icon-wrapper bg-info-subtle">
+              <i class="bi bi-people stat-icon text-info"></i>
             </div>
             <div class="stat-content">
               <h3 class="stat-number counter" th:attr="data-target=${totalUsuarios ?: 0}">0</h3>
@@ -94,10 +154,12 @@
               </small>
             </div>
             <div class="stat-progress">
-              <div class="progress-bar bg-primary" style="width: 75%"></div>
+              <div class="progress-bar bg-info" style="width: 75%"></div>
             </div>
           </div>
         </div>
+        
+        <!-- Tarjeta 2: Rutinas Creadas -->
         <div class="col-xl-3 col-md-6">
           <div class="stat-card-enhanced stat-card-entrenador stat-card-hover">
             <div class="stat-icon-wrapper bg-success-subtle">
@@ -115,33 +177,37 @@
             </div>
           </div>
         </div>
+        
+        <!-- Tarjeta 3: Total Ejercicios -->
         <div class="col-xl-3 col-md-6">
           <div class="stat-card-enhanced stat-card-entrenador stat-card-hover">
-            <div class="stat-icon-wrapper bg-info-subtle">
-              <i class="bi bi-calendar-check stat-icon text-info"></i>
-            </div>
-            <div class="stat-content">
-              <h3 class="stat-number counter" th:attr="data-target=${totalAsignacionesActivas ?: 0}">0</h3>
-              <p class="stat-label mb-0">Rutinas Asignadas</p>
-              <small class="stat-trend text-success">
-                <i class="bi bi-arrow-up"></i> +15% este mes
-              </small>
-            </div>
-            <div class="stat-progress">
-              <div class="progress-bar bg-info" style="width: 85%"></div>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-          <div class="stat-card-enhanced stat-card-entrenador stat-card-hover">
-            <div class="stat-icon-wrapper bg-warning-subtle">
-              <i class="bi bi-activity stat-icon text-warning"></i>
+            <div class="stat-icon-wrapper bg-primary-subtle">
+              <i class="bi bi-activity stat-icon text-primary"></i>
             </div>
             <div class="stat-content">
               <h3 class="stat-number counter" th:attr="data-target=${totalEjerciciosPersonalizados ?: 0}">0</h3>
               <p class="stat-label mb-0">Ejercicios Creados</p>
               <small class="stat-trend text-success">
                 <i class="bi bi-arrow-up"></i> +5% este mes
+              </small>
+            </div>
+            <div class="stat-progress">
+              <div class="progress-bar bg-primary" style="width: 85%"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tarjeta 4: Asignaciones Activas -->
+        <div class="col-xl-3 col-md-6">
+          <div class="stat-card-enhanced stat-card-entrenador stat-card-hover">
+            <div class="stat-icon-wrapper bg-warning-subtle">
+              <i class="bi bi-calendar-check stat-icon text-warning"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number counter" th:attr="data-target=${totalAsignacionesActivas ?: 0}">0</h3>
+              <p class="stat-label mb-0">Rutinas Asignadas</p>
+              <small class="stat-trend text-success">
+                <i class="bi bi-arrow-up"></i> +15% este mes
               </small>
             </div>
             <div class="stat-progress">
@@ -155,36 +221,42 @@
       <div class="row mb-4">
         <div class="col-lg-8 mb-4">
           <div class="card-base card-entrenador">
-            <div class="card-header">
-              <h5><i class="bi bi-journal-text me-2"></i>Rutinas Recientes</h5>
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Rutinas Recientes</h5>
+              <a th:href="@{/entrenador/rutinas}" class="btn btn-sm btn-flowfit-primary btn-entrenador-primary">Ver todo</a>
             </div>
             <div class="card-body">
-              <div th:if="${#lists.isEmpty(rutinasRecientes)}" class="text-center py-5">
-                <i class="bi bi-journal-x fs-2 text-muted-flowfit mb-3"></i>
+              <!-- Estado Vacío -->
+              <div th:if="${rutinasRecientes == null or rutinasRecientes.isEmpty()}" class="text-center py-5">
+                <i class="bi bi-inbox fs-2 mb-3" style="color: rgba(255, 255, 255, 0.4);"></i>
                 <h5 class="mt-3 text-white">No tienes rutinas creadas</h5>
-                <p class="text-muted-flowfit mb-4">Crea tu primera rutina para comenzar a entrenar usuarios</p>
-                <a href="/entrenador/rutinas/crear" class="btn-flowfit-primary btn-entrenador-primary">
-                  <i class="bi bi-plus-circle"></i>Crear Primera Rutina
-                </a>
+                <p class="text-white mb-4" style="opacity: 0.7;">Crea tu primera rutina para comenzar a entrenar usuarios</p>
               </div>
 
+              <!-- Lista de Rutinas Recientes -->
               <div th:if="${!#lists.isEmpty(rutinasRecientes)}">
                 <div class="row g-3">
                   <div th:each="rutina : ${rutinasRecientes}" class="col-12">
-                    <div class="d-flex align-items-center p-3 rounded-3" style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3);">
+                    <div class="d-flex align-items-center p-3 rounded-3" 
+                         style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.35); transition: all 0.3s ease;">
+                      <!-- Icono de Estado -->
                       <div class="me-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center icon-entrenador" 
-                             style="width: 48px; height: 48px; color: var(--entrenador-primary);">
-                          <i class="bi bi-journal-text fs-5"></i>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 48px; height: 48px; background: rgba(59, 130, 246, 0.2); color: var(--entrenador-primary-light);">
+                          <i class="bi bi-clipboard-check fs-5"></i>
                         </div>
                       </div>
+                      
+                      <!-- Información de Rutina -->
                       <div class="flex-grow-1">
-                        <h6 class="mb-1 text-white" th:text="${rutina.nombre}">Rutina</h6>
-                        <p class="small text-muted-flowfit mb-0" th:text="${#strings.abbreviate(rutina.descripcion, 60)}">Descripción...</p>
+                        <h6 class="mb-1 text-white fw-bold" th:text="${rutina.nombre}">Nombre Rutina</h6>
+                        <p class="small mb-0 text-white" style="opacity: 0.85;" th:text="${#strings.abbreviate(rutina.descripcion ?: 'Sin descripción', 60)}">Descripción...</p>
                       </div>
+                      
+                      <!-- Información Adicional -->
                       <div class="text-end">
-                        <span class="badge badge-admin-success mb-2" th:text="${rutina.ejercicios?.size() ?: 0} + ' ejercicios'">0 ejercicios</span><br>
-                        <small class="text-muted-flowfit" th:text="${#temporals.format(rutina.fechaCreacion, 'dd/MM/yyyy')}">01/01/2025</small>
+                        <span class="badge badge-entrenador-success mb-2" th:text="${(rutina.ejercicios != null ? rutina.ejercicios.size() : 0) + ' ejercicios'}">0 ejercicios</span><br>
+                        <small class="text-white" style="opacity: 0.7;" th:text="${#temporals.format(rutina.fechaCreacion ?: #dates.createNow(), 'dd/MM/yyyy')}">01/01/2025</small>
                       </div>
                     </div>
                   </div>
@@ -201,16 +273,16 @@
             </div>
             <div class="card-body">
               <div class="d-grid gap-3">
-                <a href="/entrenador/rutinas/crear" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced w-100">
+                <a th:href="@{/entrenador/rutinas/crear}" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced w-100">
                   <i class="bi bi-plus-circle me-2"></i>Crear Nueva Rutina
                 </a>
-                <a href="/entrenador/asignar-rutinas" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced w-100">
+                <a th:href="@{/entrenador/asignar-rutinas}" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced w-100">
                   <i class="bi bi-person-check me-2"></i>Asignar Rutina
                 </a>
-                <a href="/entrenador/ejercicios" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced w-100">
+                <a th:href="@{/entrenador/ejercicios}" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced w-100">
                   <i class="bi bi-activity me-2"></i>Gestionar Ejercicios
                 </a>
-                <a href="/entrenador/mis-usuarios" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced w-100">
+                <a th:href="@{/entrenador/mis-usuarios}" class="btn-flowfit-outline btn-entrenador-outline btn-enhanced w-100">
                   <i class="bi bi-people me-2"></i>Ver Usuarios
                 </a>
               </div>

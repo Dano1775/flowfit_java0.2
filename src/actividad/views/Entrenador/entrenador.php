@@ -58,43 +58,33 @@ $primerNombre = explode(' ', $_SESSION["nombre"] ?? "Usuario")[0];
 <section class="container my-5" id="panel">
   <div class="row g-4 justify-content-center">
 
-    <!-- Ejercicios -->
-    <div class="col-md-3 col-sm-6">
-      <div class="card text-center p-4">
-        <i class="bi bi-bicycle fs-1 text-primary mb-3"></i>
-        <h5>Ejercicios</h5>
-        <p>Crea y administra ejercicios para tus rutinas.</p>
-        <a href="ejercicios_entrenador.php" class="btn btn-blue mt-2">Ir a Ejercicios</a>
-      </div>
-    </div>
-
     <!-- Gestión de Rutinas -->
-    <div class="col-md-3 col-sm-6">
+    <div class="col-md-4 col-sm-6">
       <div class="card text-center p-4">
         <i class="bi bi-clipboard-data fs-1 text-blue mb-3"></i>
         <h5>Gestión de Rutinas</h5>
-        <p>Crea, edita y administra tus rutinas.</p>
+        <p>Crea, edita y administra tus rutinas personalizadas.</p>
         <a href="rutina.php" class="btn btn-blue mt-2">Ver Rutinas</a>
       </div>
     </div>
 
-    <!-- Mis Usuarios -->
-    <div class="col-md-3 col-sm-6">
+    <!-- Ejercicios Personalizados -->
+    <div class="col-md-4 col-sm-6">
       <div class="card text-center p-4">
-        <i class="bi bi-people-fill fs-1 text-success mb-3"></i>
-        <h5>Mis Usuarios</h5>
-        <p>Gestiona los usuarios asignados a tus rutinas.</p>
-        <a href="mis_usuarios.php" class="btn btn-blue mt-2">Ver Usuarios</a>
+        <i class="bi bi-bicycle fs-1 text-blue mb-3"></i>
+        <h5>Ejercicios Personalizados</h5>
+        <p>Crea y administra ejercicios para tus rutinas.</p>
+        <a href="ejercicios_entrenador.php" class="btn btn-blue mt-2">Gestionar</a>
       </div>
     </div>
 
-    <!-- Historial -->
-    <div class="col-md-3 col-sm-6">
+    <!-- Mis Usuarios -->
+    <div class="col-md-4 col-sm-6">
       <div class="card text-center p-4">
-        <i class="bi bi-journal-text fs-1 text-info mb-3"></i>
-        <h5>Historial</h5>
-        <p>Consulta el historial de rutinas asignadas.</p>
-        <a href="historial_asignaciones.php" class="btn btn-blue mt-2">Ver Historial</a>
+        <i class="bi bi-people-fill fs-1 text-blue mb-3"></i>
+        <h5>Mis Usuarios</h5>
+        <p>Gestiona los usuarios asignados a tus rutinas.</p>
+        <a href="mis_usuarios.php" class="btn btn-blue mt-2">Ver Usuarios</a>
       </div>
     </div>
 

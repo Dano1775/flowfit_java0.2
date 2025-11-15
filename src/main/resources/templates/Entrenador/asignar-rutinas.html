@@ -9,15 +9,21 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" th:href="@{/css/Entrenador/entrenador-dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/flowfit-base.css}">
+    <link rel="stylesheet" th:href="@{/css/flowfit-entrenador.css}">
 </head>
 <body>
+    <!-- Desktop Toggle Button -->
+    <button type="button" class="btn-toggle-desktop" id="desktopToggle" onclick="toggleSidebar()">
+        <i class="bi bi-chevron-left"></i>
+    </button>
+
     <!-- Mobile Toggle -->
     <div class="mobile-toggle d-md-none" onclick="toggleSidebar()">
         <i class="bi bi-list"></i>
@@ -27,123 +33,123 @@
     <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar -->
-    <nav class="sidebar-flowfit" id="sidebar">
-        <!-- Sidebar Header -->
-        <div class="sidebar-header">
-            <img th:src="@{/assets/logo_flowfit_usuario.png}" alt="FlowFit" class="sidebar-logo">
-            <div class="sidebar-brand">FlowFit</div>
-            <div class="sidebar-role">Entrenador</div>
-        </div>
+    <nav class="sidebar-base sidebar-entrenador d-flex flex-column" id="sidebar">
+        <a th:href="@{/entrenador/dashboard}" class="navbar-brand">
+            <img src="/assets/logo_flowfit.png" alt="FlowFit" height="40" class="logo-flowfit">
+            <span class="brand-text">FlowFit</span>
+        </a>
 
         <!-- Navigation Menu -->
-        <ul class="sidebar-nav list-unstyled">
+        <ul class="nav-menu list-unstyled flex-grow-1">
             <li class="nav-item">
-                <a th:href="@{/entrenador/dashboard}" class="nav-link-flowfit">
+                <a th:href="@{/entrenador/dashboard}" class="nav-link-entrenador">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a th:href="@{/entrenador/rutinas}" class="nav-link-flowfit">
+                <a th:href="@{/entrenador/rutinas}" class="nav-link-entrenador">
                     <i class="bi bi-journal-text"></i>
                     <span>Mis Rutinas</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a th:href="@{/entrenador/rutinas/crear}" class="nav-link-flowfit">
+                <a th:href="@{/entrenador/rutinas/crear}" class="nav-link-entrenador">
                     <i class="bi bi-plus-circle"></i>
                     <span>Crear Rutina</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a th:href="@{/entrenador/asignar-rutinas}" class="nav-link-flowfit active">
+                <a th:href="@{/entrenador/asignar-rutinas}" class="nav-link-entrenador active">
                     <i class="bi bi-person-check"></i>
                     <span>Asignar Rutinas</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a th:href="@{/entrenador/ejercicios}" class="nav-link-flowfit">
+                <a th:href="@{/entrenador/ejercicios}" class="nav-link-entrenador">
                     <i class="bi bi-activity"></i>
                     <span>Ejercicios</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a th:href="@{/entrenador/historial-asignaciones}" class="nav-link-flowfit">
-                    <i class="bi bi-clock-history"></i>
-                    <span>Historial</span>
+                <a th:href="@{/entrenador/mis-usuarios}" class="nav-link-entrenador">
+                    <i class="bi bi-people"></i>
+                    <span>Mis Usuarios</span>
                 </a>
             </li>
         </ul>
 
-        <!-- Profile Section -->
-        <div class="sidebar-profile">
+        <!-- Sidebar Footer - Profile Section -->
+        <div class="sidebar-footer">
             <div class="profile-info">
-                <img th:src="@{/assets/perfil_default.png}" alt="Perfil" class="profile-avatar">
+                <img src="/assets/perfil_default.png" alt="Perfil" class="profile-avatar">
                 <div class="profile-details">
-                    <h6 th:text="${entrenador.nombre}">Nombre del Entrenador</h6>
-                    <small th:text="${entrenador.correo}">correo@entrenador.com</small>
+                    <h6 class="profile-name" th:text="${entrenador?.nombre ?: 'Entrenador'}">Nombre</h6>
+                    <small class="profile-email" th:text="${entrenador?.correo ?: 'correo@example.com'}">Email</small>
                 </div>
             </div>
             <a th:href="@{/logout}" class="btn-logout">
-                <i class="bi bi-box-arrow-right me-1"></i>
-                Cerrar Sesión
+                <i class="bi bi-box-arrow-right"></i>
             </a>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="main-content" id="mainContent">
+    <main class="main-content-base" id="mainContent">
         <!-- Page Header -->
-        <div class="page-header fade-in-up">
-            <h1 class="page-title">
-                <i class="bi bi-person-check me-2"></i>
-                Asignar Rutinas a Usuarios
-            </h1>
-            <p class="page-subtitle">
-                Asigna tus rutinas personalizadas a usuarios específicos para comenzar su entrenamiento
-            </p>
+        <div class="page-header-entrenador fade-in-up">
+            <div>
+                <h1 class="page-title-entrenador">
+                    <i class="bi bi-person-check me-2"></i>
+                    Asignar Rutinas
+                </h1>
+                <p class="page-subtitle-entrenador">
+                    Asigna tus rutinas personalizadas a usuarios específicos
+                </p>
+            </div>
         </div>
 
         <!-- Success/Error Messages -->
-        <div th:if="${successMessage}" class="alert-flowfit alert-success-flowfit fade-in-up">
+        <div th:if="${successMessage}" class="alert alert-success fade-in-up" role="alert" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981; border-radius: 12px;">
             <i class="bi bi-check-circle me-2"></i>
             <span th:text="${successMessage}"></span>
         </div>
 
-        <div th:if="${errorMessage}" class="alert-flowfit alert-error-flowfit fade-in-up">
+        <div th:if="${errorMessage}" class="alert alert-danger fade-in-up" role="alert" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 12px;">
             <i class="bi bi-exclamation-circle me-2"></i>
             <span th:text="${errorMessage}"></span>
         </div>
 
+        <!-- Main Content Grid -->
         <div class="row g-4 fade-in-up">
-            <!-- Asignar Nueva Rutina -->
+            <!-- Nueva Asignación Card -->
             <div class="col-lg-6">
-                <div class="card-flowfit h-100">
-                    <div class="card-header">
-                        <h4 class="mb-0">
+                <div class="glass-card-entrenador h-100">
+                    <div class="card-header-entrenador border-bottom" style="border-color: rgba(59, 130, 246, 0.2);">
+                        <h4 class="mb-0" style="color: #3b82f6;">
                             <i class="bi bi-plus-circle me-2"></i>
                             Nueva Asignación
                         </h4>
                     </div>
                     <div class="card-body">
-                        <div th:if="${#lists.isEmpty(rutinas) or #lists.isEmpty(usuarios)}" class="text-center py-4">
-                            <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
-                            <h5 class="mt-2 text-muted">No se puede asignar</h5>
-                            <p class="text-muted mb-3">
+                        <div th:if="${#lists.isEmpty(rutinas) or #lists.isEmpty(usuarios)}" class="text-center py-5">
+                            <i class="bi bi-exclamation-triangle" style="font-size: 2.5rem; color: #f59e0b;"></i>
+                            <h5 class="mt-3 text-muted">No se puede asignar</h5>
+                            <p class="text-muted small mb-3">
                                 <span th:if="${#lists.isEmpty(rutinas)}">No tienes rutinas creadas. </span>
                                 <span th:if="${#lists.isEmpty(usuarios)}">No hay usuarios registrados. </span>
                             </p>
-                            <a th:if="${#lists.isEmpty(rutinas)}" th:href="@{/entrenador/rutinas/crear}" class="btn-flowfit">
-                                <i class="bi bi-plus-circle"></i>
+                            <a th:if="${#lists.isEmpty(rutinas)}" th:href="@{/entrenador/rutinas/crear}" class="btn-entrenador-primary btn-sm">
+                                <i class="bi bi-plus-circle me-1"></i>
                                 Crear Primera Rutina
                             </a>
                         </div>
 
                         <form th:if="${!#lists.isEmpty(rutinas) and !#lists.isEmpty(usuarios)}" 
-                              method="post" th:action="@{/entrenador/asignar-rutina}">
+                              method="post" th:action="@{/entrenador/asignar-rutina}" class="form-entrenador">
                             <div class="mb-3">
-                                <label class="form-label-flowfit">Seleccionar Rutina *</label>
-                                <select name="rutinaId" class="form-control form-control-flowfit" required>
+                                <label class="form-label-entrenador">Seleccionar Rutina <span style="color: #ef4444;">*</span></label>
+                                <select name="rutinaId" class="form-control-entrenador" required>
                                     <option value="">-- Selecciona una rutina --</option>
                                     <option th:each="rutina : ${rutinas}" 
                                             th:value="${rutina.id}" 
@@ -154,8 +160,8 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label-flowfit">Seleccionar Usuario *</label>
-                                <select name="usuarioId" class="form-control form-control-flowfit" required>
+                                <label class="form-label-entrenador">Seleccionar Usuario <span style="color: #ef4444;">*</span></label>
+                                <select name="usuarioId" class="form-control-entrenador" required>
                                     <option value="">-- Selecciona un usuario --</option>
                                     <option th:each="usuario : ${usuarios}" 
                                             th:value="${usuario.id}" 
@@ -165,8 +171,8 @@
                                 </select>
                             </div>
 
-                            <button type="submit" class="btn-flowfit w-100">
-                                <i class="bi bi-person-plus"></i>
+                            <button type="submit" class="btn-entrenador-primary w-100">
+                                <i class="bi bi-person-plus me-2"></i>
                                 Asignar Rutina
                             </button>
                         </form>
@@ -174,46 +180,44 @@
                 </div>
             </div>
 
-            <!-- Lista de Rutinas Disponibles -->
+            <!-- Mis Rutinas Disponibles -->
             <div class="col-lg-6">
-                <div class="card-flowfit h-100">
-                    <div class="card-header">
-                        <h4 class="mb-0">
+                <div class="glass-card-entrenador h-100">
+                    <div class="card-header-entrenador border-bottom" style="border-color: rgba(59, 130, 246, 0.2);">
+                        <h4 class="mb-0" style="color: #3b82f6;">
                             <i class="bi bi-journal-text me-2"></i>
                             Mis Rutinas Disponibles
                         </h4>
                     </div>
-                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                        <div th:if="${#lists.isEmpty(rutinas)}" class="text-center py-4">
-                            <i class="bi bi-journal-x text-muted" style="font-size: 2rem;"></i>
-                            <p class="text-muted mt-2">No tienes rutinas creadas</p>
+                    <div class="card-body" style="max-height: 450px; overflow-y: auto;">
+                        <div th:if="${#lists.isEmpty(rutinas)}" class="text-center py-5">
+                            <i class="bi bi-journal-x text-muted" style="font-size: 2.5rem;"></i>
+                            <p class="text-muted mt-3">No tienes rutinas creadas</p>
                         </div>
 
-                        <div th:if="${!#lists.isEmpty(rutinas)}" class="rutinas-list">
-                            <div class="rutina-item" th:each="rutina : ${rutinas}">
+                        <div th:if="${!#lists.isEmpty(rutinas)}" class="d-flex flex-column gap-2">
+                            <div class="activity-card-entrenador" th:each="rutina : ${rutinas}">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div class="flex-grow-1">
-                                        <h6 class="mb-1" th:text="${rutina.nombre}">Nombre de la Rutina</h6>
-                                        <p class="text-muted small mb-1" th:text="${rutina.descripcion ?: 'Sin descripción'}">
-                                            Descripción de la rutina...
+                                        <h6 class="mb-1 text-white" th:text="${rutina.nombre}">Nombre Rutina</h6>
+                                        <p class="text-muted small mb-2" th:text="${rutina.descripcion ?: 'Sin descripción'}">
+                                            Descripción...
                                         </p>
                                         <div class="d-flex gap-2 flex-wrap">
-                                            <span class="badge small" style="background: rgba(74, 222, 128, 0.2); color: var(--flowfit-primary);">
+                                            <span class="badge-entrenador-sm" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">
                                                 <i class="bi bi-activity me-1"></i>
                                                 <span th:text="${rutina.ejercicios?.size() ?: 0}">0</span> ejercicios
                                             </span>
-                                            <span class="badge small" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">
+                                            <span class="badge-entrenador-sm" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">
                                                 <i class="bi bi-calendar me-1"></i>
                                                 <span th:text="${#temporals.format(rutina.fechaCreacion, 'dd/MM/yy')}">01/01/24</span>
                                             </span>
                                         </div>
                                     </div>
-                                    <div class="ms-2">
-                                        <a th:href="@{/entrenador/rutinas/{id}(id=${rutina.id})}" 
-                                           class="btn btn-sm btn-flowfit-outline">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                    </div>
+                                    <a th:href="@{/entrenador/rutinas/{id}(id=${rutina.id})}" 
+                                       class="btn-entrenador-outline btn-sm ms-2">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -225,55 +229,63 @@
         <!-- Asignaciones Recientes -->
         <div class="row mt-4 fade-in-up">
             <div class="col-12">
-                <div class="card-flowfit">
-                    <div class="card-header">
+                <div class="glass-card-entrenador">
+                    <div class="card-header-entrenador border-bottom" style="border-color: rgba(59, 130, 246, 0.2);">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h4 class="mb-0">
+                            <h4 class="mb-0" style="color: #3b82f6;">
                                 <i class="bi bi-clock-history me-2"></i>
                                 Asignaciones Recientes
                             </h4>
-                            <a th:href="@{/entrenador/historial-asignaciones}" class="btn-flowfit-outline btn-sm">
-                                <i class="bi bi-arrow-right"></i>
-                                Ver Todo el Historial
-                            </a>
+                            <small class="text-muted" th:if="${asignacionesRecientes != null && !asignacionesRecientes.isEmpty()}"
+                                   th:text="'Total: ' + ${asignacionesRecientes.size()}">Total: 0</small>
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-flowfit">
+                        <div th:if="${#lists.isEmpty(asignacionesRecientes)}" class="text-center py-5">
+                            <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+                            <p class="text-muted mt-3">No hay asignaciones recientes</p>
+                        </div>
+
+                        <div th:if="${!#lists.isEmpty(asignacionesRecientes)}" class="table-responsive">
+                            <table class="table table-hover mb-0">
                                 <thead>
-                                    <tr>
-                                        <th>Usuario</th>
-                                        <th>Rutina</th>
-                                        <th>Fecha Asignación</th>
-                                        <th>Estado</th>
-                                        <th class="text-center">Acciones</th>
+                                    <tr style="border-bottom: 1px solid rgba(59, 130, 246, 0.2);">
+                                        <th style="color: rgba(255,255,255,0.7);">
+                                            <i class="bi bi-person me-2"></i>Usuario
+                                        </th>
+                                        <th style="color: rgba(255,255,255,0.7);">
+                                            <i class="bi bi-journal me-2"></i>Rutina
+                                        </th>
+                                        <th style="color: rgba(255,255,255,0.7);">
+                                            <i class="bi bi-calendar me-2"></i>Fecha
+                                        </th>
+                                        <th style="color: rgba(255,255,255,0.7);">Estado</th>
+                                        <th class="text-center" style="color: rgba(255,255,255,0.7);">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:if="${#lists.isEmpty(asignacionesRecientes)}">
-                                        <td colspan="5" class="text-center text-muted py-4">
-                                            <i class="bi bi-inbox me-1"></i>
-                                            No hay asignaciones recientes
-                                        </td>
-                                    </tr>
-                                    <tr th:each="asignacion : ${asignacionesRecientes}">
+                                    <tr th:each="asignacion : ${asignacionesRecientes}" style="border-bottom: 1px solid rgba(59, 130, 246, 0.1);">
                                         <td>
-                                            <div>
-                                                <strong th:text="${asignacion.usuario?.nombre}">Nombre Usuario</strong>
-                                                <br>
-                                                <small class="text-muted" th:text="${asignacion.usuario?.correo}">usuario@email.com</small>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm me-2" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center;">
+                                                    <i class="bi bi-person text-primary"></i>
+                                                </div>
+                                                <div>
+                                                    <strong th:text="${asignacion.usuario?.nombre}">Usuario</strong>
+                                                    <br>
+                                                    <small class="text-muted" th:text="${asignacion.usuario?.correo}">email</small>
+                                                </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <strong th:text="${asignacion.rutina?.nombre}">Nombre de la Rutina</strong>
+                                            <strong th:text="${asignacion.rutina?.nombre}">Rutina</strong>
                                         </td>
                                         <td>
                                             <span th:text="${#temporals.format(asignacion.fechaAsignacion, 'dd/MM/yyyy')}">01/01/2024</span>
                                         </td>
                                         <td>
-                                            <span th:class="'badge ' + (${asignacion.estado.name()} == 'ACTIVA' ? 'text-bg-success' : 
-                                                           (${asignacion.estado.name()} == 'COMPLETADA' ? 'text-bg-primary' : 'text-bg-secondary'))"
+                                            <span class="badge" 
+                                                  th:class="${asignacion.estado.name() == 'ACTIVA' ? 'bg-success' : (${asignacion.estado.name() == 'COMPLETADA' ? 'bg-info' : 'bg-secondary'})}"
                                                   th:text="${asignacion.estado.name()}">
                                                 ESTADO
                                             </span>
@@ -281,10 +293,10 @@
                                         <td class="text-center">
                                             <div class="btn-group btn-group-sm">
                                                 <a th:href="@{/entrenador/rutinas/{id}(id=${asignacion.rutinaId})}" 
-                                                   class="btn btn-flowfit-outline">
+                                                   class="btn btn-outline-info btn-sm">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-danger-flowfit"
+                                                <button type="button" class="btn btn-outline-danger btn-sm"
                                                         th:attr="onclick=|confirmarDesasignacion(${asignacion.rutinaId}, ${asignacion.usuarioId}, '${asignacion.usuario?.nombre}', '${asignacion.rutina?.nombre}')|">
                                                     <i class="bi bi-x"></i>
                                                 </button>
@@ -300,32 +312,32 @@
         </div>
     </main>
 
-    <!-- Modal de Confirmación de Desasignación -->
+    <!-- Modal de Confirmación -->
     <div class="modal fade" id="desasignarModal" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content" style="background: var(--flowfit-glass); backdrop-filter: blur(20px); border: 1px solid var(--flowfit-glass-border); border-radius: 20px;">
-                <div class="modal-header" style="border-bottom: 1px solid var(--flowfit-glass-border);">
-                    <h5 class="modal-title text-light">
-                        <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+            <div class="modal-content" style="background: linear-gradient(135deg, rgba(20, 50, 120, 0.8) 0%, rgba(30, 64, 175, 0.8) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 20px;">
+                <div class="modal-header" style="border-bottom: 1px solid rgba(59, 130, 246, 0.2);">
+                    <h5 class="modal-title text-white">
+                        <i class="bi bi-exclamation-triangle me-2" style="color: #f59e0b;"></i>
                         Confirmar Desasignación
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body text-light">
-                    <p>¿Estás seguro de que deseas desasignar la rutina <strong id="rutinaDesasignarNombre"></strong> del usuario <strong id="usuarioDesasignarNombre"></strong>?</p>
-                    <p class="text-warning small mb-0">
+                <div class="modal-body text-white">
+                    <p>¿Deseas desasignar la rutina <strong id="rutinaDesasignarNombre" style="color: #3b82f6;"></strong> del usuario <strong id="usuarioDesasignarNombre" style="color: #3b82f6;"></strong>?</p>
+                    <p class="text-warning small mb-0" style="background: rgba(245, 158, 11, 0.1); padding: 10px; border-radius: 8px; border-left: 3px solid #f59e0b;">
                         <i class="bi bi-info-circle me-1"></i>
-                        Esta acción no se puede deshacer y el usuario perderá acceso a esta rutina.
+                        Esta acción no se puede deshacer.
                     </p>
                 </div>
-                <div class="modal-footer" style="border-top: 1px solid var(--flowfit-glass-border);">
-                    <button type="button" class="btn-flowfit-outline" data-bs-dismiss="modal">Cancelar</button>
+                <div class="modal-footer" style="border-top: 1px solid rgba(59, 130, 246, 0.2);">
+                    <button type="button" class="btn-entrenador-outline" data-bs-dismiss="modal">Cancelar</button>
                     <form id="desasignarForm" method="post" th:action="@{/entrenador/desasignar-rutina}" style="display: inline;">
                         <input type="hidden" name="rutinaId" id="rutinaIdDesasignar">
                         <input type="hidden" name="usuarioId" id="usuarioIdDesasignar">
-                        <button type="submit" class="btn-danger-flowfit">
+                        <button type="submit" class="btn btn-danger">
                             <i class="bi bi-x me-1"></i>
-                            Desasignar Rutina
+                            Desasignar
                         </button>
                     </form>
                 </div>
@@ -338,7 +350,7 @@
     
     <!-- Custom JavaScript -->
     <script>
-        // Sidebar Toggle Function
+        // Sidebar Toggle
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.querySelector('.sidebar-overlay');
@@ -347,29 +359,31 @@
             sidebar.classList.toggle('active');
             overlay.classList.toggle('active');
             
-            if (window.innerWidth >= 768) {
+            if (window.innerWidth >= 992) {
                 mainContent.classList.toggle('sidebar-open');
             }
         }
 
-        // Auto-open sidebar on desktop
+        // Handle Window Resize
         function handleResize() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.querySelector('.sidebar-overlay');
             const mainContent = document.getElementById('mainContent');
+            const desktopToggle = document.getElementById('desktopToggle');
             
-            if (window.innerWidth >= 768) {
+            if (window.innerWidth >= 992) {
                 sidebar.classList.add('active');
                 mainContent.classList.add('sidebar-open');
                 overlay.classList.remove('active');
+                desktopToggle.style.display = 'flex';
             } else {
                 sidebar.classList.remove('active');
                 mainContent.classList.remove('sidebar-open');
-                overlay.classList.remove('active');
+                desktopToggle.style.display = 'none';
             }
         }
 
-        // Confirmar desasignación
+        // Confirm Desasignación
         function confirmarDesasignacion(rutinaId, usuarioId, usuarioNombre, rutinaNombre) {
             document.getElementById('usuarioDesasignarNombre').textContent = usuarioNombre;
             document.getElementById('rutinaDesasignarNombre').textContent = rutinaNombre;
@@ -385,7 +399,7 @@
             handleResize();
             
             // Auto-hide alerts after 5 seconds
-            const alerts = document.querySelectorAll('.alert-flowfit');
+            const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {
                 setTimeout(() => {
                     alert.style.opacity = '0';
@@ -396,30 +410,50 @@
 
         // Handle window resize
         window.addEventListener('resize', handleResize);
+
+        // Escape key to close sidebar
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.querySelector('.sidebar-overlay');
+                if (sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+            }
+        });
     </script>
 
     <style>
-        .rutina-item {
+        .badge-entrenador-sm {
+            font-size: 0.7rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .activity-card-entrenador {
             padding: 1rem;
             margin-bottom: 0.75rem;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px solid rgba(59, 130, 246, 0.15);
             border-radius: 12px;
-            border: 1px solid var(--flowfit-glass-border);
-            transition: var(--flowfit-transition);
+            transition: all 0.3s ease;
         }
 
-        .rutina-item:hover {
-            background: rgba(74, 222, 128, 0.1);
-            border-color: var(--flowfit-primary);
+        .activity-card-entrenador:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
         }
 
-        .rutina-item:last-child {
-            margin-bottom: 0;
+        .table-hover tbody tr:hover {
+            background: rgba(59, 130, 246, 0.05) !important;
         }
 
-        .badge.small {
-            font-size: 0.65rem;
-            padding: 0.25rem 0.5rem;
+        .table tbody td {
+            vertical-align: middle;
+            color: rgba(255,255,255,0.9);
+            padding: 0.75rem;
         }
     </style>
 </body>

@@ -485,6 +485,16 @@
     box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
+.badge-entrenador-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
 /* Mejorar scrollbar */
 .sidebar-base::-webkit-scrollbar {
     width: 6px;
