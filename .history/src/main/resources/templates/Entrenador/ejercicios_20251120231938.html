@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicios - FlowFit</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- FlowFit CSS System -->
+  <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
+  <link th:href="@{/css/flowfit-entrenador.css}" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Desktop Toggle (for collapse) -->
+  <button class="sidebar-collapse-btn d-none d-md-flex" id="sidebarCollapseBtn" title="Contraer/Expandir Sidebar">
+    <i class="bi bi-chevron-left"></i>
+  </button>
+
+  <!-- Mobile Toggle -->
+  <button class="sidebar-toggle-base sidebar-toggle-entrenador d-md-none" id="sidebarToggle">
+    <i class="bi bi-list fs-4"></i>
+  </button>
+
+  <!-- Sidebar Overlay for Mobile -->
+  <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
+
+  <!-- FlowFit Sidebar -->
+  <nav class="sidebar-base sidebar-entrenador d-flex flex-column" id="sidebar">
+    <!-- Brand -->
+    <a th:href="@{/entrenador/dashboard}" class="navbar-brand d-flex align-items-center text-decoration-none">
+      <img src="/assets/logo_flowfit.png" alt="FlowFit Entrenador" height="40" class="me-3 logo-flowfit">
+      <span class="brand-text">FlowFit</span>
+    </a>
+
+    <!-- Navigation -->
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a th:href="@{/entrenador/dashboard}" class="nav-link-base nav-link-entrenador" title="Dashboard">
+          <i class="bi bi-speedometer2 me-3"></i> 
+          <span class="nav-text">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/rutinas}" class="nav-link-base nav-link-entrenador" title="Rutinas">
+          <i class="bi bi-clipboard-data me-3"></i> 
+          <span class="nav-text">Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/ejercicios}" class="nav-link-base nav-link-entrenador active" title="Ejercicios">
+          <i class="bi bi-activity me-3"></i> 
+          <span class="nav-text">Ejercicios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/mis-usuarios}" class="nav-link-base nav-link-entrenador" title="Mis Usuarios">
+          <i class="bi bi-people me-3"></i> 
+          <span class="nav-text">Mis Usuarios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/asignar-rutinas}" class="nav-link-base nav-link-entrenador" title="Asignar Rutinas">
+          <i class="bi bi-person-check me-3"></i> 
+          <span class="nav-text">Asignar Rutinas</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Profile Section -->
+    <div class="border-top pt-3 mt-auto">
+      <div class="dropdown profile-dropdown-base">
+        <div class="profile-icon-base d-flex align-items-center w-100" id="profileDropdownEntrenador" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-base me-2" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+          <div class="flex-grow-1">
+            <div class="small fw-bold text-white" th:text="${entrenador != null ? #strings.substringBefore(entrenador.nombre, ' ') : 'Entrenador'}">Entrenador</div>
+            <div class="small text-muted-flowfit">Entrenador</div>
+          </div>
+          <i class="bi bi-chevron-down text-white"></i>
+        </div>
+        <ul class="dropdown-menu" aria-labelledby="profileDropdownEntrenador">
+          <li><a class="dropdown-item" th:href="@{/entrenador/perfil}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <!-- Main Content -->
+  <main class="main-content-base fade-in-up">
+    <div class="container-fluid">
+      <!-- Welcome Header - Mejorado -->
+      <div class="welcome-header-enhanced mb-4">
+        <div class="row align-items-center">
+          <div class="col-lg-8 mb-3 mb-lg-0">
+            <div class="d-flex align-items-center">
+              <div class="user-avatar-enhanced me-3">
+                <img src="/assets/perfil_default.png" alt="Avatar" class="rounded-circle profile-image-base">
+                <div class="status-indicator"></div>
+              </div>
+              <div class="flex-grow-1">
+                <h1 class="display-6 mb-2 text-white fw-bold">
+                  <i class="bi bi-activity me-2"></i>Ejercicios 💪
+                </h1>
+                <p class="lead mb-2 text-white-50">Gestiona y crea ejercicios personalizados para tus rutinas</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="d-flex flex-column gap-2">
+              <a th:href="@{/entrenador/ejercicios/crear}" class="btn-flowfit-primary btn-entrenador-primary btn-enhanced text-decoration-none">
+                <i class="bi bi-plus-circle me-2"></i>
+                <span>Crear Ejercicio</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success/Error Messages -->
+      <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+
+      <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="mb-4">
+        <div class="input-group">
+          <span class="input-group-text" style="background: rgba(30, 41, 59, 0.5); border: 1.5px solid rgba(59, 130, 246, 0.3); border-right: none;">
+            <i class="bi bi-search text-primary"></i>
+          </span>
+          <input type="text" 
+                 id="searchInput" 
+                 class="form-control" 
+                 placeholder="Buscar ejercicios por nombre o descripción..." 
+                 style="background: rgba(30, 41, 59, 0.5); border: 1.5px solid rgba(59, 130, 246, 0.3); border-left: none; color: rgba(255, 255, 255, 0.9);">
+        </div>
+      </div>
+
+      <!-- Tabs for Ejercicios -->
+      <div class="card-base card-entrenador">
+        <div class="card-header">
+          <ul class="nav nav-pills mb-0" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="globales-tab" data-bs-toggle="pill" data-bs-target="#ejercicios-globales" type="button" role="tab" aria-controls="ejercicios-globales" aria-selected="true" style="color: rgba(255, 255, 255, 0.9);">
+                <i class="bi bi-globe me-2"></i>
+                Ejercicios Globales
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="personales-tab" data-bs-toggle="pill" data-bs-target="#mis-ejercicios" type="button" role="tab" aria-controls="mis-ejercicios" aria-selected="false" style="color: rgba(255, 255, 255, 0.7);">
+                <i class="bi bi-person me-2"></i>
+                Mis Ejercicios
+              </button>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body">
+          <div class="tab-content">
+            <!-- Ejercicios Globales -->
+            <div class="tab-pane fade show active" id="ejercicios-globales" role="tabpanel" aria-labelledby="globales-tab">
+              <div class="row g-4">
+                <div th:each="ejercicio : ${ejerciciosGlobales}" class="col-md-6 col-xl-4">
+                  <div class="card-base card-entrenador h-100">
+                    <div class="card-body">
+                      <div class="mb-3" style="height: 200px; background: rgba(59, 130, 246, 0.1); border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                        <img th:if="${ejercicio.imagen}" 
+                             th:src="@{'/ejercicio_image_uploads/' + ${ejercicio.imagen}}"
+                             alt="Imagen del ejercicio" 
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                        <img th:unless="${ejercicio.imagen}"
+                             th:src="@{/assets/ejercicio-default.png}"
+                             alt="Imagen por defecto"
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                      </div>
+                      <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="text-white" th:text="${ejercicio.nombre}">Nombre del Ejercicio</h5>
+                        <span class="badge-entrenador-success">
+                          <i class="bi bi-globe"></i>
+                        </span>
+                      </div>
+                      <p class="text-white" style="opacity: 0.8; font-size: 0.9rem;" th:text="${ejercicio.descripcion}">Descripción del ejercicio...</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mis Ejercicios -->
+            <div class="tab-pane fade" id="mis-ejercicios" role="tabpanel" aria-labelledby="personales-tab">
+              <div class="text-end mb-4">
+                <a th:href="@{/entrenador/ejercicios/crear}" class="btn-flowfit-primary btn-entrenador-primary text-decoration-none">
+                  <i class="bi bi-plus-circle me-2"></i>
+                  Nuevo Ejercicio
+                </a>
+              </div>
+
+              <div class="row g-4">
+                <div th:if="${#lists.isEmpty(ejerciciosPersonales)}" class="col-12">
+                  <div class="text-center py-5">
+                    <i class="bi bi-activity text-muted" style="font-size: 3rem; opacity: 0.5;"></i>
+                    <h4 class="mt-3 text-white">No tienes ejercicios personalizados</h4>
+                    <p class="text-white" style="opacity: 0.7;">Comienza creando tu primer ejercicio personalizado</p>
+                    <a th:href="@{/entrenador/ejercicios/crear}" class="btn-flowfit-primary btn-entrenador-primary mt-3 text-decoration-none">
+                      <i class="bi bi-plus-circle me-2"></i>
+                      Crear Mi Primer Ejercicio
+                    </a>
+                  </div>
+                </div>
+                            </div>
+
+                            <div th:each="ejercicio : ${ejerciciosPersonales}" class="col-md-6 col-xl-4">
+                                <div class="ejercicio-card">
+                                    <div class="ejercicio-header">
+                                        <img th:if="${ejercicio.imagen}" 
+                                             th:src="@{'/ejercicio_image_uploads/' + ${ejercicio.imagen}}"
+                                             alt="Imagen del ejercicio" 
+                                             class="ejercicio-imagen">
+                                        <img th:unless="${ejercicio.imagen}"
+                                             th:src="@{/assets/ejercicio-default.png}"
+                                             alt="Imagen por defecto"
+                                             class="ejercicio-imagen">
+                                        <div class="ejercicio-actions">
+                                            <button class="btn btn-sm btn-edit" 
+                                                    th:onclick="'editarEjercicio(' + ${ejercicio.id} + ')'">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-delete" 
+                                                    th:onclick="'confirmarEliminar(' + ${ejercicio.id} + ', \'' + ${ejercicio.nombre} + '\')'">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="ejercicio-body">
+                                        <h5 th:text="${ejercicio.nombre}">Nombre del Ejercicio</h5>
+                                        <p class="text-muted" th:text="${ejercicio.descripcion}">Descripción del ejercicio...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Crear Ejercicio -->
+    <div class="modal fade" id="crearEjercicioModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background: var(--flowfit-glass); backdrop-filter: blur(20px); border: 1px solid var(--flowfit-glass-border);">
+                <div class="modal-header">
+                    <h5 class="modal-title text-light">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Crear Nuevo Ejercicio
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/entrenador/ejercicios/crear}" method="post" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label text-light">Nombre del Ejercicio *</label>
+                            <input type="text" name="nombre" class="form-control form-control-flowfit" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light">Descripción *</label>
+                            <textarea name="descripcion" class="form-control form-control-flowfit" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light">Imagen</label>
+                            <input type="file" name="imagen" class="form-control form-control-flowfit" accept="image/*">
+                            <small class="text-muted d-block mt-1">Formatos aceptados: JPG, PNG. Máx. 5MB</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-flowfit-outline" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn-flowfit">Crear Ejercicio</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Eliminar Ejercicio -->
+    <div class="modal fade" id="eliminarModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background: var(--flowfit-glass); backdrop-filter: blur(20px); border: 1px solid var(--flowfit-glass-border);">
+                <div class="modal-header">
+                    <h5 class="modal-title text-light">
+                        <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                        Confirmar Eliminación
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-light">
+                    <p>¿Estás seguro de que deseas eliminar el ejercicio <strong id="ejercicioEliminarNombre"></strong>?</p>
+                    <p class="text-warning small mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Esta acción no se puede deshacer.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-flowfit-outline" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="eliminarForm" method="post" style="display: inline;">
+                        <button type="submit" class="btn-danger-flowfit">
+                            <i class="bi bi-trash me-1"></i>
+                            Eliminar Ejercicio
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- FlowFit Ejercicios Script -->
+    <script>
+      // Mobile Sidebar Toggle
+      document.addEventListener('DOMContentLoaded', function() {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+        const mainContent = document.querySelector('.main-content-base');
+
+        // Mobile toggle
+        function toggleSidebar() {
+          sidebar.classList.toggle('show');
+          sidebarOverlay.classList.toggle('show');
+        }
+
+        function closeSidebar() {
+          sidebar.classList.remove('show');
+          sidebarOverlay.classList.remove('show');
+        }
+
+        sidebarToggle?.addEventListener('click', toggleSidebar);
+        sidebarOverlay?.addEventListener('click', closeSidebar);
+
+        // Desktop collapse toggle
+        sidebarCollapseBtn?.addEventListener('click', function() {
+          sidebar.classList.toggle('collapsed');
+          mainContent.classList.toggle('sidebar-collapsed');
+          
+          const icon = this.querySelector('i');
+          if (sidebar.classList.contains('collapsed')) {
+            icon.classList.remove('bi-chevron-left');
+            icon.classList.add('bi-chevron-right');
+            this.classList.add('collapsed');
+          } else {
+            icon.classList.remove('bi-chevron-right');
+            icon.classList.add('bi-chevron-left');
+            this.classList.remove('collapsed');
+          }
+        });
+
+        // Close sidebar on escape key
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') closeSidebar();
+        });
+
+        // Highlight active navigation
+        const currentPath = window.location.pathname;
+        const navLinks = document.querySelectorAll('.nav-link-entrenador');
+        
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+          }
+        });
+
+        console.log('FlowFit Ejercicios page loaded successfully! 🔥');
+      });
+
+      // Confirmar eliminación
+      function confirmarEliminar(ejercicioId, ejercicioNombre) {
+        if (confirm(`¿Estás seguro de que deseas eliminar el ejercicio "${ejercicioNombre}"?`)) {
+          window.location.href = `/entrenador/ejercicios/${ejercicioId}/eliminar`;
+        }
+      }
+
+      // Search functionality
+      const searchInput = document.getElementById('searchInput');
+      searchInput?.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        
+        // Get all exercise cards
+        const ejercicioCards = document.querySelectorAll('.col-md-6.col-xl-4');
+        
+        ejercicioCards.forEach(card => {
+          const nombre = card.querySelector('h5')?.textContent.toLowerCase() || '';
+          const descripcion = card.querySelector('p')?.textContent.toLowerCase() || '';
+          
+          // Show/hide based on search
+          if (nombre.includes(searchTerm) || descripcion.includes(searchTerm)) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    </script>
+  </main>
+</body>
+</html>
