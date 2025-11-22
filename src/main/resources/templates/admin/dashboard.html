@@ -85,8 +85,6 @@
           <i class="bi bi-chevron-down text-white"></i>
         </div>
         <ul class="dropdown-menu" aria-labelledby="profileDropdownAdmin">
-          <li><a class="dropdown-item" th:href="@{/admin/perfil}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
-          <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
         </ul>
       </div>
@@ -465,7 +463,7 @@
           <div class="row g-3">
             <!-- Registro Masivo CSV -->
             <div class="col-lg-3 col-md-6">
-              <form id="registroMasivoForm" action="/admin/registro_masivo" method="post" enctype="multipart/form-data" class="text-center border rounded-3 p-3" style="background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.3) !important; height: 100%;">
+              <form id="registroMasivoForm" action="/admin/registro_masivo" method="post" enctype="multipart/form-data" class="text-center border rounded-3 p-3" style="background: var(--flowfit-glass-bg); border-color: rgba(220, 38, 38, 0.3) !important; height: 100%;">
                 <h6 class="text-white mb-3">
                   <i class="bi bi-upload fs-3 d-block mb-2 text-danger"></i>
                   Registro Masivo
@@ -478,7 +476,7 @@
                   <a href="/assets/registro_masivo_template.csv" download class="btn btn-outline-light btn-admin-outline w-100 mb-2">
                     <i class="bi bi-download me-2"></i>Descargar plantilla CSV
                   </a>
-                  <button id="registroMasivoSubmit" type="submit" class="btn btn-flowfit-primary btn-admin-primary w-100">
+                  <button id="registroMasivoSubmit" type="submit" class="btn btn-flowfit-primary btn-admin-primary w-100" style="border: 1px solid rgba(220, 38, 38, 0.5);">
                     <span id="registroMasivoSubmitText"><i class="bi bi-cloud-upload me-2"></i>Subir CSV</span>
                     <span id="registroMasivoSubmitting" class="d-none"><i class="bi bi-hourglass-split me-2"></i>Subiendo...</span>
                   </button>
@@ -488,33 +486,41 @@
 
             <!-- Aprobar Usuarios -->
             <div class="col-lg-3 col-md-6">
-              <a th:href="@{/admin/usuarios-pendientes}" class="btn-flowfit-outline btn-admin-outline w-100 text-center d-flex flex-column align-items-center justify-content-center" style="padding: 24px 16px; height: 100%; min-height: 180px;">
-                <i class="bi bi-person-plus fs-3 d-block mb-2"></i> 
-                <span class="fw-bold">Aprobar Usuarios</span>
+              <a th:href="@{/admin/usuarios-pendientes}" class="w-100 text-center d-flex flex-column align-items-center justify-content-center rounded-3 p-3 text-decoration-none" style="background: var(--flowfit-glass-bg); border: 1px solid rgba(220, 38, 38, 0.3); height: 100%; min-height: 180px; transition: all 0.3s ease;">
+                <h6 class="text-white mb-3">
+                  <i class="bi bi-person-plus fs-3 d-block mb-2 text-danger"></i>
+                  Aprobar Usuarios
+                </h6>
               </a>
             </div>
 
             <!-- Gestionar Usuarios -->
             <div class="col-lg-3 col-md-6">
-              <a th:href="@{/admin/usuarios}" class="btn-flowfit-outline btn-admin-outline w-100 text-center d-flex flex-column align-items-center justify-content-center" style="padding: 24px 16px; height: 100%; min-height: 180px;">
-                <i class="bi bi-person-badge fs-3 d-block mb-2"></i> 
-                <span class="fw-bold">Gestionar Usuarios</span>
+              <a th:href="@{/admin/usuarios}" class="w-100 text-center d-flex flex-column align-items-center justify-content-center rounded-3 p-3 text-decoration-none" style="background: var(--flowfit-glass-bg); border: 1px solid rgba(220, 38, 38, 0.3); height: 100%; min-height: 180px; transition: all 0.3s ease;">
+                <h6 class="text-white mb-3">
+                  <i class="bi bi-person-badge fs-3 d-block mb-2 text-danger"></i>
+                  Gestionar Usuarios
+                </h6>
               </a>
             </div>
 
             <!-- Gestionar Ejercicios -->
             <div class="col-lg-3 col-md-6">
-              <a th:href="@{/admin/ejercicios}" class="btn-flowfit-outline btn-admin-outline w-100 text-center d-flex flex-column align-items-center justify-content-center" style="padding: 24px 16px; height: 100%; min-height: 180px;">
-                <i class="bi bi-activity fs-3 d-block mb-2"></i> 
-                <span class="fw-bold">Gestionar Ejercicios</span>
+              <a th:href="@{/admin/ejercicios}" class="w-100 text-center d-flex flex-column align-items-center justify-content-center rounded-3 p-3 text-decoration-none" style="background: var(--flowfit-glass-bg); border: 1px solid rgba(220, 38, 38, 0.3); height: 100%; min-height: 180px; transition: all 0.3s ease;">
+                <h6 class="text-white mb-3">
+                  <i class="bi bi-activity fs-3 d-block mb-2 text-danger"></i>
+                  Gestionar Ejercicios
+                </h6>
               </a>
             </div>
 
             <!-- Envío Masivo -->
             <div class="col-lg-3 col-md-6">
-              <a th:href="@{/admin/boletines}" class="btn-flowfit-outline btn-admin-outline w-100 text-center d-flex flex-column align-items-center justify-content-center" style="padding: 24px 16px; height: 100%; min-height: 180px;">
-                <i class="bi bi-send-fill fs-3 d-block mb-2"></i> 
-                <span class="fw-bold">Envío Masivo</span>
+              <a th:href="@{/admin/boletines}" class="w-100 text-center d-flex flex-column align-items-center justify-content-center rounded-3 p-3 text-decoration-none" style="background: var(--flowfit-glass-bg); border: 1px solid rgba(220, 38, 38, 0.3); height: 100%; min-height: 180px; transition: all 0.3s ease;">
+                <h6 class="text-white mb-3">
+                  <i class="bi bi-send-fill fs-3 d-block mb-2 text-danger"></i>
+                  Envío Masivo
+                </h6>
               </a>
             </div>
           </div>
