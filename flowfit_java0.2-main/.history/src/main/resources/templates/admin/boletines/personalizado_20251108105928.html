@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensaje Personalizado - FlowFit Admin</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/flowfit-base.css}">
+    <link rel="stylesheet" th:href="@{/css/flowfit-admin.css}">
+    
+    <style>
+        .preview-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            position: sticky;
+            top: 20px;
+        }
+        .preview-email {
+            background: white;
+            color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 300px;
+            font-family: Arial, sans-serif;
+        }
+        .variable-chip {
+            display: inline-block;
+            background: rgba(220, 38, 38, 0.2);
+            color: var(--admin-primary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .variable-chip:hover {
+            background: var(--admin-primary);
+            color: white;
+            transform: scale(1.05);
+        }
+        .char-counter {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+        }
+    </style>
+</head>
+<body class="bg-base">
+    <!-- Desktop Toggle (for collapse) -->
+    <button class="sidebar-collapse-btn d-none d-md-flex" id="sidebarCollapseBtn" title="Contraer/Expandir Sidebar">
+        <i class="bi bi-chevron-left"></i>
+    </button>
+
+    <!-- Mobile Toggle -->
+    <button class="sidebar-toggle-base sidebar-toggle-admin d-md-none" id="sidebarToggle">
+        <i class="bi bi-list fs-4"></i>
+    </button>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
+
+    <!-- FlowFit Sidebar -->
+    <nav class="sidebar-base sidebar-admin d-flex flex-column" id="sidebar">
+        <!-- Brand -->
+        <a th:href="@{/admin/dashboard}" class="navbar-brand d-flex align-items-center text-decoration-none">
+            <img src="/assets/logo_flowfit_admin.png" alt="FlowFit Admin" height="40" class="me-3 logo-flowfit">
+            <span class="brand-text">FlowFit</span>
+        </a>
+
+        <!-- Navigation -->
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+                <a th:href="@{/admin/dashboard}" class="nav-link-base nav-link-admin" title="Dashboard">
+                    <i class="bi bi-speedometer2 me-3"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/admin/usuarios-pendientes}" class="nav-link-base nav-link-admin" title="Usuarios Pendientes">
+                    <i class="bi bi-people me-3"></i>
+                    <span class="nav-text">Usuarios Pendientes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/admin/usuarios}" class="nav-link-base nav-link-admin" title="Gestión Usuarios">
+                    <i class="bi bi-person-badge me-3"></i>
+                    <span class="nav-text">Gestión Usuarios</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/admin/ejercicios}" class="nav-link-base nav-link-admin" title="Ejercicios">
+                    <i class="bi bi-activity me-3"></i>
+                    <span class="nav-text">Ejercicios</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/admin/boletines}" class="nav-link-base nav-link-admin active" title="Envío Masivo">
+                    <i class="bi bi-send-fill me-3"></i>
+                    <span class="nav-text">Envío Masivo</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Profile Section -->
+        <div class="border-top pt-3 mt-auto">
+            <div class="dropdown profile-dropdown-base">
+                <div class="profile-icon-base d-flex align-items-center w-100" id="profileDropdownAdmin" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-base me-2" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                    <div class="flex-grow-1">
+                        <div class="small fw-bold text-white" th:text="${usuario != null ? #strings.substringBefore(usuario.nombre, ' ') : 'Admin'}">Admin</div>
+                        <div class="small text-muted-flowfit">Administrador</div>
+                    </div>
+                    <i class="bi bi-chevron-down text-white"></i>
+                </div>
+                <ul class="dropdown-menu" aria-labelledby="profileDropdownAdmin">
+                    <li><a class="dropdown-item" th:href="@{/admin/perfil}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content-base">
+        <div class="container-fluid p-4">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="text-white mb-1">
+                        <i class="bi bi-pencil-square me-2" style="color: var(--admin-primary);"></i>
+                        Crear Mensaje Personalizado
+                    </h2>
+                    <p class="text-white-50 mb-0">Escribe tu mensaje desde cero con variables dinámicas</p>
+                </div>
+                <a href="/admin/boletines" class="btn btn-flowfit-outline btn-admin-outline">
+                    <i class="bi bi-arrow-left me-2"></i>Volver
+                </a>
+            </div>
+
+            <!-- Alertas -->
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="row">
+                <!-- Formulario -->
+                <div class="col-lg-7">
+                    <form action="/admin/boletines/enviar-personalizado" method="post" id="formPersonalizado">
+                        <div class="card-base card-admin mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0 text-white">
+                                    <i class="bi bi-gear-fill me-2"></i>Configuración del Envío
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Tipo de destinatario -->
+                                <div class="mb-3">
+                                    <label for="tipoDestinatario" class="form-label text-white">
+                                        <i class="bi bi-people-fill me-2"></i>Destinatarios
+                                    </label>
+                                    <select class="form-select" id="tipoDestinatario" name="tipoDestinatario" required onchange="actualizarContador()">
+                                        <option value="TODOS">🌍 Todos los usuarios</option>
+                                        <option value="USUARIOS_ACTIVOS">✅ Solo usuarios activos</option>
+                                        <option value="USUARIOS">💪 Solo clientes (usuarios normales)</option>
+                                        <option value="ENTRENADORES">🏋️ Solo entrenadores</option>
+                                        <option value="NUTRICIONISTAS">🥗 Solo nutricionistas</option>
+                                        <option value="ADMINISTRADORES">👨‍💼 Solo administradores</option>
+                                        <option value="USUARIOS_INACTIVOS">💤 Solo usuarios inactivos</option>
+                                    </select>
+                                    <div class="form-text">
+                                        <span id="contadorDestinatarios" class="badge" style="background: var(--admin-primary); font-size: 0.9rem;">Calculando...</span>
+                                    </div>
+                                </div>
+
+                                <!-- Asunto -->
+                                <div class="mb-3">
+                                    <label for="asunto" class="form-label text-white">
+                                        <i class="bi bi-tag-fill me-2"></i>Asunto del Correo *
+                                    </label>
+                                    <input type="text" class="form-control" id="asunto" name="asunto" 
+                                           placeholder="Ej: ¡Nuevas funcionalidades en FlowFit!"
+                                           maxlength="150" required>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="form-text text-white-50">
+                                            <i class="bi bi-info-circle me-1"></i>Máximo 150 caracteres
+                                        </div>
+                                        <span class="char-counter" id="contadorAsunto">0/150</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-base card-admin">
+                            <div class="card-header">
+                                <h5 class="mb-0 text-white">
+                                    <i class="bi bi-file-text-fill me-2"></i>Contenido del Mensaje
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Variables disponibles -->
+                                <div class="alert" style="background: rgba(220, 38, 38, 0.15); border: 1px solid var(--admin-primary); color: white;">
+                                    <h6 class="mb-2"><i class="bi bi-lightning-charge-fill me-2"></i>Variables Disponibles (haz clic para insertar):</h6>
+                                    <div>
+                                        <span class="variable-chip" onclick="insertarVariable('{{nombre}}')">{{nombre}}</span>
+                                        <span class="variable-chip" onclick="insertarVariable('{{correo}}')">{{correo}}</span>
+                                        <span class="variable-chip" onclick="insertarVariable('{{perfil}}')">{{perfil}}</span>
+                                    </div>
+                                    <small class="mt-2 d-block opacity-75">
+                                        Estas variables se reemplazan automáticamente con los datos de cada usuario.
+                                    </small>
+                                </div>
+
+                                <!-- Textarea con soporte HTML -->
+                                <div class="mb-3">
+                                    <label for="contenido" class="form-label text-white">
+                                        Contenido (Soporta HTML básico) *
+                                    </label>
+                                    <textarea class="form-control" id="contenido" name="contenido" rows="12" 
+                                              placeholder="Escribe aquí el contenido de tu mensaje..." 
+                                              required></textarea>
+                                    <div class="form-text text-white-50">
+                                        <i class="bi bi-code-square me-1"></i>
+                                        Puedes usar etiquetas HTML: &lt;strong&gt;, &lt;em&gt;, &lt;p&gt;, &lt;br&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;h2&gt;, etc.
+                                    </div>
+                                    <span class="char-counter float-end" id="contadorContenido">0 caracteres</span>
+                                </div>
+
+                                <!-- Botones -->
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-lg" 
+                                            style="background: var(--admin-gradient); color: white; font-weight: 600;">
+                                        <i class="bi bi-send-fill me-2"></i>Enviar Mensaje Masivo
+                                    </button>
+                                    <button type="button" class="btn btn-lg btn-outline-light" onclick="previsualizar()">
+                                        <i class="bi bi-eye-fill me-2"></i>Previsualizar
+                                    </button>
+                                    <button type="reset" class="btn btn-lg btn-outline-secondary" onclick="limpiarFormulario()">
+                                        <i class="bi bi-trash me-2"></i>Limpiar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Preview -->
+                <div class="col-lg-5">
+                    <div class="preview-card">
+                        <h5 class="text-white mb-3">
+                            <i class="bi bi-eye-fill me-2"></i>Vista Previa
+                        </h5>
+                        <div class="preview-email">
+                            <div class="mb-3 pb-3 border-bottom">
+                                <strong>Para:</strong> <span class="text-muted">ejemplo@usuario.com</span><br>
+                                <strong>Asunto:</strong> <span id="previewAsunto" class="text-muted">Escribe el asunto...</span>
+                            </div>
+                            <div id="previewContenido" class="text-muted fst-italic">
+                                Escribe el contenido para ver la previsualización con datos de ejemplo...
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <small class="text-white-50">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Esta es una simulación. Las variables mostrarán datos de ejemplo.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Actualizar contador de asunto
+        document.getElementById('asunto').addEventListener('input', function() {
+            const contador = document.getElementById('contadorAsunto');
+            contador.textContent = this.value.length + '/150';
+            
+            // Actualizar preview
+            const preview = document.getElementById('previewAsunto');
+            preview.textContent = this.value || 'Escribe el asunto...';
+            preview.className = this.value ? '' : 'text-muted';
+        });
+        
+        // Actualizar contador de contenido
+        document.getElementById('contenido').addEventListener('input', function() {
+            const contador = document.getElementById('contadorContenido');
+            contador.textContent = this.value.length + ' caracteres';
+        });
+        
+        // Actualizar contador de destinatarios
+        function actualizarContador() {
+            const tipo = document.getElementById('tipoDestinatario').value;
+            const contador = document.getElementById('contadorDestinatarios');
+            contador.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Calculando...';
+            
+            fetch('/admin/boletines/contar/' + tipo)
+                .then(response => response.json())
+                .then(data => {
+                    contador.innerHTML = `<i class="bi bi-people-fill me-1"></i>${data.count} destinatarios`;
+                })
+                .catch(error => {
+                    contador.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>Error al contar';
+                });
+        }
+        
+        // Insertar variable en el cursor
+        function insertarVariable(variable) {
+            const textarea = document.getElementById('contenido');
+            const cursorPos = textarea.selectionStart;
+            const textBefore = textarea.value.substring(0, cursorPos);
+            const textAfter = textarea.value.substring(cursorPos);
+            
+            textarea.value = textBefore + variable + textAfter;
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd = cursorPos + variable.length;
+            
+            // Trigger input event
+            textarea.dispatchEvent(new Event('input'));
+        }
+        
+        // Previsualizar
+        function previsualizar() {
+            const contenido = document.getElementById('contenido').value;
+            const preview = document.getElementById('previewContenido');
+            
+            if (!contenido.trim()) {
+                preview.innerHTML = '<span class="text-muted fst-italic">Escribe el contenido para ver la previsualización...</span>';
+                return;
+            }
+            
+            // Reemplazar variables con datos de ejemplo
+            let previewText = contenido
+                .replace(/\{\{nombre\}\}/g, '<strong style="color: var(--admin-primary);">Juan Pérez</strong>')
+                .replace(/\{\{correo\}\}/g, '<em>juan.perez@ejemplo.com</em>')
+                .replace(/\{\{perfil\}\}/g, '<span class="badge bg-info">Usuario</span>');
+            
+            preview.innerHTML = previewText;
+            preview.className = '';
+        }
+        
+        // Limpiar formulario
+        function limpiarFormulario() {
+            document.getElementById('previewAsunto').textContent = 'Escribe el asunto...';
+            document.getElementById('previewAsunto').className = 'text-muted';
+            document.getElementById('previewContenido').innerHTML = '<span class="text-muted fst-italic">Escribe el contenido...</span>';
+            document.getElementById('contadorAsunto').textContent = '0/150';
+            document.getElementById('contadorContenido').textContent = '0 caracteres';
+            actualizarContador();
+        }
+        
+        // Confirmar antes de enviar
+        document.getElementById('formPersonalizado').addEventListener('submit', function(e) {
+            const tipo = document.getElementById('tipoDestinatario').selectedOptions[0].text;
+            const asunto = document.getElementById('asunto').value;
+            
+            if (!confirm(`⚠️ ¿Confirmas el envío masivo?\n\n📧 Asunto: "${asunto}"\n👥 Destinatarios: ${tipo}\n\nEsta acción NO se puede deshacer y enviará correos reales.`)) {
+                e.preventDefault();
+            }
+        });
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            actualizarContador();
+        });
+    </script>
+</body>
+</html>

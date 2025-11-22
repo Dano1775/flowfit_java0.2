@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <                </div>
+              </div>
+              <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(251, 191, 36, 0.15); display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-trophy-fill" style="font-size: 1.75rem; color: #fbbf24;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rutinas Completadas -->"viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Progreso - FlowFit</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- FlowFit CSS -->
+    <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
+    <link th:href="@{/css/flowfit-usuario.css}" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Mobile Toggle -->
+  <button class="sidebar-toggle-base sidebar-toggle-usuario d-md-none" id="sidebarToggle">
+    <i class="bi bi-list fs-4"></i>
+  </button>
+
+  <!-- Sidebar Overlay for Mobile -->
+  <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
+
+  <!-- FlowFit Sidebar -->
+  <nav class="sidebar-base sidebar-usuario d-flex flex-column" id="sidebar">
+    <!-- Brand -->
+    <a th:href="@{/usuario/dashboard}" class="navbar-brand d-flex align-items-center text-decoration-none">
+      <img src="/assets/logo_flowfit_usuario.png" alt="FlowFit" height="40" class="me-3 logo-flowfit">
+      <span class="brand-text">FlowFit</span>
+    </a>
+
+    <!-- Navigation -->
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a th:href="@{/usuario/dashboard}" class="nav-link-base nav-link-usuario">
+          <i class="bi bi-speedometer2 me-3"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/usuario/rutinas}" class="nav-link-base nav-link-usuario">
+          <i class="bi bi-list-check me-3"></i> Mis Rutinas
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/usuario/buscar-entrenador}" class="nav-link-base nav-link-usuario">
+          <i class="bi bi-person-plus me-3"></i> Mi Entrenador
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/usuario/progreso}" class="nav-link-base nav-link-usuario active">
+          <i class="bi bi-graph-up me-3"></i> Mi Progreso
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/usuario/perfil}" class="nav-link-base nav-link-usuario">
+          <i class="bi bi-person-circle me-3"></i> Mi Perfil
+        </a>
+      </li>
+    </ul>
+
+    <!-- Profile Section -->
+    <div class="border-top pt-3 mt-auto">
+      <div class="dropdown profile-dropdown-base">
+        <div class="profile-icon-base d-flex align-items-center w-100" id="profileDropdownUsuario" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-base me-2" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+          <div class="flex-grow-1">
+            <div class="small fw-bold text-white" th:text="${usuario != null ? #strings.substringBefore(usuario.nombre, ' ') : 'Usuario'}">Usuario</div>
+            <div class="small text-muted-flowfit">FlowFit</div>
+          </div>
+          <i class="bi bi-chevron-down text-white"></i>
+        </div>
+        <ul class="dropdown-menu" aria-labelledby="profileDropdownUsuario">
+          <li><a class="dropdown-item" th:href="@{/usuario/perfil}"><i class="bi bi-person-gear me-2"></i>Mi Perfil</a></li>
+          <li><a class="dropdown-item" th:href="@{/usuario/configuracion}"><i class="bi bi-gear me-2"></i>Configuración</a></li>
+          <li><a class="dropdown-item" th:href="@{/usuario/soporte}"><i class="bi bi-headset me-2"></i>Soporte</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content-base fade-in-up">
+    <div class="container-fluid px-4 py-4">
+      <!-- Page Header -->
+      <div class="page-header mb-4">
+        <h1 class="page-title text-white mb-2">
+          <i class="bi bi-graph-up me-2"></i>
+          Mi Progreso
+        </h1>
+        <p class="page-subtitle text-muted-flowfit">
+          Visualiza tu evolución y logros 📊
+        </p>
+      </div>
+
+      <!-- Estadísticas Generales -->
+      <div class="row g-4 mb-5">
+        <!-- Progreso General -->
+        <div class="col-lg-3 col-md-6">
+          <div class="card-base card-usuario h-100" style="border-radius: 16px; padding: 1.75rem;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h4 class="mb-2 text-white" style="font-weight: 600;" th:text="${progresoGeneral != null ? progresoGeneral + '%' : '0%'}">65%</h4>
+                <div class="stat-label mb-3">Progreso General</div>
+                <div class="progress" style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden;">
+                  <div class="progress-bar" style="background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%); border-radius: 10px; box-shadow: 0 0 10px rgba(74, 222, 128, 0.4);" th:style="'width: ' + ${progresoGeneral != null ? progresoGeneral : 0} + '%'"></div>
+                </div>
+              </div>
+              <div class="stat-icon-container" style="width: 56px; height: 56px; border-radius: 50%; background: rgba(251, 191, 36, 0.15); display: flex; align-items-center; justify-content: center;">
+                <i class="bi bi-trophy-fill" style="font-size: 1.75rem; color: #fbbf24;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rutinas Completadas -->
+        <div class="col-lg-3 col-md-6">
+          <div class="card-base card-usuario h-100" style="border-radius: 16px; padding: 1.75rem;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h4 class="mb-2 text-white" style="font-weight: 600;" th:text="${rutinasCompletadas}">12</h4>
+                <div class="stat-label">Rutinas Completadas</div>
+                <small style="color: #cbd5e1; font-size: 0.875rem;">de <span th:text="${rutinasTotal}">15</span> asignadas</small>
+              </div>
+              <div class="stat-icon-container" style="width: 56px; height: 56px; border-radius: 50%; background: rgba(34, 197, 94, 0.15); display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-check-circle-fill" style="font-size: 1.75rem; color: #4ade80;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Días Activos -->
+        <div class="col-lg-3 col-md-6">
+          <div class="card-base card-usuario h-100" style="border-radius: 16px; padding: 1.75rem;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h4 class="mb-2 text-white" style="font-weight: 600;" th:text="${diasActivosEsteMes}">18</h4>
+                <div class="stat-label">Días Activos</div>
+                <small style="color: #cbd5e1; font-size: 0.875rem;">este mes</small>
+              </div>
+              <div class="stat-icon-container" style="width: 56px; height: 56px; border-radius: 50%; background: rgba(59, 130, 246, 0.15); display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-calendar-event" style="font-size: 1.75rem; color: #60a5fa;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Racha Actual -->
+        <div class="col-lg-3 col-md-6">
+          <div class="card-base card-usuario h-100" style="border-radius: 16px; padding: 1.75rem;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h4 class="mb-2 text-white" style="font-weight: 600;" th:text="${rachaActual}">7</h4>
+                <div class="stat-label">Racha Actual</div>
+                <small style="color: #cbd5e1; font-size: 0.875rem;">días consecutivos</small>
+              </div>
+              <div class="stat-icon-container" style="width: 56px; height: 56px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-fire" style="font-size: 1.75rem; color: #f87171;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráficos de Progreso -->
+      <div class="row g-4 mb-5">
+        <!-- Progreso Semanal -->
+        <div class="col-lg-8">
+          <div class="card-base card-usuario" style="border-radius: 16px; padding: 2rem;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h5 class="text-white mb-2" style="font-size: 1.125rem; font-weight: 600;">
+                  <i class="bi bi-graph-up me-2" style="color: #60a5fa;"></i>Progreso Semanal
+                </h5>
+                <p class="mb-0" style="color: #cbd5e1; font-size: 0.875rem;">Tu evolución en los últimos 7 días</p>
+              </div>
+              <div class="dropdown">
+                <button class="btn" type="button" data-bs-toggle="dropdown" style="background: rgba(255, 255, 255, 0.05); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.5rem 0.75rem; border-radius: 8px;">
+                  <i class="bi bi-three-dots"></i>
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#" onclick="cambiarPeriodoGrafico('7')">Últimos 7 días</a></li>
+                  <li><a class="dropdown-item" href="#" onclick="cambiarPeriodoGrafico('30')">Último mes</a></li>
+                  <li><a class="dropdown-item" href="#" onclick="cambiarPeriodoGrafico('90')">Últimos 3 meses</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="chart-container" style="position: relative; height: 300px;">
+              <canvas id="progresoChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Distribución de Rutinas -->
+        <div class="col-lg-4">
+          <div class="card-base card-usuario" style="border-radius: 16px; padding: 2rem;">
+            <div class="mb-4">
+              <h5 class="text-white mb-2" style="font-size: 1.125rem; font-weight: 600;">
+                <i class="bi bi-pie-chart me-2" style="color: #a78bfa;"></i>Estado de Rutinas
+              </h5>
+              <p class="mb-0" style="color: #cbd5e1; font-size: 0.875rem;">Distribución actual</p>
+            </div>
+            <div class="chart-container mb-4" style="position: relative; height: 200px;">
+              <canvas id="distribucionChart"></canvas>
+            </div>
+            <div class="chart-legend">
+              <div class="d-flex justify-content-between align-items-center mb-3 p-2" style="background: rgba(34, 197, 94, 0.1); border-radius: 8px;">
+                <div class="d-flex align-items-center">
+                  <div style="width: 12px; height: 12px; border-radius: 50%; background: #4ade80; margin-right: 0.75rem;"></div>
+                  <span style="color: #cbd5e1; font-size: 0.875rem;">Completadas</span>
+                </div>
+                <span class="fw-bold" style="color: #4ade80;" th:text="${rutinasCompletadas}">12</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-3 p-2" style="background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
+                <div class="d-flex align-items-center">
+                  <div style="width: 12px; height: 12px; border-radius: 50%; background: #60a5fa; margin-right: 0.75rem;"></div>
+                  <span style="color: #cbd5e1; font-size: 0.875rem;">En Progreso</span>
+                </div>
+                <span class="fw-bold" style="color: #60a5fa;" th:text="${rutinasEnProgreso}">3</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center p-2" style="background: rgba(148, 163, 184, 0.1); border-radius: 8px;">
+                <div class="d-flex align-items-center">
+                  <div style="width: 12px; height: 12px; border-radius: 50%; background: #94a3b8; margin-right: 0.75rem;"></div>
+                  <span style="color: #cbd5e1; font-size: 0.875rem;">Pausadas</span>
+                </div>
+                <span class="fw-bold" style="color: #94a3b8;">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rutinas Recientes y Motivación -->
+      <div class="row mb-5">
+        <!-- Rutinas Recientes -->
+        <div class="col-lg-8 mb-4">
+          <div class="card-base card-usuario" style="border-radius: 16px; padding: 2rem;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h5 class="text-white mb-2" style="font-size: 1.125rem; font-weight: 600;">
+                  <i class="bi bi-clock-history me-2" style="color: #fb923c;"></i>Actividad Reciente
+                </h5>
+                <p class="mb-0" style="color: #cbd5e1; font-size: 0.875rem;">Tus últimas rutinas trabajadas</p>
+              </div>
+              <a th:href="@{/usuario/rutinas}" class="btn-usuario" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                <i class="bi bi-eye me-1"></i>Ver Todas
+              </a>
+            </div>
+            <div class="rutinas-recientes">
+              <div th:each="rutina : ${rutinasAsignadas}" th:if="${rutinaStat.index < 5}" 
+                   class="mb-3">
+                <div style="background: rgba(255, 255, 255, 0.03); padding: 1.25rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.08);">
+                  <div class="d-flex align-items-center">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem; flex-shrink: 0;"
+                         th:style="${rutina.estado.toString() == 'COMPLETADA'} ? 'background: rgba(34, 197, 94, 0.15); border: 2px solid #4ade80;' : 'background: rgba(59, 130, 246, 0.15); border: 2px solid #60a5fa;'">
+                      <i th:class="${rutina.estado.toString() == 'COMPLETADA'} ? 'bi bi-check-circle-fill' : 'bi bi-play-circle-fill'"
+                         th:style="${rutina.estado.toString() == 'COMPLETADA'} ? 'color: #4ade80; font-size: 1.25rem;' : 'color: #60a5fa; font-size: 1.25rem;'"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                      <h6 class="mb-2 text-white" style="font-weight: 600;" th:text="'Rutina ID: ' + ${rutina.rutinaId}">Rutina de Fuerza</h6>
+                      <div class="d-flex align-items-center mb-2">
+                        <small style="color: #cbd5e1; margin-right: 1rem;">
+                          <i class="bi bi-calendar-check me-1"></i>
+                          <span th:text="'Asignada: ' + ${#temporals.format(rutina.fechaAsignacion, 'dd/MM/yyyy')}">Asignada: 15/03/2024</span>
+                        </small>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <div class="progress flex-grow-1 me-3" style="height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 50px; overflow: hidden;">
+                          <div class="progress-bar" th:style="'width: ' + ${rutina.progreso} + '%; background: linear-gradient(90deg, #4ade80, #22c55e);'"></div>
+                        </div>
+                        <small class="fw-bold" style="color: #4ade80; min-width: 40px; text-align: right;" th:text="${rutina.progreso} + '%'">85%</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel de Motivación -->
+        <div class="col-lg-4 mb-4">
+          <div class="card-base card-usuario" style="border-radius: 16px; padding: 2rem;">
+            <div class="text-center">
+              <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(251, 191, 36, 0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                <i class="bi bi-award-fill" style="font-size: 2rem; color: #fbbf24;"></i>
+              </div>
+              <h5 class="text-white fw-bold mb-2" style="font-size: 1.125rem;">¡Excelente Progreso!</h5>
+              <p class="mb-4" style="color: #cbd5e1; font-size: 0.9375rem;">
+                Has completado <span class="fw-bold" style="color: #4ade80;" th:text="${rutinasCompletadas}">12</span> rutinas este mes.
+              </p>
+              
+              <!-- Próximos Objetivos -->
+              <div class="text-start">
+                <h6 class="text-white mb-3" style="font-weight: 600; font-size: 0.9375rem;">
+                  <i class="bi bi-target me-2" style="color: #a78bfa;"></i>Próximos Objetivos
+                </h6>
+                
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span style="color: #cbd5e1; font-size: 0.875rem;">Completar 15 rutinas</span>
+                    <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); padding: 0.25rem 0.5rem; border-radius: 50px; font-size: 0.75rem;" th:text="${rutinasCompletadas} + '/15'">12/15</span>
+                  </div>
+                  <div class="progress" style="height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 50px; overflow: hidden;">
+                    <div class="progress-bar" th:style="'width: ' + ${(rutinasCompletadas * 100) / 15} + '%; background: linear-gradient(90deg, #60a5fa, #3b82f6);'"></div>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span style="color: #cbd5e1; font-size: 0.875rem;">Racha de 10 días</span>
+                    <span class="badge" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); padding: 0.25rem 0.5rem; border-radius: 50px; font-size: 0.75rem;" th:text="${rachaActual} + '/10'">7/10</span>
+                  </div>
+                  <div class="progress" style="height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 50px; overflow: hidden;">
+                    <div class="progress-bar" th:style="'width: ' + ${(rachaActual * 100) / 10} + '%; background: linear-gradient(90deg, #fbbf24, #f59e0b);'"></div>
+                  </div>
+                </div>
+                
+                <div class="mb-4">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span style="color: #cbd5e1; font-size: 0.875rem;">20 días activos</span>
+                    <span class="badge" style="background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); padding: 0.25rem 0.5rem; border-radius: 50px; font-size: 0.75rem;" th:text="${diasActivosEsteMes} + '/20'">18/20</span>
+                  </div>
+                  <div class="progress" style="height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 50px; overflow: hidden;">
+                    <div class="progress-bar" th:style="'width: ' + ${(diasActivosEsteMes * 100) / 20} + '%; background: linear-gradient(90deg, #4ade80, #22c55e);'"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mensaje Motivacional -->
+              <div class="p-3" style="background: rgba(255, 255, 255, 0.03); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.08);">
+                <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(96, 165, 250, 0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem;">
+                  <i class="bi bi-emoji-smile" style="font-size: 1.5rem; color: #60a5fa;"></i>
+                </div>
+                <p class="mb-0 text-white" style="font-size: 0.875rem; line-height: 1.6;">
+                  <span th:if="${progresoGeneral >= 80}">¡Estás en una racha increíble! Sigue así y alcanzarás tus metas.</span>
+                  <span th:if="${progresoGeneral >= 60 && progresoGeneral < 80}">¡Muy buen trabajo! Estás por encima del promedio.</span>
+                  <span th:if="${progresoGeneral >= 40 && progresoGeneral < 60}">Buen progreso. Mantén la consistencia para mejores resultados.</span>
+                  <span th:if="${progresoGeneral < 40}">¡Cada paso cuenta! Mantén el ritmo y verás mejoras pronto.</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div> <!-- Cierre container-fluid -->
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Sidebar Toggle
+    document.getElementById('sidebarToggle').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+      document.getElementById('main-content').classList.toggle('expanded');
+    });
+
+    // Datos reales desde Thymeleaf
+    const progresoGeneralData = /*[[${progresoGeneral}]]*/ 0;
+    const rutinasCompletadasData = /*[[${rutinasCompletadas}]]*/ 0;
+    const rutinasEnProgresoData = /*[[${rutinasEnProgreso}]]*/ 0;
+    const diasActivosData = /*[[${diasActivosEsteMes}]]*/ 0;
+    const rachaActualData = /*[[${rachaActual}]]*/ 0;
+    const progresoSemanalData = /*[[${progresoSemanal}]]*/ [];
+
+    // Gráfico de Progreso Semanal
+    const ctx = document.getElementById('progresoChart').getContext('2d');
+    
+    // Generar datos de progreso basados en datos reales o simulados
+    const generateWeeklyData = () => {
+      if (progresoSemanalData && progresoSemanalData.length > 0) {
+        // Usar datos reales si están disponibles
+        return progresoSemanalData.map(item => item[1] || 0);
+      } else {
+        // Generar datos simulados basados en el progreso real del usuario
+        const baseProgress = progresoGeneralData;
+        const variation = 10; // Variación máxima
+        return Array.from({length: 7}, (_, i) => {
+          const randomVariation = (Math.random() - 0.5) * variation;
+          return Math.max(0, Math.min(100, baseProgress + randomVariation));
+        });
+      }
+    };
+
+    // Generar etiquetas para el gráfico
+    const generateWeeklyLabels = () => {
+      if (progresoSemanalData && progresoSemanalData.length > 0) {
+        return progresoSemanalData.map(item => {
+          const fecha = new Date(item[0]);
+          return fecha.toLocaleDateString('es-ES', { weekday: 'short' });
+        });
+      } else {
+        return ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+      }
+    };
+
+    const progresoChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: generateWeeklyLabels(),
+        datasets: [{
+          label: 'Progreso %',
+          data: generateWeeklyData(),
+          borderColor: '#28a745',
+          backgroundColor: 'rgba(40, 167, 69, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#28a745',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            },
+            ticks: {
+              color: 'rgba(255, 255, 255, 0.7)',
+              callback: function(value) {
+                return value + '%';
+              }
+            }
+          },
+          x: {
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            },
+            ticks: {
+              color: 'rgba(255, 255, 255, 0.7)'
+            }
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        elements: {
+          point: {
+            hoverRadius: 8
+          }
+        }
+      }
+    });
+
+    // Gráfico de Distribución
+    const ctx2 = document.getElementById('distribucionChart').getContext('2d');
+    const distribucionChart = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+        labels: ['Completadas', 'En Progreso', 'Pausadas'],
+        datasets: [{
+          data: [rutinasCompletadasData, rutinasEnProgresoData, 0],
+          backgroundColor: ['#28a745', '#007bff', '#6c757d'],
+          borderWidth: 0,
+          cutout: '70%'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+
+    // Función para cambiar período del gráfico
+    function cambiarPeriodoGrafico(dias) {
+      // Aquí se puede implementar lógica para cambiar los datos del gráfico
+      console.log('Cambiando a período de ' + dias + ' días');
+      // Por ahora solo mostramos un mensaje
+      const toast = new bootstrap.Toast(document.createElement('div'));
+      // Implementar cambio de datos si es necesario
+    }
+
+    // Animaciones de entrada
+    window.addEventListener('load', function() {
+      // Animar las tarjetas de estadísticas
+      const statCards = document.querySelectorAll('.stat-card');
+      statCards.forEach((card, index) => {
+        setTimeout(() => {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          card.style.transition = 'all 0.5s ease';
+          
+          setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, 100);
+        }, index * 100);
+      });
+
+      // Animar números con efecto contador
+      const statNumbers = document.querySelectorAll('.stat-number');
+      statNumbers.forEach(number => {
+        const finalValue = parseInt(number.textContent.replace(/[^\d]/g, ''));
+        if (!isNaN(finalValue)) {
+          animateNumber(number, 0, finalValue, 1500);
+        }
+      });
+    });
+
+    // Función para animar números
+    function animateNumber(element, start, end, duration) {
+      let startTime = null;
+      const originalText = element.textContent;
+      const suffix = originalText.replace(/[\d]/g, '');
+      
+      function animate(currentTime) {
+        if (startTime === null) startTime = currentTime;
+        const progress = Math.min((currentTime - startTime) / duration, 1);
+        const current = Math.round(progress * (end - start) + start);
+        element.textContent = current + suffix;
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      }
+      
+      requestAnimationFrame(animate);
+    }
+  </script>
+
+  <!-- Sidebar Responsive JS -->
+  <!-- FlowFit VIP Usuario Script -->
+  <script>
+    // Mobile Sidebar Toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const sidebar = document.getElementById('sidebar');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+      function toggleSidebar() {
+        sidebar.classList.toggle('show');
+        sidebarOverlay.classList.toggle('show');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove('show');
+        sidebarOverlay.classList.remove('show');
+      }
+
+      sidebarToggle?.addEventListener('click', toggleSidebar);
+      sidebarOverlay?.addEventListener('click', closeSidebar);
+
+      // Close sidebar on escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeSidebar();
+      });
+
+      // Highlight active navigation
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.nav-link-usuario');
+      
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active');
+        }
+      });
+
+      console.log('FlowFit VIP Usuario Progreso loaded successfully! 💪');
+    });
+  </script>
+
+</body>
+</html>

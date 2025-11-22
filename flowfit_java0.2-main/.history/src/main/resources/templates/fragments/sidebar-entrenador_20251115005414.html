@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+<body>
+  <nav th:fragment="sidebar" class="sidebar-base sidebar-entrenador d-flex flex-column" id="sidebar">
+    <!-- Logo y Título -->
+    <a th:href="@{/entrenador/dashboard}" class="navbar-brand d-flex align-items-center text-decoration-none">
+      <img src="/assets/logo_flowfit.png" alt="FlowFit" height="40" class="me-3 logo-flowfit">
+      <span class="brand-text">FlowFit</span>
+    </a>
+
+    <!-- Navegación Principal -->
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a th:href="@{/entrenador/dashboard}" class="nav-link-base nav-link-entrenador active" title="Dashboard">
+          <i class="bi bi-speedometer2 me-3"></i>
+          <span class="nav-text">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/mis-usuarios}" class="nav-link-base nav-link-entrenador" title="Mis Usuarios">
+          <i class="bi bi-people me-3"></i>
+          <span class="nav-text">Mis Usuarios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/rutinas/crear}" class="nav-link-base nav-link-entrenador" title="Crear Rutinas">
+          <i class="bi bi-plus-circle me-3"></i>
+          <span class="nav-text">Crear Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/rutinas}" class="nav-link-base nav-link-entrenador" title="Ver Rutinas">
+          <i class="bi bi-list-check me-3"></i>
+          <span class="nav-text">Ver Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/asignar-rutinas}" class="nav-link-base nav-link-entrenador" title="Asignar Rutinas">
+          <i class="bi bi-person-plus-fill me-3"></i>
+          <span class="nav-text">Asignar Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/entrenador/progreso}" class="nav-link-base nav-link-entrenador" title="Progreso">
+          <i class="bi bi-graph-up me-3"></i>
+          <span class="nav-text">Progreso de Usuarios</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Perfil del Entrenador -->
+    <div class="border-top pt-3 mt-auto">
+      <div class="dropdown profile-dropdown-base">
+        <div class="profile-icon-base d-flex align-items-center w-100" id="profileDropdownEntrenador" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-base me-2" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+          <div class="flex-grow-1">
+            <div class="small fw-bold text-white" th:text="${entrenador != null ? #strings.substringBefore(entrenador.nombre, ' ') : 'Entrenador'}">Entrenador</div>
+            <div class="small text-muted-flowfit">Entrenador</div>
+          </div>
+          <i class="bi bi-chevron-down text-white"></i>
+        </div>
+        <ul class="dropdown-menu" aria-labelledby="profileDropdownEntrenador">
+          <li><a class="dropdown-item" th:href="@{/entrenador/perfil}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</body>
+</html>

@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Usuarios - FlowFit</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- FlowFit CSS System -->
+  <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
+  <link th:href="@{/css/flowfit-entrenador.css}" rel="stylesheet">
+  
+  <!-- Page Specific Styles -->
+  <!-- Page Specific Styles -->
+  <style>
+    /* Solicitud Cards */
+    .solicitud-card {
+      border-left: 4px solid #f59e0b;
+      background: rgba(245, 158, 11, 0.03);
+    }
+    
+    .solicitud-card:hover {
+      border-left-color: #d97706;
+    }
+    
+    /* Usuario Cards */
+    .usuario-card {
+      border-left: 4px solid #10b981;
+      background: rgba(16, 185, 129, 0.03);
+    }
+    
+    .usuario-card:hover {
+      border-left-color: #059669;
+    }
+    
+    /* Avatar styles */
+    .user-avatar {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      border: 2px solid rgba(59, 130, 246, 0.2);
+      flex-shrink: 0;
+    }
+    
+    .user-avatar i {
+      font-size: 1.75rem;
+      color: #ffffff;
+    }
+    
+    /* Message box */
+    .message-box {
+      background: rgba(59, 130, 246, 0.05);
+      border: 1px solid rgba(59, 130, 246, 0.15);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 0.75rem;
+    }
+    
+    .message-box i {
+      color: rgba(59, 130, 246, 0.8);
+    }
+    
+    /* Modal backdrop */
+    .modal-backdrop.show {
+      opacity: 0.8;
+    }
+    
+    /* Animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .fade-in-up {
+      animation: fadeInUp 0.5s ease-out;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Desktop Toggle (for collapse) -->
+  <button class="sidebar-collapse-btn d-none d-md-flex" id="sidebarCollapseBtn" title="Contraer/Expandir Sidebar">
+    <i class="bi bi-chevron-left"></i>
+  </button>
+
+  <!-- Mobile Toggle -->
+  <button class="sidebar-toggle-base sidebar-toggle-entrenador d-md-none" id="sidebarToggle">
+    <i class="bi bi-list fs-4"></i>
+  </button>
+
+  <!-- Sidebar Overlay for Mobile -->
+  <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
+
+  <!-- FlowFit Sidebar -->
+  <div th:replace="~{fragments/sidebar-entrenador :: sidebar}"></div>
+
+  <!-- Main Content -->
+  <main class="main-content-base fade-in-up">
+    <div class="container-fluid p-4">
+
+      <!-- Solicitudes Pendientes Section -->
+      <div class="mb-5">
+        <div class="d-flex align-items-center mb-4">
+          <div style="width: 48px; height: 48px;" class="bg-warning-subtle text-warning border border-warning border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3 px-3 py-2">
+            <i class="bi bi-bell fs-4"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h3 class="text-white fw-semibold mb-1">Solicitudes Pendientes</h3>
+            <p class="text-muted-flowfit mb-0 small">Nuevas solicitudes esperando tu aprobación</p>
+          </div>
+          <span th:if="${solicitudesPendientes != null && !solicitudesPendientes.empty}" 
+                class="badge bg-warning text-dark px-3 py-2 rounded-pill fs-6"
+                th:text="${solicitudesPendientes.size()}">0</span>
+        </div>
+        
+        <div th:if="${solicitudesPendientes != null && !solicitudesPendientes.empty}">
+          <div class="card-base card-entrenador solicitud-card mb-3" 
+               th:each="solicitud : ${solicitudesPendientes}"
+               style="min-height: auto;">
+            <div class="card-body p-4">
+              <div class="row align-items-center">
+                <div class="col-lg-8">
+                  <div class="d-flex align-items-start mb-3">
+                    <div class="user-avatar me-3">
+                      <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                      <h5 class="text-white fw-bold mb-2" th:text="${solicitud.usuario.nombre}">Nombre del Usuario</h5>
+                      <div class="d-flex flex-column gap-2">
+                        <div class="d-flex align-items-center text-muted-flowfit small">
+                          <i class="bi bi-envelope me-2"></i>
+                          <span th:text="${solicitud.usuario.correo}">correo@ejemplo.com</span>
+                        </div>
+                        <div class="d-flex align-items-center text-muted-flowfit small">
+                          <i class="bi bi-telephone me-2"></i>
+                          <span th:text="${solicitud.usuario.telefono}">123-456-7890</span>
+                        </div>
+                        <div class="d-flex align-items-center text-muted-flowfit small">
+                          <i class="bi bi-clock me-2"></i>
+                          <span>Solicitado el </span>
+                          <span th:text="${#temporals.format(solicitud.fechaSolicitud, 'dd/MM/yyyy HH:mm')}" class="ms-1"></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div th:if="${solicitud.mensajeSolicitud}" class="message-box">
+                    <div class="d-flex align-items-start">
+                      <i class="bi bi-chat-left-text me-2 text-primary mt-1"></i>
+                      <div>
+                        <strong class="text-white small d-block mb-1">Mensaje del usuario:</strong>
+                        <p class="text-muted-flowfit small mb-0 fst-italic" th:text="${solicitud.mensajeSolicitud}"></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-lg-4 mt-3 mt-lg-0">
+                  <div class="d-flex flex-column gap-2">
+                    <button class="btn btn-flowfit-primary btn-entrenador-primary btn-enhanced btn-aceptar" 
+                            th:data-solicitud-id="${solicitud.id}"
+                            th:data-usuario-nombre="${solicitud.usuario.nombre}">
+                      <i class="bi bi-check-circle me-2"></i>
+                      Aceptar Solicitud
+                    </button>
+                    <button class="btn btn-flowfit-outline btn-entrenador-outline btn-enhanced btn-rechazar" 
+                            th:data-solicitud-id="${solicitud.id}"
+                            th:data-usuario-nombre="${solicitud.usuario.nombre}">
+                      <i class="bi bi-x-circle me-2"></i>
+                      Rechazar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div th:if="${solicitudesPendientes == null || solicitudesPendientes.empty}" 
+             class="card-base card-entrenador text-center p-5">
+          <div class="mb-4">
+            <div style="width: 80px; height: 80px;" 
+                 class="bg-success-subtle text-success border border-success border-opacity-25 rounded-circle d-flex align-items-center justify-content-center mx-auto">
+              <i class="bi bi-check-circle display-4"></i>
+            </div>
+          </div>
+          <h4 class="text-white fw-semibold mb-2">Sin solicitudes pendientes</h4>
+          <p class="text-muted-flowfit mb-0">Todas las solicitudes han sido procesadas. ¡Excelente trabajo!</p>
+        </div>
+      </div>
+
+      <!-- Usuarios Asignados Section -->
+      <div>
+        <div class="d-flex align-items-center mb-4">
+          <div style="width: 48px; height: 48px;" class="bg-success-subtle text-success border border-success border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3 px-3 py-2">
+            <i class="bi bi-people-fill fs-4"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h3 class="text-white fw-semibold mb-1">Mis Usuarios Asignados</h3>
+            <p class="text-muted-flowfit mb-0 small">Usuarios bajo tu supervisión y entrenamiento</p>
+          </div>
+          <span th:if="${usuariosAsignados != null && !usuariosAsignados.empty}" 
+                class="badge bg-success px-3 py-2 rounded-pill fs-6"
+                th:text="${usuariosAsignados.size()}">0</span>
+        </div>
+        
+        <div th:if="${usuariosAsignados != null && !usuariosAsignados.empty}">
+          <div class="row g-4">
+            <div class="col-lg-6 col-xl-4" th:each="asignacion : ${usuariosAsignados}">
+              <div class="card-base card-entrenador usuario-card h-100" style="min-height: auto;">
+                <div class="card-body p-4">
+                  <div class="d-flex align-items-start mb-3">
+                    <div class="user-avatar me-3" style="width: 48px; height: 48px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                      <i class="bi bi-person-check" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                      <h5 class="text-white fw-bold mb-2" th:text="${asignacion.usuario.nombre}">Nombre del Usuario</h5>
+                      <div class="d-flex align-items-center text-muted-flowfit small mb-2">
+                        <i class="bi bi-calendar-check me-2 text-success"></i>
+                        <span>Asignado el </span>
+                        <span th:text="${#temporals.format(asignacion.fechaAceptacion, 'dd/MM/yyyy')}" class="ms-1"></span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex flex-column gap-2 mb-4">
+                    <div class="d-flex align-items-center text-muted-flowfit small">
+                      <i class="bi bi-envelope me-2"></i>
+                      <span th:text="${asignacion.usuario.correo}">correo@ejemplo.com</span>
+                    </div>
+                    <div class="d-flex align-items-center text-muted-flowfit small">
+                      <i class="bi bi-telephone me-2"></i>
+                      <span th:text="${asignacion.usuario.telefono}">123-456-7890</span>
+                    </div>
+                  </div>
+                  
+                  <a th:href="@{/entrenador/asignar-rutinas(usuarioId=${asignacion.usuario.id})}" 
+                     class="btn btn-flowfit-primary btn-entrenador-primary btn-enhanced w-100">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Asignar Rutina
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div th:if="${usuariosAsignados == null || usuariosAsignados.empty}" 
+             class="card-base card-entrenador text-center p-5">
+          <div class="mb-4">
+            <div style="width: 80px; height: 80px;" 
+                 class="bg-primary-subtle text-primary border border-primary border-opacity-25 rounded-circle d-flex align-items-center justify-content-center mx-auto">
+              <i class="bi bi-people display-4"></i>
+            </div>
+          </div>
+          <h4 class="text-white fw-semibold mb-2">Sin usuarios asignados</h4>
+          <p class="text-muted-flowfit mb-0">Los usuarios aparecerán aquí una vez que aceptes sus solicitudes de entrenamiento.</p>
+        </div>
+      </div>
+
+      <!-- Usuarios Rechazados Section -->
+      <div th:if="${usuariosRechazados != null && !usuariosRechazados.empty}">
+        <div class="d-flex align-items-center mb-4">
+          <div style="width: 48px; height: 48px;" class="bg-danger-subtle text-danger border border-danger border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3 px-3 py-2">
+            <i class="bi bi-x-circle-fill fs-4"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h3 class="text-white fw-semibold mb-1">Usuarios Rechazados</h3>
+            <p class="text-muted-flowfit mb-0 small">Solicitudes que has rechazado anteriormente</p>
+          </div>
+          <span class="badge bg-danger px-3 py-2 rounded-pill fs-6"
+                th:text="${usuariosRechazados.size()}">0</span>
+        </div>
+        
+        <div class="row g-4">
+          <div class="col-lg-6 col-xl-4" th:each="asignacion : ${usuariosRechazados}">
+            <div class="card-base card-entrenador usuario-card h-100" style="min-height: auto; border-left: 3px solid #dc2626;">
+              <div class="card-body p-4">
+                <div class="d-flex align-items-start mb-3">
+                  <div class="user-avatar me-3" style="width: 48px; height: 48px; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);">
+                    <i class="bi bi-person-x" style="font-size: 1.5rem;"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h5 class="text-white fw-bold mb-2" th:text="${asignacion.usuario.nombre}">Nombre del Usuario</h5>
+                    <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-50 mb-2">
+                      <i class="bi bi-x-circle me-1"></i>Rechazado
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="d-flex flex-column gap-2 mb-3">
+                  <div class="d-flex align-items-center text-muted-flowfit small">
+                    <i class="bi bi-envelope me-2"></i>
+                    <span th:text="${asignacion.usuario.correo}">correo@ejemplo.com</span>
+                  </div>
+                  <div class="d-flex align-items-center text-muted-flowfit small">
+                    <i class="bi bi-telephone me-2"></i>
+                    <span th:text="${asignacion.usuario.telefono}">123-456-7890</span>
+                  </div>
+                </div>
+                
+                <!-- Mensaje de solicitud si existe -->
+                <div th:if="${asignacion.mensajeSolicitud != null && !asignacion.mensajeSolicitud.empty}" 
+                     class="mb-3 p-3 rounded-3" 
+                     style="background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6;">
+                  <p class="text-white small mb-1 fw-semibold">
+                    <i class="bi bi-chat-left-text me-1"></i>Mensaje del usuario:
+                  </p>
+                  <p class="text-muted-flowfit small mb-0" th:text="${asignacion.mensajeSolicitud}">Mensaje...</p>
+                </div>
+                
+                <!-- Mensaje de respuesta si existe -->
+                <div th:if="${asignacion.mensajeRespuesta != null && !asignacion.mensajeRespuesta.empty}" 
+                     class="mb-3 p-3 rounded-3" 
+                     style="background: rgba(220, 38, 38, 0.1); border-left: 3px solid #dc2626;">
+                  <p class="text-white small mb-1 fw-semibold">
+                    <i class="bi bi-reply me-1"></i>Tu respuesta:
+                  </p>
+                  <p class="text-muted-flowfit small mb-0" th:text="${asignacion.mensajeRespuesta}">Respuesta...</p>
+                </div>
+                
+                <div class="d-flex gap-2">
+                  <button class="btn btn-flowfit-primary btn-entrenador-primary btn-enhanced flex-grow-1"
+                          onclick="aceptarRechazado(event)"
+                          th:data-id="${asignacion.id}"
+                          th:data-nombre="${asignacion.usuario.nombre}">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Aceptar Ahora
+                  </button>
+                  <button class="btn btn-flowfit-outline btn-entrenador-outline btn-enhanced flex-grow-1"
+                          onclick="eliminarAsignacion(event)"
+                          th:data-id="${asignacion.id}"
+                          th:data-nombre="${asignacion.usuario.nombre}">
+                    <i class="bi bi-trash me-2"></i>
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </main>
+
+  <!-- Modal para aceptar solicitud -->
+  <div class="modal fade" id="modalAceptar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark border border-primary border-opacity-25" style="border-radius: 16px; overflow: hidden;">
+        <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+          <div class="d-flex align-items-center">
+            <div style="width: 48px; height: 48px;" class="bg-success-subtle text-success border border-success border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3">
+              <i class="bi bi-check-circle fs-4"></i>
+            </div>
+            <div>
+              <h5 class="modal-title text-white fw-bold mb-1">Aceptar Usuario</h5>
+              <p class="text-muted-flowfit small mb-0">Confirmar nueva asignación</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-white mb-3">¿Deseas aceptar a <strong id="nombreUsuarioAceptar" class="text-primary"></strong> como tu usuario asignado?</p>
+          <div class="mb-3">
+            <label for="mensajeAceptacion" class="form-label text-white fw-semibold small">
+              <i class="bi bi-chat-left-heart me-2 text-primary"></i>
+              Mensaje de bienvenida (opcional)
+            </label>
+            <textarea class="form-control bg-dark text-white border-secondary" 
+                      id="mensajeAceptacion" 
+                      rows="3" 
+                      placeholder="Escribe un mensaje personal de bienvenida..."
+                      style="resize: vertical;"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-2"></i>
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-flowfit-primary btn-entrenador-primary btn-enhanced" id="confirmarAceptacion">
+            <i class="bi bi-check-circle me-2"></i>
+            Aceptar Usuario
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para rechazar solicitud -->
+  <div class="modal fade" id="modalRechazar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark border border-danger border-opacity-25" style="border-radius: 16px; overflow: hidden;">
+        <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+          <div class="d-flex align-items-center">
+            <div style="width: 48px; height: 48px;" class="bg-danger-subtle text-danger border border-danger border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3">
+              <i class="bi bi-x-circle fs-4"></i>
+            </div>
+            <div>
+              <h5 class="modal-title text-white fw-bold mb-1">Rechazar Solicitud</h5>
+              <p class="text-muted-flowfit small mb-0">Declinar asignación de usuario</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-white mb-3">¿Estás seguro de que deseas rechazar la solicitud de <strong id="nombreUsuarioRechazar" class="text-danger"></strong>?</p>
+          <div class="mb-3">
+            <label for="mensajeRechazo" class="form-label text-white fw-semibold small">
+              <i class="bi bi-chat-left-text me-2 text-danger"></i>
+              Motivo del rechazo (opcional)
+            </label>
+            <textarea class="form-control bg-dark text-white border-secondary" 
+                      id="mensajeRechazo" 
+                      rows="3" 
+                      placeholder="Explica brevemente el motivo del rechazo..."
+                      style="resize: vertical;"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+            <i class="bi bi-arrow-left me-2"></i>
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-danger btn-enhanced" id="confirmarRechazo">
+            <i class="bi bi-x-circle me-2"></i>
+            Rechazar Solicitud
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para aceptar usuario rechazado -->
+  <div class="modal fade" id="modalAceptarRechazado" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark border border-primary border-opacity-25" style="border-radius: 16px; overflow: hidden;">
+        <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+          <div class="d-flex align-items-center">
+            <div style="width: 48px; height: 48px;" class="bg-success-subtle text-success border border-success border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3">
+              <i class="bi bi-check-circle fs-4"></i>
+            </div>
+            <div>
+              <h5 class="modal-title text-white fw-bold mb-1">Aceptar Usuario</h5>
+              <p class="text-muted-flowfit small mb-0">Cambiar estado a aceptado</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-white mb-3">¿Deseas aceptar a <strong id="nombreUsuarioAceptarRechazado" class="text-primary"></strong>?</p>
+          <p class="text-muted-flowfit small mb-3">Este usuario será agregado a tus usuarios asignados.</p>
+          <div class="mb-3">
+            <label for="mensajeAceptacionRechazado" class="form-label text-white fw-semibold small">
+              <i class="bi bi-chat-left-heart me-2 text-primary"></i>
+              Nuevo mensaje (opcional)
+            </label>
+            <textarea class="form-control bg-dark text-white border-secondary" 
+                      id="mensajeAceptacionRechazado" 
+                      rows="3" 
+                      placeholder="Escribe un mensaje de bienvenida..."
+                      style="resize: vertical;"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-2"></i>
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-flowfit-primary btn-entrenador-primary btn-enhanced" id="confirmarAceptacionRechazado">
+            <i class="bi bi-check-circle me-2"></i>
+            Aceptar Usuario
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para eliminar asignación -->
+  <div class="modal fade" id="modalEliminar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark border border-warning border-opacity-25" style="border-radius: 16px; overflow: hidden;">
+        <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+          <div class="d-flex align-items-center">
+            <div style="width: 48px; height: 48px;" class="bg-warning-subtle text-warning border border-warning border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3">
+              <i class="bi bi-trash fs-4"></i>
+            </div>
+            <div>
+              <h5 class="modal-title text-white fw-bold mb-1">Eliminar Asignación</h5>
+              <p class="text-muted-flowfit small mb-0">Permitir nueva solicitud</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-white mb-3">¿Estás seguro de eliminar la asignación de <strong id="nombreUsuarioEliminar" class="text-warning"></strong>?</p>
+          <div class="alert alert-warning bg-warning bg-opacity-10 border border-warning border-opacity-25 text-white">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Nota:</strong> Al eliminar esta asignación, el usuario podrá volver a enviar una solicitud de entrenamiento.
+          </div>
+        </div>
+        <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-2"></i>
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-warning btn-enhanced" id="confirmarEliminacion">
+            <i class="bi bi-trash me-2"></i>
+            Eliminar Asignación
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let solicitudSeleccionada = null;
+    let asignacionRechazadaSeleccionada = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Manejar clicks en botones de aceptar
+      const botonesAceptar = document.querySelectorAll('.btn-aceptar');
+      botonesAceptar.forEach(boton => {
+        boton.addEventListener('click', function() {
+          solicitudSeleccionada = this.getAttribute('data-solicitud-id');
+          const nombreUsuario = this.getAttribute('data-usuario-nombre');
+          
+          document.getElementById('nombreUsuarioAceptar').textContent = nombreUsuario;
+          
+          const modal = new bootstrap.Modal(document.getElementById('modalAceptar'));
+          modal.show();
+        });
+      });
+
+      // Manejar clicks en botones de rechazar
+      const botonesRechazar = document.querySelectorAll('.btn-rechazar');
+      botonesRechazar.forEach(boton => {
+        boton.addEventListener('click', function() {
+          solicitudSeleccionada = this.getAttribute('data-solicitud-id');
+          const nombreUsuario = this.getAttribute('data-usuario-nombre');
+          
+          document.getElementById('nombreUsuarioRechazar').textContent = nombreUsuario;
+          
+          const modal = new bootstrap.Modal(document.getElementById('modalRechazar'));
+          modal.show();
+        });
+      });
+
+      // Confirmar aceptación
+      document.getElementById('confirmarAceptacion').addEventListener('click', function() {
+        if (!solicitudSeleccionada) return;
+
+        const mensaje = document.getElementById('mensajeAceptacion').value;
+        procesarSolicitud('aceptar', mensaje);
+      });
+
+      // Confirmar rechazo
+      document.getElementById('confirmarRechazo').addEventListener('click', function() {
+        if (!solicitudSeleccionada) return;
+
+        const mensaje = document.getElementById('mensajeRechazo').value;
+        procesarSolicitud('rechazar', mensaje);
+      });
+    });
+
+    function procesarSolicitud(accion, mensaje) {
+      const formData = new FormData();
+      formData.append('asignacionId', solicitudSeleccionada);
+      formData.append('mensaje', mensaje);
+
+      const url = accion === 'aceptar' ? '/entrenador/aceptar-solicitud' : '/entrenador/rechazar-solicitud';
+      
+      fetch(url, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          location.reload();
+        } else {
+          alert('Error: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión');
+      })
+      .finally(() => {
+        // Cerrar modales
+        const modalAceptar = bootstrap.Modal.getInstance(document.getElementById('modalAceptar'));
+        const modalRechazar = bootstrap.Modal.getInstance(document.getElementById('modalRechazar'));
+        
+        if (modalAceptar) modalAceptar.hide();
+        if (modalRechazar) modalRechazar.hide();
+      });
+    }
+
+    // ===== SIDEBAR TOGGLE FUNCTIONALITY =====
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebar = document.getElementById('sidebar');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+      const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+
+      // Mobile Toggle
+      if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function() {
+          sidebar.classList.add('active');
+          sidebarOverlay.classList.add('active');
+        });
+      }
+
+      // Overlay Click
+      if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', function() {
+          sidebar.classList.remove('active');
+          sidebarOverlay.classList.remove('active');
+        });
+      }
+
+      // Desktop Collapse
+      if (sidebarCollapseBtn) {
+        sidebarCollapseBtn.addEventListener('click', function() {
+          sidebar.classList.toggle('collapsed');
+          const icon = this.querySelector('i');
+          icon.classList.toggle('bi-chevron-left');
+          icon.classList.toggle('bi-chevron-right');
+        });
+      }
+    });
+  </script>
+</body>
+</html>

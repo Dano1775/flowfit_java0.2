@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<div th:fragment="sidebar">
+  <!-- FlowFit Sidebar (Usuario) -->
+  <nav class="sidebar-base sidebar-usuario" id="sidebar">
+    <div class="sidebar-brand-base">
+      <div class="brand-container">
+        <i class="bi bi-activity brand-icon-base"></i>
+        <span class="brand-text-base">FlowFit VIP</span>
+      </div>
+    </div>
+
+    <div class="sidebar-nav-base">
+      <a th:href="@{/usuario/dashboard}" class="nav-link-usuario">
+        <i class="bi bi-speedometer2 me-3"></i>
+        <span>Dashboard</span>
+      </a>
+      <a th:href="@{/usuario/rutinas}" class="nav-link-usuario">
+        <i class="bi bi-calendar-check me-3"></i>
+        <span>Mis Rutinas</span>
+      </a>
+      <a th:href="@{/usuario/buscar-entrenador}" class="nav-link-usuario">
+        <i class="bi bi-person-plus me-3"></i>
+        <span>Mi Entrenador</span>
+      </a>
+      <a th:href="@{/usuario/progreso}" class="nav-link-usuario">
+        <i class="bi bi-graph-up me-3"></i>
+        <span>Mi Progreso</span>
+      </a>
+      <a th:href="@{/usuario/mapa}" class="nav-link-usuario">
+        <i class="bi bi-geo-alt me-3"></i>
+        <span>Mapa</span>
+      </a>
+      <a th:href="@{/usuario/perfil}" class="nav-link-usuario">
+        <i class="bi bi-person-gear me-3"></i>
+        <span>Mi Perfil</span>
+      </a>
+    </div>
+
+    <div class="border-top pt-3 mt-auto">
+      <div class="dropdown profile-dropdown-base">
+        <div class="profile-icon-base d-flex align-items-center w-100" id="profileDropdownUsuario" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-base me-2" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+          <div class="flex-grow-1">
+            <div class="small fw-bold text-white" th:text="${usuario != null ? #strings.substringBefore(usuario.nombre, ' ') : 'Usuario'}">Usuario</div>
+            <div class="small text-muted-flowfit">FlowFit VIP</div>
+          </div>
+          <i class="bi bi-chevron-down text-white"></i>
+        </div>
+        <ul class="dropdown-menu" aria-labelledby="profileDropdownUsuario">
+          <li><a class="dropdown-item" th:href="@{/usuario/perfil}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+          <li><a class="dropdown-item" th:href="@{/usuario/configuracion}"><i class="bi bi-gear me-2"></i>Configuración</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>

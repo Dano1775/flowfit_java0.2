@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<div th:fragment="sidebar">
+  <!-- FlowFit Sidebar (Usuario) -->
+  <nav class="sidebar-base sidebar-usuario" id="sidebar">
+    <div class="sidebar-brand-base">
+      <div class="brand-container">
+        <i class="bi bi-activity brand-icon-base"></i>
+        <span class="brand-text-base">FlowFit VIP</span>
+      </div>
+    </div>
+
+    <div class="sidebar-nav-base">
+      <a th:href="@{/usuario/dashboard}" class="nav-link-usuario">
+        <i class="bi bi-speedometer2 me-3"></i>
+        <span>Dashboard</span>
+      </a>
+      <a th:href="@{/usuario/rutinas}" class="nav-link-usuario">
+        <i class="bi bi-calendar-check me-3"></i>
+        <span>Mis Rutinas</span>
+      </a>
+      <a th:href="@{/usuario/buscar-entrenador}" class="nav-link-usuario">
+        <i class="bi bi-person-plus me-3"></i>
+        <span>Mi Entrenador</span>
+      </a>
+      <a th:href="@{/usuario/progreso}" class="nav-link-usuario">
+        <i class="bi bi-graph-up me-3"></i>
+        <span>Mi Progreso</span>
+      </a>
+      <a th:href="@{/usuario/mapa}" class="nav-link-usuario">
+        <i class="bi bi-geo-alt me-3"></i>
+        <span>Mapa</span>
+      </a>
+      <a th:href="@{/usuario/perfil}" class="nav-link-usuario">
+        <i class="bi bi-person-gear me-3"></i>
+        <span>Mi Perfil</span>
+      </a>
+    </div>
+
+    <div class="border-top pt-3 mt-auto">
+      <div class="flowfit-profile-section">
+        <div class="flowfit-profile-dropdown" id="flowfitProfileDropdown">
+          <div class="flowfit-profile-trigger" id="flowfitProfileTrigger" role="button" aria-haspopup="true" aria-expanded="false">
+            <img th:src="@{/assets/perfil_default.png}" src="/assets/perfil_default.png" alt="Profile" class="flowfit-profile-img me-2">
+            <div class="flowfit-profile-info">
+              <div class="flowfit-profile-name" th:text="${usuario != null ? #strings.substringBefore(usuario.nombre, ' ') : 'Usuario'}">Usuario</div>
+              <div class="flowfit-profile-role">FlowFit VIP</div>
+            </div>
+            <div class="flowfit-profile-arrow"><i class="bi bi-chevron-down"></i></div>
+          </div>
+
+          <div class="flowfit-profile-menu" id="flowfitProfileMenu" aria-labelledby="flowfitProfileTrigger">
+            <div class="px-2 py-2">
+              <div class="d-flex align-items-center gap-3">
+                <img th:src="@{/assets/perfil_default.png}" src="/assets/perfil_default.png" alt="Profile" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
+                <div>
+                  <div class="fw-bold" th:text="${usuario != null ? #strings.substringBefore(usuario.nombre, ' ') : 'Usuario'}">Usuario</div>
+                  <div class="text-muted small">FlowFit VIP</div>
+                </div>
+              </div>
+            </div>
+            <div class="flowfit-profile-divider"></div>
+            <a class="flowfit-profile-item d-flex align-items-center" th:href="@{/usuario/perfil}"><i class="bi bi-person-gear me-2"></i>Mi Perfil</a>
+            <a class="flowfit-profile-item d-flex align-items-center" th:href="@{/usuario/mapa}"><i class="bi bi-geo-alt me-2"></i>Mapa cercano</a>
+            <a class="flowfit-profile-item d-flex align-items-center" th:href="@{/usuario/configuracion}"><i class="bi bi-gear me-2"></i>Configuración</a>
+            <a class="flowfit-profile-item d-flex align-items-center" th:href="@{/usuario/soporte}"><i class="bi bi-headset me-2"></i>Soporte</a>
+            <div class="flowfit-profile-divider"></div>
+            <a class="flowfit-profile-item danger d-flex align-items-center" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <script src="/js/sidebar-profile.js"></script>
+</div>

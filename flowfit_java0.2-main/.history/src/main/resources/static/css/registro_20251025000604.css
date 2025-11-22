@@ -1,0 +1,594 @@
+/* ============================================
+   BASE & RESET
+   ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  background-attachment: fixed;
+  color: #e2e8f0;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ============================================
+   ANIMATED BLOBS
+   ============================================ */
+.blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  z-index: 0;
+  animation: float 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.blob-1 {
+  width: 500px;
+  height: 500px;
+  background: #4ade80;
+  top: -150px;
+  left: -150px;
+  animation-delay: 0s;
+}
+
+.blob-2 {
+  width: 400px;
+  height: 400px;
+  background: #60a5fa;
+  bottom: -100px;
+  right: -100px;
+  animation-delay: 7s;
+}
+
+.blob-3 {
+  width: 350px;
+  height: 350px;
+  background: #a78bfa;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: 14s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(50px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-30px, 30px) scale(0.9);
+  }
+}
+
+/* ============================================
+   FORM CONTAINER
+   ============================================ */
+.form-container {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 2rem 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 450px;
+  margin: 60px auto 30px auto;
+  position: relative;
+  z-index: 10;
+}
+
+/* ============================================
+   LOGO & TITLE
+   ============================================ */
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-logo {
+  height: 50px;
+  width: auto;
+  filter: drop-shadow(0 4px 12px rgba(74, 222, 128, 0.3));
+}
+
+.form-title {
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.375rem;
+  letter-spacing: -0.5px;
+}
+
+.form-subtitle {
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  font-weight: 400;
+  margin-bottom: 0;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+.form-label {
+  color: #e2e8f0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 0.375rem;
+  display: flex;
+  align-items: center;
+}
+
+.form-label i {
+  color: #4ade80;
+}
+
+.form-control {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #e2e8f0;
+  padding: 0.6875rem 0.875rem;
+  font-size: 0.8125rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: #4ade80;
+  box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.1);
+  color: #e2e8f0;
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: #64748b;
+  font-weight: 400;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn-flowfit {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  border: none;
+  color: #0f172a;
+  width: 100%;
+  padding: 0.8125rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 8px 24px rgba(74, 222, 128, 0.3);
+}
+
+.btn-flowfit:hover {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(74, 222, 128, 0.4);
+  color: #000;
+}
+
+.btn-flowfit:active {
+  transform: translateY(0);
+}
+
+/* ============================================
+   DIVIDER
+   ============================================ */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 2rem 0 1.5rem;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.divider span {
+  padding: 0 1rem;
+}
+
+/* ============================================
+   ROLE BUTTONS
+   ============================================ */
+.extra-links {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.btn-role {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  color: #e2e8f0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-role i {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.btn-role small {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #94a3b8;
+  margin-top: 0.125rem;
+}
+
+.btn-entrenador {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.btn-entrenador:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+.btn-entrenador i {
+  color: #60a5fa;
+}
+
+.btn-nutricionista {
+  border-color: rgba(251, 146, 60, 0.3);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-nutricionista i {
+  color: #fb923c;
+}
+
+.btn-nutricionista:disabled {
+  pointer-events: none;
+}
+
+/* ============================================
+   LOGIN LINK
+   ============================================ */
+.login-link {
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.login-link p {
+  color: #94a3b8;
+  font-size: 0.9375rem;
+  margin: 0;
+}
+
+.login-link a {
+  color: #4ade80;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.login-link a:hover {
+  color: #22c55e;
+  text-decoration: underline;
+}
+
+/* ============================================
+   ALERTS
+   ============================================ */
+.alert {
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.9375rem;
+  border: 1.5px solid;
+}
+
+.alert i {
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.alert-danger {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.alert-success {
+  background-color: rgba(74, 222, 128, 0.1);
+  border-color: rgba(74, 222, 128, 0.3);
+  color: #86efac;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  margin-top: auto;
+  padding: 2rem 0;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  position: relative;
+  z-index: 10;
+}
+
+.footer p {
+  margin-bottom: 0.5rem;
+}
+
+.footer a {
+  color: #4ade80;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.footer a:hover {
+  color: #22c55e;
+  text-decoration: underline;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 576px) {
+  body {
+    padding: 1rem;
+  }
+
+  .blob-1,
+  .blob-2,
+  .blob-3 {
+    width: 300px;
+    height: 300px;
+  }
+
+  .form-container {
+    margin: 2rem auto;
+    padding: 2rem 1.5rem;
+    border-radius: 20px;
+  }
+
+  .form-logo {
+    height: 48px;
+  }
+
+  .form-title {
+    font-size: 1.75rem;
+  }
+
+  .form-subtitle {
+    font-size: 0.9375rem;
+  }
+
+  .extra-links {
+    flex-direction: column;
+  }
+
+  .btn-role {
+    width: 100%;
+  }
+
+  .form-control {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .btn-flowfit {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.9375rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .form-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .form-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+.form-container {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus states enhancement */
+.form-control:focus ~ .form-label i {
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
+}
+
+/* Loading state for button (optional for future) */
+.btn-flowfit.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.btn-flowfit.loading::after {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 0.6s linear infinite;
+  margin-left: 0.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   ENTRENADOR PAGE SPECIFIC STYLES
+   ============================================ */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  padding: 0.625rem 1.25rem;
+  border-radius: 50px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+
+.role-badge i {
+  font-size: 1.125rem;
+}
+
+/* Entrenador form labels with blue icons */
+.page-wrapper .form-label i {
+  color: #60a5fa;
+}
+
+.info-box {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1.5px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  backdrop-filter: blur(8px);
+}
+
+.info-box-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #60a5fa;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  margin-bottom: 0.5rem;
+}
+
+.info-box-header i {
+  font-size: 1.125rem;
+}
+
+.info-box-text {
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.btn-entrenador-submit {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
+.btn-entrenador-submit:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
+}
+
+.back-link {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-back {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
+  transform: translateY(-2px);
+}
+
+.btn-back i {
+  font-size: 1.125rem;
+}
+
+/* Page wrapper for entrenador page */
+.page-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+main {
+  position: relative;
+  z-index: 10;
+}

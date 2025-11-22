@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<div th:fragment="sidebar">
+  <!-- FlowFit Sidebar (Admin) -->
+  <nav class="sidebar-base sidebar-admin d-flex flex-column" id="sidebar">
+    <!-- Brand -->
+    <a th:href="@{/admin/dashboard}" class="navbar-brand d-flex align-items-center text-decoration-none">
+      <img src="/assets/logo_flowfit_admin.png" alt="FlowFit Admin" height="40" class="me-3 logo-flowfit">
+      <span class="brand-text">FlowFit</span>
+    </a>
+
+    <!-- Navigation -->
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a th:href="@{/admin/dashboard}" class="nav-link-base nav-link-admin" title="Dashboard">
+          <i class="bi bi-speedometer2 me-3"></i>
+          <span class="nav-text">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/usuarios-pendientes}" class="nav-link-base nav-link-admin" title="Usuarios Pendientes">
+          <i class="bi bi-people me-3"></i>
+          <span class="nav-text">Usuarios Pendientes</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/usuarios}" class="nav-link-base nav-link-admin" title="Gestión Usuarios">
+          <i class="bi bi-person-badge me-3"></i>
+          <span class="nav-text">Gestión Usuarios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/ejercicios}" class="nav-link-base nav-link-admin" title="Ejercicios">
+          <i class="bi bi-activity me-3"></i>
+          <span class="nav-text">Ejercicios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/correos}" class="nav-link-base nav-link-admin" title="Envío Masivo">
+          <i class="bi bi-envelope me-3"></i>
+          <span class="nav-text">Envío Masivo</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Profile Section -->
+    <div class="border-top pt-3 mt-auto">
+      <div class="dropdown profile-dropdown-base">
+        <div class="profile-icon-base d-flex align-items-center w-100" id="profileDropdownAdmin" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-base me-2" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+          <div class="flex-grow-1">
+            <div class="small fw-bold text-white" th:text="${usuario != null ? #strings.substringBefore(usuario.nombre, ' ') : 'Admin'}">Admin</div>
+            <div class="small text-muted-flowfit">Administrador</div>
+          </div>
+          <i class="bi bi-chevron-down text-white"></i>
+        </div>
+        <ul class="dropdown-menu" aria-labelledby="profileDropdownAdmin">
+          <li><a class="dropdown-item" th:href="@{/admin/perfil}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>

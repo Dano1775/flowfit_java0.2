@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Rutinas - FlowFit</title>
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- FlowFit CSS System -->
+    <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
+    <link th:href="@{/css/flowfit-entrenador.css}" rel="stylesheet">
+    
+    <style>
+        /* Rutina Cards */
+        .rutina-card {
+            transition: all 0.3s ease;
+        }
+        
+        .rutina-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Dropdown custom */
+        .dropdown-menu {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+        
+        .dropdown-item {
+            color: #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(59, 130, 246, 0.2);
+            color: white;
+        }
+        
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Desktop Toggle (for collapse) -->
+  <button class="sidebar-collapse-btn d-none d-md-flex" id="sidebarCollapseBtn" title="Contraer/Expandir Sidebar">
+    <i class="bi bi-chevron-left"></i>
+  </button>
+
+  <!-- Mobile Toggle -->
+  <button class="sidebar-toggle-base sidebar-toggle-entrenador d-md-none" id="sidebarToggle">
+    <i class="bi bi-list fs-4"></i>
+  </button>
+
+  <!-- Sidebar Overlay for Mobile -->
+  <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
+
+  <!-- FlowFit Sidebar -->
+  <div th:replace="~{fragments/sidebar-entrenador :: sidebar}"></div>
+
+  <!-- Main Content -->
+  <main class="main-content-base fade-in-up">
+    <div class="container-fluid p-4">
+      <!-- Page Header -->
+      <div class="mb-5">
+        <div class="d-flex align-items-center mb-4">
+          <div style="width: 48px; height: 48px;" class="bg-primary-subtle text-primary border border-primary border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3">
+            <i class="bi bi-list-check fs-4"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h3 class="text-white fw-semibold mb-1">Mis Rutinas</h3>
+            <p class="text-muted-flowfit mb-0 small">Administra y gestiona todas tus rutinas de entrenamiento</p>
+          </div>
+          <a th:href="@{/entrenador/rutinas/crear}" class="btn-primary-entrenador">
+            <i class="bi bi-plus-circle"></i>
+            Nueva Rutina
+          </a>
+        </div>
+
+        
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-4">
+          <i class="bi bi-check-circle me-2"></i>
+          <span th:text="${successMessage}"></span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-4">
+          <i class="bi bi-exclamation-circle me-2"></i>
+          <span th:text="${errorMessage}"></span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      </div>
+
+      <!-- Rutinas List -->
+      <div class="row">
+        <div class="col-12">
+          <div th:if="${#lists.isEmpty(rutinas)}" class="card-base card-entrenador text-center">
+            <div class="card-body py-5">
+              <i class="bi bi-journal-x text-muted-flowfit" style="font-size: 4rem;"></i>
+              <h3 class="mt-4 mb-3 text-white">No tienes rutinas creadas</h3>
+              <p class="text-muted-flowfit mb-4">Crea tu primera rutina para comenzar a entrenar a tus usuarios</p>
+              <a th:href="@{/entrenador/rutinas/crear}" class="btn-primary-entrenador">
+                <i class="bi bi-plus-circle"></i>
+                Crear Mi Primera Rutina
+              </a>
+            </div>
+          </div>
+
+          <div th:if="${!#lists.isEmpty(rutinas)}" class="row g-4">
+            <div class="col-lg-6 col-xl-4" th:each="rutina : ${rutinas}">
+              <div class="card-base card-entrenador h-100">
+                <div class="card-body p-4">
+                  <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="text-white fw-semibold mb-0" th:text="${rutina.nombre}">Nombre de la Rutina</h5>
+                    <div class="dropdown">
+                      <button class="btn btn-sm p-1" style="background: none; border: none; color: #94a3b8;" 
+                              data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots-vertical"></i>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end" 
+                          style="background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;">
+                        <li>
+                          <a class="dropdown-item" th:href="@{/entrenador/rutinas/{id}(id=${rutina.id})}"
+                             style="color: #cbd5e1;">
+                            <i class="bi bi-eye me-2"></i>Ver Detalles
+                          </a>
+                        </li>
+                        <li>
+                          <a class="dropdown-item" th:href="@{/entrenador/asignar-rutinas(rutina=${rutina.id})}"
+                             style="color: #cbd5e1;">
+                            <i class="bi bi-person-plus me-2"></i>Asignar a Usuario
+                          </a>
+                        </li>
+                        <li><hr class="dropdown-divider" style="border-color: rgba(255, 255, 255, 0.1);"></li>
+                        <li>
+                          <a class="dropdown-item text-danger" href="#" 
+                             th:attr="onclick=|confirmarEliminar(${rutina.id}, '${rutina.nombre}')|">
+                            <i class="bi bi-trash me-2"></i>Eliminar
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <p class="text-muted-flowfit mb-3" th:text="${rutina.descripcion ?: 'Sin descripción'}">
+                    Descripción de la rutina...
+                  </p>
+                  
+                  <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="badge badge-primary-entrenador">
+                      <i class="bi bi-activity me-1"></i>
+                      <span th:text="${rutina.ejercicios?.size() ?: 0}">0</span> ejercicios
+                    </span>
+                    <span class="badge badge-secondary-entrenador">
+                      <i class="bi bi-calendar me-1"></i>
+                      <span th:text="${#temporals.format(rutina.fechaCreacion, 'dd/MM/yy')}">01/01/24</span>
+                    </span>
+                  </div>
+
+                  <div class="d-flex gap-2 mt-auto">
+                    <a th:href="@{/entrenador/rutinas/{id}(id=${rutina.id})}" 
+                       class="btn-outline-entrenador flex-fill text-center">
+                      <i class="bi bi-eye"></i>
+                      Ver
+                    </a>
+                    <a th:href="@{/entrenador/asignar-rutinas(rutina=${rutina.id})}" 
+                       class="btn-primary-entrenador flex-fill text-center">
+                      <i class="bi bi-person-plus"></i>
+                      Asignar
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal de Confirmación de Eliminación -->
+  <div class="modal fade" id="eliminarModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content" style="background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;">
+        <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+          <h5 class="modal-title text-light">
+            <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+            Confirmar Eliminación
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-light">
+          <p>¿Estás seguro de que deseas eliminar la rutina <strong id="rutinaEliminarNombre"></strong>?</p>
+          <p class="text-warning small mb-0">
+            <i class="bi bi-info-circle me-1"></i>
+            Esta acción no se puede deshacer y también eliminará todas las asignaciones relacionadas.
+          </p>
+        </div>
+        <div class="modal-footer" style="border-top: 1px solid rgba(255, 255, 255, 0.1);">
+          <button type="button" class="btn-outline-entrenador" data-bs-dismiss="modal">Cancelar</button>
+          <form id="eliminarForm" method="post" style="display: inline;">
+            <button type="submit" class="btn-danger-flowfit">
+              <i class="bi bi-trash me-1"></i>
+              Eliminar Rutina
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Sidebar Toggle Functionality
+    const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebar = document.querySelector('.sidebar-base');
+
+    if (sidebarCollapseBtn) {
+      sidebarCollapseBtn.addEventListener('click', function() {
+        sidebar.classList.toggle('collapsed');
+        document.querySelector('.main-content-base').classList.toggle('expanded');
+      });
+    }
+
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.add('show');
+        sidebarOverlay.classList.add('show');
+      });
+    }
+
+    if (sidebarOverlay) {
+      sidebarOverlay.addEventListener('click', function() {
+        sidebar.classList.remove('show');
+        sidebarOverlay.classList.remove('show');
+      });
+    }
+
+    // Confirmar eliminación de rutina
+    function confirmarEliminar(rutinaId, rutinaNombre) {
+      document.getElementById('rutinaEliminarNombre').textContent = rutinaNombre;
+      document.getElementById('eliminarForm').action = /*[[@{/entrenador/rutinas/}]]*/ '' + rutinaId + '/eliminar';
+      
+      const modal = new bootstrap.Modal(document.getElementById('eliminarModal'));
+      modal.show();
+    }
+  </script>
+</body>
+</html>

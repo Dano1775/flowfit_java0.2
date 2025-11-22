@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar Sesión | FlowFit</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+  <link rel="stylesheet" th:href="@{/css/inicio.css}" />
+</head>
+<body>
+
+  <!-- Background Blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="login-background">
+    <!-- Back to Home Button -->
+    <a th:href="@{/}" class="btn-home">
+      <i class="bi bi-house-door"></i>
+      <span>Inicio</span>
+    </a>
+
+    <div class="login-wrapper" data-aos="zoom-in">
+      <!-- Left Side: Login Form -->
+      <div class="login-form-section">
+        <!-- Logo and Title -->
+        <div class="text-center mb-4">
+          <div class="logo-wrapper mb-3">
+            <img th:src="@{/assets/logo_flowfit.png}" alt="FlowFit" class="form-logo">
+          </div>
+          <h2 class="login-title">Bienvenido de vuelta</h2>
+          <p class="login-subtitle">Inicia sesión para continuar tu progreso</p>
+        </div>
+
+        <!-- Display error message if login fails -->
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <span th:text="${error}"></span>
+        </div>
+
+        <!-- Display success message if any -->
+        <div th:if="${success}" class="alert alert-success" role="alert">
+          <i class="bi bi-check-circle-fill me-2"></i>
+          <span th:text="${success}"></span>
+        </div>
+
+        <form th:action="@{/login}" method="POST">
+          <div class="mb-3">
+            <label for="correo" class="form-label">
+              <i class="bi bi-envelope me-2"></i>Correo electrónico
+            </label>
+            <div class="input-wrapper">
+              <i class="bi bi-envelope-fill input-icon"></i>
+              <input type="email" class="form-control input-glass" id="correo" name="correo" 
+                     placeholder="correo@ejemplo.com" th:value="${correo}" required />
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="clave" class="form-label">
+              <i class="bi bi-lock me-2"></i>Contraseña
+            </label>
+            <div class="input-wrapper">
+              <i class="bi bi-lock-fill input-icon"></i>
+              <input type="password" class="form-control input-glass" id="clave" name="clave" 
+                     placeholder="Ingresa tu contraseña" required />
+            </div>
+            <div class="text-end mt-2">
+              <a href="#" class="forgot-password-link" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+                ¿Olvidaste tu contraseña?
+              </a>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-flowfit">
+            <span>Iniciar sesión</span>
+            <i class="bi bi-arrow-right-circle ms-2"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- Vertical Divider -->
+      <div class="vertical-divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">O</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- Right Side: Registration Options -->
+      <div class="register-section">
+        <div class="register-header">
+          <h3 class="register-title">¿Primera vez aquí?</h3>
+          <p class="register-subtitle">Únete a FlowFit y comienza tu viaje fitness</p>
+        </div>
+
+        <div class="register-options">
+          <a th:href="@{/registro}" class="register-card register-card-user">
+            <div class="register-card-icon">
+              <i class="bi bi-person-plus-fill"></i>
+            </div>
+            <div class="register-card-content">
+              <h4 class="register-card-title">Registrarse como Usuario</h4>
+              <p class="register-card-description">Accede a rutinas personalizadas y seguimiento de progreso</p>
+            </div>
+            <i class="bi bi-arrow-right register-card-arrow"></i>
+          </a>
+
+          <a th:href="@{/registro/entrenador}" class="register-card register-card-trainer">
+            <div class="register-card-icon">
+              <i class="bi bi-person-badge-fill"></i>
+            </div>
+            <div class="register-card-content">
+              <h4 class="register-card-title">Registrarse como Entrenador</h4>
+              <p class="register-card-description">Crea rutinas y gestiona a tus clientes</p>
+            </div>
+            <i class="bi bi-arrow-right register-card-arrow"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Recuperación de Contraseña -->
+  <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal-glass">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="resetPasswordModalLabel">
+            <i class="bi bi-key-fill me-2" style="color: #fbbf24;"></i>
+            Recuperar Contraseña
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="resetFormContainer">
+            <p class="text-light mb-3">
+              Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+            </p>
+            <form id="resetPasswordForm">
+              <div class="mb-3">
+                <label for="resetEmail" class="form-label text-light">
+                  <i class="bi bi-envelope me-2"></i>Correo electrónico
+                </label>
+                <input type="email" class="form-control input-glass" id="resetEmail" 
+                       placeholder="correo@ejemplo.com" required />
+              </div>
+              <div id="resetMessage" class="alert d-none" role="alert"></div>
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-warning btn-lg" id="resetSubmitBtn">
+                  <i class="bi bi-send-fill me-2"></i>
+                  Enviar enlace de recuperación
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    AOS.init();
+
+    // Manejo del formulario de recuperación de contraseña
+    document.getElementById('resetPasswordForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('resetEmail').value;
+      const submitBtn = document.getElementById('resetSubmitBtn');
+      const messageDiv = document.getElementById('resetMessage');
+      
+      // Deshabilitar botón y mostrar loading
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
+      messageDiv.classList.add('d-none');
+      
+      try {
+        const response = await fetch('/api/password-reset/request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: email })
+        });
+        
+        const data = await response.json();
+        
+        // Mostrar mensaje
+        messageDiv.classList.remove('d-none', 'alert-danger', 'alert-success');
+        
+        if (data.success) {
+          messageDiv.classList.add('alert-success');
+          messageDiv.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>' + data.message;
+          
+          // Limpiar formulario
+          document.getElementById('resetEmail').value = '';
+          
+          // Cerrar modal después de 3 segundos
+          setTimeout(() => {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal'));
+            modal.hide();
+            messageDiv.classList.add('d-none');
+          }, 3000);
+        } else {
+          messageDiv.classList.add('alert-danger');
+          messageDiv.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i>' + data.message;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        messageDiv.classList.remove('d-none');
+        messageDiv.classList.add('alert-danger');
+        messageDiv.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>Error de conexión. Por favor, intenta nuevamente.';
+      } finally {
+        // Restaurar botón
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-send-fill me-2"></i>Enviar enlace de recuperación';
+      }
+    });
+  </script>
+  
+  <style>
+    .forgot-password-link {
+      color: #10b981;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .forgot-password-link:hover {
+      color: #059669;
+      text-decoration: underline;
+    }
+    
+    .modal-glass {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+    }
+    
+    .modal-glass .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .modal-glass .modal-title {
+      color: #f1f5f9;
+      font-weight: 700;
+    }
+    
+    .modal-glass .modal-body {
+      padding: 2rem 1.5rem;
+    }
+    
+    .btn-warning {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+      color: white;
+    }
+  </style>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido Administrador - FlowFit</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+    
+    <!-- Main Container -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <!-- Email Card -->
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);">
+                    
+                    <!-- Header Gradient -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 40px 30px; text-align: center; position: relative;">
+                            <!-- Avatar Circle -->
+                            <div style="width: 100px; height: 100px; margin: 0 auto 20px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 4px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);">
+                                <span style="font-size: 48px; line-height: 100px;">🛡️</span>
+                                <!-- Status Indicator -->
+                                <div style="position: absolute; bottom: 35px; right: 0; width: 20px; height: 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 3px solid #dc2626; border-radius: 50%; box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);"></div>
+                            </div>
+                            <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 800; letter-spacing: -0.5px; text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);">FlowFit</h1>
+                            <p style="margin: 8px 0 0 0; color: rgba(255, 255, 255, 0.95); font-size: 14px; font-weight: 600;">Sistema de Gestión - Panel de Administración</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px 30px; background: rgba(15, 23, 42, 0.95);">
+                            
+                            <!-- Welcome Message -->
+                            <h2 style="margin: 0 0 20px 0; color: #ffffff; font-size: 26px; font-weight: 700; text-align: center;">
+                                ¡Hola, <span th:text="${nombre}" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Admin</span>! 🎯
+                            </h2>
+                            
+                            <p style="margin: 0 0 30px 0; color: #cbd5e1; font-size: 16px; line-height: 1.8; text-align: center;">
+                                Tu cuenta de administrador ha sido creada con éxito. Ahora tienes acceso completo al panel de control de FlowFit.
+                            </p>
+                            
+                            <!-- Credentials Card -->
+                            <div style="background: linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(153, 27, 27, 0.1) 100%); border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 16px; padding: 24px; margin: 30px 0; box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);">
+                                <h3 style="margin: 0 0 16px 0; color: #ef4444; font-size: 18px; font-weight: 700; text-align: center;">
+                                    🔐 Datos de Acceso
+                                </h3>
+                                <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 16px;">
+                                    <p style="margin: 0 0 12px 0; color: rgba(203, 213, 225, 0.7); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Email:</p>
+                                    <p th:text="${correo}" style="margin: 0 0 20px 0; color: #ffffff; font-size: 16px; font-weight: 600; word-break: break-all;">admin@flowfit.com</p>
+                                    
+                                    <p style="margin: 0 0 12px 0; color: rgba(203, 213, 225, 0.7); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">URL Dashboard:</p>
+                                    <p style="margin: 0; color: #ef4444; font-size: 14px; font-weight: 600; word-break: break-all;">
+                                        <a th:href="${urlDashboard}" th:text="${urlDashboard}" style="color: #ef4444; text-decoration: none;">http://localhost:8080/admin/dashboard</a>
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Features Showcase -->
+                            <h3 style="margin: 30px 0 20px 0; color: #ffffff; font-size: 18px; font-weight: 700; text-align: center;">
+                                ⚡ Funciones Principales
+                            </h3>
+                            
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td width="33%" style="padding: 12px; text-align: center; vertical-align: top;">
+                                        <div style="background: rgba(220, 38, 38, 0.08); border: 1px solid rgba(220, 38, 38, 0.2); border-radius: 12px; padding: 20px; height: 100%;">
+                                            <div style="font-size: 32px; margin-bottom: 12px;">👥</div>
+                                            <h4 style="margin: 0 0 8px 0; color: #ffffff; font-size: 14px; font-weight: 700;">Gestión Usuarios</h4>
+                                            <p style="margin: 0; color: rgba(203, 213, 225, 0.8); font-size: 12px; line-height: 1.5;">Aprobar, editar y administrar cuentas</p>
+                                        </div>
+                                    </td>
+                                    <td width="33%" style="padding: 12px; text-align: center; vertical-align: top;">
+                                        <div style="background: rgba(220, 38, 38, 0.08); border: 1px solid rgba(220, 38, 38, 0.2); border-radius: 12px; padding: 20px; height: 100%;">
+                                            <div style="font-size: 32px; margin-bottom: 12px;">💪</div>
+                                            <h4 style="margin: 0 0 8px 0; color: #ffffff; font-size: 14px; font-weight: 700;">Ejercicios Globales</h4>
+                                            <p style="margin: 0; color: rgba(203, 213, 225, 0.8); font-size: 12px; line-height: 1.5;">Catálogo completo de ejercicios</p>
+                                        </div>
+                                    </td>
+                                    <td width="33%" style="padding: 12px; text-align: center; vertical-align: top;">
+                                        <div style="background: rgba(220, 38, 38, 0.08); border: 1px solid rgba(220, 38, 38, 0.2); border-radius: 12px; padding: 20px; height: 100%;">
+                                            <div style="font-size: 32px; margin-bottom: 12px;">📊</div>
+                                            <h4 style="margin: 0 0 8px 0; color: #ffffff; font-size: 14px; font-weight: 700;">Estadísticas</h4>
+                                            <p style="margin: 0; color: rgba(203, 213, 225, 0.8); font-size: 12px; line-height: 1.5;">Monitoreo y análisis completo</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- CTA Button -->
+                            <div style="text-align: center; margin: 35px 0 20px 0;">
+                                <a th:href="${urlDashboard}" style="display: inline-block; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 12px; font-weight: 700; font-size: 16px; box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4); transition: all 0.3s ease;">
+                                    🚀 Acceder al Panel
+                                </a>
+                            </div>
+                            
+                            <!-- Important Note -->
+                            <div style="background: rgba(251, 191, 36, 0.1); border-left: 4px solid #fbbf24; border-radius: 8px; padding: 16px; margin: 30px 0;">
+                                <p style="margin: 0; color: #fbbf24; font-size: 14px; line-height: 1.6;">
+                                    <strong>⚠️ Importante:</strong> Como administrador, tienes acceso completo al sistema. Por favor, mantén tus credenciales seguras.
+                                </p>
+                            </div>
+                            
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center; background: rgba(15, 23, 42, 0.95); border-top: 1px solid rgba(220, 38, 38, 0.2);">
+                            <p style="margin: 0 0 12px 0; color: #cbd5e1; font-size: 14px; font-weight: 600;">¿Necesitas soporte técnico?</p>
+                            <p style="margin: 0 0 20px 0;">
+                                <a href="mailto:admin@flowfit.com" style="color: #ef4444; text-decoration: none; font-weight: 600; font-size: 14px;">admin@flowfit.com</a>
+                            </p>
+                            <div style="border-top: 1px solid rgba(71, 85, 105, 0.5); padding-top: 20px; margin-top: 20px;">
+                                <p style="margin: 0; color: rgba(148, 163, 184, 0.8); font-size: 12px; line-height: 1.6;">
+                                    © 2025 FlowFit. Todos los derechos reservados.<br>
+                                    Sistema de Gestión de Entrenamientos
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+    
+</body>
+</html>

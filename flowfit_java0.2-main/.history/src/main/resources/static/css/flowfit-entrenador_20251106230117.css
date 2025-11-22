@@ -1,0 +1,112 @@
+/* ===== FLOWFIT - ENTRENADOR SPECIFIC CSS ===== */
+
+/* Variables específicas del Entrenador */
+:root {
+    --entrenador-primary: #3b82f6;      /* Azul vibrante */
+    --entrenador-primary-light: #60a5fa; /* Azul claro */
+    --entrenador-primary-dark: #2563eb;  /* Azul oscuro */
+    --entrenador-gradient: linear-gradient(135deg, #3b82f6 0%, #60a5fa 50%, #3b82f6 100%);
+    --entrenador-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+/* Sidebar específico del entrenador */
+.sidebar-entrenador {
+    background: linear-gradient(180deg, 
+        rgba(59, 130, 246, 0.95) 0%, 
+        rgba(96, 165, 250, 0.85) 40%,
+        rgba(15, 23, 42, 0.95) 100%);
+}
+
+/* Logo específico */
+.sidebar-entrenador .brand-text {
+    background: linear-gradient(135deg, #ffffff 0%, #bfdbfe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Enlaces activos del entrenador */
+.sidebar-entrenador .nav-pills .nav-link-entrenador.active {
+    background: var(--entrenador-gradient) !important;
+    color: white !important;
+    box-shadow: var(--entrenador-shadow);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-entrenador .nav-pills .nav-link-entrenador:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Botón toggle específico */
+.sidebar-toggle-entrenador {
+    background: var(--entrenador-gradient);
+    box-shadow: var(--entrenador-shadow);
+}
+
+/* Stats cards del entrenador */
+.stat-card-entrenador {
+    position: relative;
+}
+
+.stat-card-entrenador::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--entrenador-gradient);
+    border-radius: 16px 16px 0 0;
+}
+
+.stat-card-entrenador:hover::before {
+    height: 6px;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
+}
+
+/* Botones específicos del entrenador */
+.btn-entrenador-primary {
+    background: var(--entrenador-gradient);
+    box-shadow: var(--entrenador-shadow);
+}
+
+.btn-entrenador-primary:hover {
+    box-shadow: 0 12px 35px rgba(59, 130, 246, 0.6);
+    filter: brightness(1.1);
+}
+
+.btn-entrenador-outline {
+    border-color: var(--entrenador-primary);
+    color: var(--entrenador-primary);
+}
+
+.btn-entrenador-outline:hover {
+    background: var(--entrenador-gradient);
+    border-color: var(--entrenador-primary-light);
+    color: white;
+    box-shadow: var(--entrenador-shadow);
+}
+
+/* Cards específicas del entrenador */
+.card-entrenador .card-header h5 {
+    background: var(--entrenador-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Iconos específicos del entrenador */
+.icon-entrenador {
+    color: var(--entrenador-primary);
+    filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3));
+}
+
+/* Efectos hover específicos */
+.stat-card-entrenador:hover {
+    box-shadow: var(--flowfit-shadow-lg), var(--entrenador-shadow);
+}
+
+.card-entrenador:hover {
+    border-color: rgba(225, 29, 72, 0.3) !important;
+}
