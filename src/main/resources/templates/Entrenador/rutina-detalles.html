@@ -313,7 +313,7 @@
                         </span>
                         <span class="badge badge-secondary-entrenador" th:if="${ejercicio.pesoKg != null && ejercicio.pesoKg > 0}">
                           <i class="bi bi-lightning me-1"></i>
-                          <span th:text="${ejercicio.pesoKg} + ' kg'">0 kg</span>
+                          <span th:text="${ejercicio.pesoKg} + ' kg'"¿>0 kg</span>
                         </span>
                       </div>
                       
@@ -342,7 +342,7 @@
                 <div class="bg-success bg-opacity-25 rounded-3 p-2 me-3">
                   <i class="bi bi-people fs-4 text-success"></i>
                 </div>
-                <div>
+-                <div>
                   <h5 class="text-white mb-1 fw-bold">Usuarios con esta Rutina</h5>
                   <p class="text-muted-flowfit small mb-0">
                     <span th:text="${#lists.size(asignaciones)}">0</span> usuarios asignados

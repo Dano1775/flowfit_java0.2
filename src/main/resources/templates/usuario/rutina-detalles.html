@@ -1,61 +1,181 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title th:text="'Detalles: ' + ${rutina.nombre} + ' - FlowFit VIP'">Detalles de Rutina - FlowFit VIP</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${rutina.nombre} + ' - FlowFit'">Detalles de Rutina - FlowFit</title>
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
-  <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
-  <!-- Sistema CSS FlowFit VIP -->
-  <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
-  <link th:href="@{/css/flowfit-usuario.css}" rel="stylesheet">
+    <!-- FlowFit CSS System -->
+    <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
+    <link th:href="@{/css/flowfit-usuario.css}" rel="stylesheet">
+    
+    <style>
+        /* Ejercicio Card Mejorado */
+        .ejercicio-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #10b981;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ejercicio-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+            transition: width 0.3s ease;
+        }
+        
+        .ejercicio-card:hover {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: #10b981;
+            transform: translateX(8px);
+            box-shadow: -8px 8px 24px rgba(16, 185, 129, 0.2);
+        }
+        
+        .ejercicio-card:hover::before {
+            width: 100%;
+            opacity: 0.1;
+        }
+        
+        /* Número de orden */
+        .orden-badge {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Stats badges */
+        .stat-badge {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-badge:hover {
+            background: rgba(16, 185, 129, 0.25);
+            transform: scale(1.05);
+        }
+        
+        .stat-badge i {
+            color: #10b981;
+            font-size: 1.125rem;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: rgba(16, 185, 129, 0.3);
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+        
+        /* Animaciones */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .stagger-item {
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+        
+        .stagger-item:nth-child(1) { animation-delay: 0.05s; }
+        .stagger-item:nth-child(2) { animation-delay: 0.1s; }
+        .stagger-item:nth-child(3) { animation-delay: 0.15s; }
+        .stagger-item:nth-child(4) { animation-delay: 0.2s; }
+        .stagger-item:nth-child(5) { animation-delay: 0.25s; }
+        .stagger-item:nth-child(6) { animation-delay: 0.3s; }
+    </style>
 </head>
 <body>
 
-  <!-- Botón Toggle Móvil -->
+  <!-- Mobile Toggle -->
   <button class="sidebar-toggle-base sidebar-toggle-usuario d-md-none" id="sidebarToggle">
     <i class="bi bi-list fs-4"></i>
   </button>
 
-  <!-- Superposición de Sidebar para Móvil -->
+  <!-- Sidebar Overlay for Mobile -->
   <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
 
-  <!-- Sidebar FlowFit VIP -->
+  <!-- Sidebar -->
   <nav class="sidebar-base sidebar-usuario d-flex flex-column" id="sidebar">
-    <!-- Marca -->
+    <!-- Logo y Título -->
     <a th:href="@{/usuario/dashboard}" class="navbar-brand d-flex align-items-center text-decoration-none">
-      <img src="/assets/logo_flowfit_usuario.png" alt="FlowFit VIP" height="40" class="me-3 logo-flowfit">
-      <span class="brand-text">FlowFit VIP</span>
+      <img src="/assets/logo_flowfit_usuario.png" alt="FlowFit" height="40" class="me-3 logo-flowfit">
+      <span class="brand-text">FlowFit</span>
     </a>
 
-    <!-- Navegación -->
+    <!-- Navegación Principal -->
     <ul class="nav nav-pills flex-column mb-auto">
       <li class="nav-item">
-        <a th:href="@{/usuario/dashboard}" class="nav-link-base nav-link-usuario">
-          <i class="bi bi-speedometer2 me-3"></i> Dashboard
+        <a th:href="@{/usuario/dashboard}" class="nav-link-base nav-link-usuario" title="Dashboard">
+          <i class="bi bi-speedometer2 me-3"></i>
+          <span class="nav-text">Dashboard</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/usuario/rutinas}" class="nav-link-base nav-link-usuario active">
-          <i class="bi bi-list-check me-3"></i> Mis Rutinas
+        <a th:href="@{/usuario/rutinas}" class="nav-link-base nav-link-usuario active" title="Mis Rutinas">
+          <i class="bi bi-journal-text me-3"></i>
+          <span class="nav-text">Mis Rutinas</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/usuario/buscar-entrenador}" class="nav-link-base nav-link-usuario">
-          <i class="bi bi-person-plus me-3"></i> Mi Entrenador
+        <a th:href="@{/usuario/buscar-entrenador}" class="nav-link-base nav-link-usuario" title="Mi Entrenador">
+          <i class="bi bi-search me-3"></i>
+          <span class="nav-text">Mi Entrenador</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/usuario/progreso}" class="nav-link-base nav-link-usuario">
-          <i class="bi bi-graph-up me-3"></i> Mi Progreso
+        <a th:href="@{/usuario/progreso}" class="nav-link-base nav-link-usuario" title="Mi Progreso">
+          <i class="bi bi-graph-up me-3"></i>
+          <span class="nav-text">Mi Progreso</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/usuario/perfil}" class="nav-link-base nav-link-usuario">
-          <i class="bi bi-person-circle me-3"></i> Mi Perfil
+        <a th:href="@{/usuario/perfil}" class="nav-link-base nav-link-usuario" title="Mi Perfil">
+          <i class="bi bi-person-circle me-3"></i>
+          <span class="nav-text">Mi Perfil</span>
         </a>
       </li>
     </ul>
@@ -67,15 +187,13 @@
           <img src="/assets/perfil_default.png" alt="Profile" class="profile-image-base me-2" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
           <div class="flex-grow-1">
             <div class="small fw-bold text-white" th:text="${usuario != null ? #strings.substringBefore(usuario.nombre, ' ') : 'Usuario'}">Usuario</div>
-            <div class="small text-muted-flowfit">FlowFit VIP</div>
+            <div class="small text-muted-flowfit">FlowFit</div>
           </div>
           <i class="bi bi-chevron-down text-white"></i>
         </div>
         <ul class="dropdown-menu" aria-labelledby="profileDropdownUsuario">
           <li><a class="dropdown-item" th:href="@{/usuario/perfil}"><i class="bi bi-person-gear me-2"></i>Mi Perfil</a></li>
-          <li><a class="dropdown-item" th:href="@{/usuario/configuracion}"><i class="bi bi-gear me-2"></i>
-            Configuración</a></li>
-          <li><a class="dropdown-item" th:href="@{/usuario/soporte}"><i class="bi bi-headset me-2"></i>Soporte</a></li>
+          <li><a class="dropdown-item" th:href="@{/usuario/configuracion}"><i class="bi bi-gear me-2"></i>Configuración</a></li>
           <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
         </ul>
@@ -83,169 +201,192 @@
     </div>
   </nav>
 
-  <!-- Contenido Principal -->
+  <!-- Main Content -->
   <main class="main-content-base fade-in-up">
-    <div class="container-fluid">
-      
-      <!-- Breadcrumb y Header -->
-      <div class="row mb-4">
-        <div class="col-12">
-          <nav aria-label="breadcrumb" class="flowfit-breadcrumb">
-            <ol class="breadcrumb">
-              <li class="breadcrumb-item">
-                <a th:href="@{/usuario/rutinas}" class="flowfit-breadcrumb-link">
-                  <i class="bi bi-arrow-left me-2"></i>Mis Rutinas
-                </a>
-              </li>
-              <li class="breadcrumb-item active flowfit-breadcrumb-active" aria-current="page" th:text="${rutina.nombre}">Detalles de Rutina</li>
-            </ol>
-          </nav>
-          
-          <div class="flowfit-page-header">
-            <div class="flowfit-page-title">
-              <h1 class="flowfit-title" th:text="${rutina.nombre}">Nombre de la Rutina</h1>
-              <p class="flowfit-subtitle" th:text="${rutina.descripcion}">Descripción de la rutina</p>
-              <div class="flowfit-meta-info">
-                <span class="flowfit-badge badge-success-usuario" th:text="${rutina.dificultad}">Intermedio</span>
-                <span class="flowfit-meta-item">
-                  <i class="bi bi-clock me-1 icon-usuario"></i><span th:text="${rutina.duracionMinutos}">45</span> minutos
-                </span>
-                <span class="flowfit-meta-item">
-                  <i class="bi bi-fire me-1 icon-usuario"></i><span th:text="${rutina.caloriasEstimadas}">300</span> kcal
-                </span>
-              </div>
+    <div class="container-fluid p-4">
+
+      <!-- Breadcrumb y Acciones -->
+      <div class="mb-4">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/usuario/dashboard}" class="text-success">Dashboard</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/usuario/rutinas}" class="text-success">Mis Rutinas</a></li>
+            <li class="breadcrumb-item active text-white" th:text="${rutina.nombre}">Nombre Rutina</li>
+          </ol>
+        </nav>
+        
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div class="d-flex align-items-center">
+            <div style="width: 48px; height: 48px;" class="bg-success bg-opacity-25 text-success border border-success border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3">
+              <i class="bi bi-journal-text fs-4"></i>
             </div>
-            
-            <!-- Botones de acción -->
-            <div class="flowfit-actions">
-              <div th:if="${rutinaAsignada != null}">
-                <form th:action="@{/usuario/rutinas/completar}" method="post" class="d-inline">
-                  <input type="hidden" name="rutinaAsignadaId" th:value="${rutinaAsignada.id}">
-                  <button type="submit" class="btn btn-usuario">
-                    <i class="bi bi-check-circle me-2"></i>Marcar como Completada
-                  </button>
-                </form>
-              </div>
-              <div th:if="${rutinaAsignada == null}">
-                <form th:action="@{/usuario/rutinas/asignar}" method="post" class="d-inline">
-                  <input type="hidden" name="rutinaId" th:value="${rutina.id}">
-                  <button type="submit" class="btn btn-usuario">
-                    <i class="bi bi-plus me-2"></i>Agregar a Mis Rutinas
-                  </button>
-                </form>
-              </div>
-              <a th:href="@{/usuario/rutinas}" class="btn btn-outline-usuario">
-                <i class="bi bi-arrow-left me-2"></i>Volver
-              </a>
+            <div>
+              <h3 class="text-white fw-semibold mb-1" th:text="${rutina.nombre}">Nombre de la Rutina</h3>
+              <p class="text-muted-flowfit mb-0 small">Detalles completos de tu rutina</p>
+            </div>
+          </div>
+          
+          <div class="d-flex gap-2">
+            <a th:href="@{/usuario/rutinas}" class="btn-outline-usuario">
+              <i class="bi bi-arrow-left me-2"></i>
+              Volver
+            </a>
+            <div th:if="${rutinaAsignada != null and rutinaAsignada.estado.toString() == 'ACTIVA'}">
+              <form th:action="@{/usuario/rutinas/completar}" method="post" class="d-inline">
+                <input type="hidden" name="rutinaAsignadaId" th:value="${rutinaAsignada.id}">
+                <button type="submit" class="btn-primary-usuario">
+                  <i class="bi bi-check-circle-fill me-2"></i>
+                  Marcar Completada
+                </button>
+              </form>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Información de la rutina asignada (si existe) -->
-      <div th:if="${rutinaAsignada != null}" class="row mb-4">
-        <div class="col-12">
-          <div class="flowfit-card card-usuario">
-            <div class="card-body">
-              <h4 class="flowfit-card-title mb-3">
-                <i class="bi bi-graph-up me-2 icon-usuario-success"></i>Tu Progreso
-              </h4>
-              <div class="row">
-                <div class="col-md-4">
-                  <div class="text-center">
-                    <h3 class="flowfit-stat-value mb-1" th:text="${rutinaAsignada.progreso + '%'}">75%</h3>
-                    <p class="flowfit-text-muted mb-0">Progreso Actual</p>
-                    <div class="progress-usuario mt-2">
-                      <div class="progress-bar-usuario" th:style="'width: ' + ${rutinaAsignada.progreso} + '%'"></div>
+      <div class="row g-4">
+        <!-- Información General -->
+        <div class="col-lg-4 stagger-item">
+          <div class="card-base card-usuario h-100">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center mb-4">
+                <div class="bg-success bg-opacity-25 rounded-3 p-2 me-3">
+                  <i class="bi bi-info-circle fs-4 text-success"></i>
+                </div>
+                <h5 class="text-white mb-0 fw-bold">Información General</h5>
+              </div>
+
+              <div class="mb-4">
+                <label class="text-muted-flowfit small mb-2">Descripción</label>
+                <p class="text-white mb-0" th:text="${rutina.descripcion ?: 'Sin descripción'}">
+                  Descripción de la rutina...
+                </p>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="stat-badge w-100 justify-content-center flex-column text-center">
+                    <i class="bi bi-list-check"></i>
+                    <div>
+                      <div class="fw-bold text-white" th:text="${#lists.size(ejercicios)}">0</div>
+                      <small class="text-muted-flowfit">Ejercicios</small>
                     </div>
                   </div>
                 </div>
-                <div class="col-md-4">
-                  <div class="text-center">
-                    <h3 class="flowfit-stat-value mb-1" th:text="${rutinaAsignada.estado}">ACTIVA</h3>
-                    <p class="flowfit-text-muted mb-0">Estado</p>
+                <div class="col-6">
+                  <div class="stat-badge w-100 justify-content-center flex-column text-center">
+                    <i class="bi bi-clock"></i>
+                    <div>
+                      <div class="fw-bold text-white" th:text="${rutina.duracionMinutos}">0</div>
+                      <small class="text-muted-flowfit">Minutos</small>
+                    </div>
                   </div>
                 </div>
-                <div class="col-md-4">
-                  <div class="text-center">
-                    <h3 class="flowfit-stat-value mb-1" th:text="${#temporals.format(rutinaAsignada.fechaAsignacion, 'dd/MM/yyyy')}">15/10/2024</h3>
-                    <p class="flowfit-text-muted mb-0">Fecha Asignación</p>
-                  </div>
+              </div>
+
+              <hr class="my-4" style="border-color: rgba(255, 255, 255, 0.1);">
+
+              <!-- Progreso (si está asignada) -->
+              <div th:if="${rutinaAsignada != null}" class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-muted-flowfit small">Progreso</span>
+                  <span class="fw-bold text-success" th:text="${rutinaAsignada.progreso ?: 0} + '%'">0%</span>
                 </div>
+                <div class="progress" style="height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 10px;">
+                  <div class="progress-bar bg-success" th:style="'width: ' + ${rutinaAsignada.progreso ?: 0} + '%'"></div>
+                </div>
+              </div>
+
+              <div th:if="${rutinaAsignada != null}" class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-calendar-event text-success"></i>
+                <span class="text-white small">
+                  Asignada el <strong th:text="${#temporals.format(rutinaAsignada.fechaAsignacion, 'dd/MM/yyyy')}">01/01/2024</strong>
+                </span>
+              </div>
+              
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-calendar-event text-success"></i>
+                <span class="text-white small">
+                  Creada el <strong th:text="${#temporals.format(rutina.fechaCreacion, 'dd/MM/yyyy')}">01/01/2024</strong>
+                </span>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Lista de Ejercicios -->
-      <div class="row">
-        <div class="col-12">
-          <div class="flowfit-card card-usuario">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="flowfit-card-title mb-0">
-                  <i class="bi bi-list-check me-2 icon-usuario"></i>Ejercicios de la Rutina
-                </h4>
-                <span class="flowfit-badge badge-info-usuario" th:text="${totalEjercicios + ' ejercicios'}">8 ejercicios</span>
-              </div>
-              
-              <!-- Mensaje si no hay ejercicios -->
-              <div th:if="${ejercicios == null or #lists.isEmpty(ejercicios)}" class="flowfit-empty-state text-center py-5">
-                <i class="bi bi-exclamation-triangle fs-1 mb-3 d-block icon-usuario-warning"></i>
-                <h4 class="flowfit-text mb-2">Esta rutina no tiene ejercicios configurados</h4>
-                <p class="flowfit-text-muted mb-4">Esta rutina está en proceso de configuración. Vuelve pronto para ver los ejercicios.</p>
-                <a th:href="@{/usuario/rutinas}" class="btn btn-usuario">
-                  <i class="bi bi-arrow-left me-2"></i>Volver a Mis Rutinas
-                </a>
+        <!-- Lista de Ejercicios -->
+        <div class="col-lg-8 stagger-item">
+          <div class="card-base card-usuario">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="d-flex align-items-center">
+                  <div class="bg-success bg-opacity-25 rounded-3 p-2 me-3">
+                    <i class="bi bi-list-ol fs-4 text-success"></i>
+                  </div>
+                  <div>
+                    <h5 class="text-white mb-1 fw-bold">Ejercicios de la Rutina</h5>
+                    <p class="text-muted-flowfit small mb-0">
+                      <span th:text="${#lists.size(ejercicios)}">0</span> ejercicios ordenados
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <!-- Lista de ejercicios -->
-              <div th:if="${ejercicios != null and not #lists.isEmpty(ejercicios)}">
-                <div class="row">
-                  <div th:each="ejercicio, iterStat : ${ejercicios}" class="col-lg-6 col-md-12 mb-4">
-                    <div class="flowfit-exercise-card">
-                      <div class="flowfit-exercise-header d-flex align-items-center mb-3">
-                        <div class="flowfit-exercise-number me-3">
-                          <span class="flowfit-badge badge-primary-usuario rounded-circle" th:text="${iterStat.count}">1</span>
-                        </div>
-                        <div class="flex-grow-1">
-                          <h5 class="flowfit-card-title mb-1" th:text="${ejercicio.ejercicioNombre != null ? ejercicio.ejercicioNombre : 'Ejercicio sin nombre'}">Nombre del Ejercicio</h5>
-                          <div class="flowfit-exercise-meta">
-                            <span th:if="${ejercicio.duracionSegundos != null}" class="flowfit-meta-item">
-                              <i class="bi bi-clock me-1 icon-usuario"></i><span th:text="${ejercicio.duracionSegundos}">60</span>s
-                            </span>
-                            <span th:if="${ejercicio.repeticiones != null}" class="flowfit-meta-item">
-                              <i class="bi bi-repeat me-1 icon-usuario"></i><span th:text="${ejercicio.repeticiones}">15</span> reps
-                            </span>
-                            <span th:if="${ejercicio.series != null}" class="flowfit-meta-item">
-                              <i class="bi bi-layers me-1 icon-usuario"></i><span th:text="${ejercicio.series}">3</span> series
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+              <div th:if="${#lists.isEmpty(ejercicios)}" class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <h5 class="text-white mb-3">No hay ejercicios</h5>
+                <p class="mb-0">Esta rutina aún no tiene ejercicios asignados.</p>
+              </div>
+
+              <div th:if="${!#lists.isEmpty(ejercicios)}" class="d-flex flex-column gap-3">
+                <div class="ejercicio-card stagger-item" th:each="ejercicio : ${ejercicios}">
+                  <div class="d-flex gap-3">
+                    <!-- Número de orden -->
+                    <div class="orden-badge flex-shrink-0" th:text="${ejercicio.orden}">1</div>
                     
-                      <div class="flowfit-exercise-info">
-                        <p class="flowfit-text-muted mb-3" th:text="${ejercicio.ejercicioDescripcion != null ? ejercicio.ejercicioDescripcion : 'Sin descripción disponible'}">
-                          Descripción del ejercicio y cómo realizarlo correctamente.
-                        </p>
-                        
-                        <div th:if="${ejercicio.notas != null and not #strings.isEmpty(ejercicio.notas)}" class="flowfit-exercise-notes">
-                          <small class="flowfit-text-warning">
-                            <i class="bi bi-lightbulb me-1 icon-usuario-warning"></i>
-                            <strong>Notas:</strong> <span th:text="${ejercicio.notas}">Notas específicas del ejercicio</span>
-                          </small>
-                        </div>
-                        
-                        <!-- Imagen del ejercicio si existe -->
-                        <div th:if="${ejercicio.ejercicioImagen != null and not #strings.isEmpty(ejercicio.ejercicioImagen)}" class="flowfit-exercise-image mt-3">
-                          <img th:src="@{'/ejercicio_image_uploads/' + ${ejercicio.ejercicioImagen}}" 
-                               th:alt="${ejercicio.ejercicioNombre}" 
-                               class="flowfit-img-rounded" 
-                               style="max-height: 200px; object-fit: cover; width: 100%;">
-                        </div>
+                    <!-- Contenido -->
+                    <div class="flex-grow-1">
+                      <h6 class="text-white fw-bold mb-2" th:text="${ejercicio.ejercicioCatalogo?.nombre ?: 'Ejercicio #' + ejercicio.ejercicioId}">
+                        Nombre del Ejercicio
+                      </h6>
+                      
+                      <p class="text-muted-flowfit small mb-3" th:if="${ejercicio.ejercicioCatalogo?.descripcion}" 
+                         th:text="${ejercicio.ejercicioCatalogo.descripcion}">
+                        Descripción del ejercicio
+                      </p>
+                      
+                      <!-- Stats -->
+                      <div class="d-flex flex-wrap gap-2">
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);" th:if="${ejercicio.series != null}">
+                          <i class="bi bi-repeat me-1"></i>
+                          <span th:text="${ejercicio.series} + ' series'">0 series</span>
+                        </span>
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);" th:if="${ejercicio.repeticiones != null}">
+                          <i class="bi bi-arrow-repeat me-1"></i>
+                          <span th:text="${ejercicio.repeticiones} + ' reps'">0 reps</span>
+                        </span>
+                        <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);" th:if="${ejercicio.duracionSegundos != null && ejercicio.duracionSegundos > 0}">
+                          <i class="bi bi-clock me-1"></i>
+                          <span th:text="${ejercicio.duracionSegundos} + 's'">0s</span>
+                        </span>
+                        <span class="badge" style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid rgba(251, 146, 60, 0.3);" th:if="${ejercicio.descansoSegundos != null && ejercicio.descansoSegundos > 0}">
+                          <i class="bi bi-pause-circle me-1"></i>
+                          Descanso: <span th:text="${ejercicio.descansoSegundos} + 's'">0s</span>
+                        </span>
+                        <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3);" th:if="${ejercicio.pesoKg != null && ejercicio.pesoKg > 0}">
+                          <i class="bi bi-lightning me-1"></i>
+                          <span th:text="${ejercicio.pesoKg} + ' kg'">0 kg</span>
+                        </span>
                       </div>
-                    </div>
+                      
+                      <!-- Notas -->
+                      <div class="mt-2" th:if="${ejercicio.notas != null && !#strings.isEmpty(ejercicio.notas)}">
+                        <small class="text-muted-flowfit">
+                          <i class="bi bi-sticky me-1"></i>
+                          <span th:text="${ejercicio.notas}">Notas del ejercicio</span>
+                        </small>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -254,68 +395,13 @@
           </div>
         </div>
       </div>
-
-    </div> <!-- Cierre container-fluid -->
+    </div>
   </main>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   
-  <!-- FlowFit VIP JavaScript -->
-  <!-- Script FlowFit VIP Usuario -->
-  <script>
-    // Funcionalidades del Sidebar Móvil
-    document.addEventListener('DOMContentLoaded', function() {
-      const sidebarToggle = document.getElementById('sidebarToggle');
-      const sidebar = document.getElementById('sidebar');
-      const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-      function toggleSidebar() {
-        sidebar.classList.toggle('show');
-        sidebarOverlay.classList.toggle('show');
-      }
-
-      function closeSidebar() {
-        sidebar.classList.remove('show');
-        sidebarOverlay.classList.remove('show');
-      }
-
-      sidebarToggle?.addEventListener('click', toggleSidebar);
-      sidebarOverlay?.addEventListener('click', closeSidebar);
-
-      // Cerrar sidebar con tecla ESC
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeSidebar();
-      });
-
-      // Resaltar navegación activa
-      const currentPath = window.location.pathname;
-      const navLinks = document.querySelectorAll('.nav-link-usuario');
-      
-      navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === currentPath) {
-          link.classList.add('active');
-        }
-      });
-
-      console.log('FlowFit VIP Usuario Rutina Detalles cargado exitosamente! 💪');
-    });
-
-    // Confirmar completar rutina
-    document.querySelector('form[action*="completar"] button')?.addEventListener('click', function(e) {
-      if (!confirm('¿Estás seguro de que has completado esta rutina?')) {
-        e.preventDefault();
-      }
-    });
-
-    // Confirmar asignar rutina
-    document.querySelector('form[action*="asignar"] button')?.addEventListener('click', function(e) {
-      if (!confirm('¿Deseas agregar esta rutina a tu plan de entrenamiento?')) {
-        e.preventDefault();
-      }
-    });
-  </script>
-
+  <!-- Flowfit Sidebar Script -->
+  <script th:src="@{/js/flowfit-sidebar.js}"></script>
 </body>
 </html>

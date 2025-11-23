@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Usuario - FlowFit</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- FlowFit CSS System -->
+  <link th:href="@{/css/flowfit-base.css?v=9}" rel="stylesheet">
+  <link th:href="@{/css/flowfit-usuario.css?v=9}" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Desktop Toggle (for collapse) -->
+  <button class="sidebar-collapse-btn d-none d-md-flex" id="sidebarCollapseBtn" title="Contraer/Expandir Sidebar">
+    <i class="bi bi-chevron-left"></i>
+  </button>
+
+  <!-- Mobile Toggle -->
+  <button class="sidebar-toggle-base sidebar-toggle-usuario d-md-none" id="sidebarToggle">
+    <i class="bi bi-list fs-4"></i>
+  </button>
+
+  <!-- Sidebar Overlay for Mobile -->
+  <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
+
+  <!-- FlowFit Sidebar -->
+  <div th:replace="~{fragments/sidebar-usuario :: sidebar}"></div>
+
+  <!-- Main Content -->
+  <main class="main-content-base fade-in-up">
+    <div class="container-fluid p-4">
+      <!-- Welcome Header - Consistent Design -->
+      <div class="welcome-header-enhanced mb-4">
+        <div class="row align-items-center">
+          <div class="col-lg-8 mb-3 mb-lg-0">
+            <div class="d-flex align-items-center">
+              <div class="user-avatar-enhanced me-3">
+                <img src="/assets/perfil_default.png" alt="Avatar" class="rounded-circle profile-image-base">
+                <div class="status-indicator-usuario"></div>
+              </div>
+              <div class="flex-grow-1">
+                <h1 class="display-6 mb-2 text-white fw-bold">
+                  ¡Bienvenido, <span th:text="${usuario != null ? #strings.substringBefore(usuario.nombre, ' ') : 'Usuario'}" class="text-gradient-green">Usuario</span>! 💪
+                </h1>
+                <p class="lead mb-2 text-white">Tu centro de entrenamiento FlowFit</p>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                  <small class="text-muted-flowfit d-flex align-items-center">
+                    <i class="bi bi-calendar3 me-2"></i>
+                    <span th:text="${#dates.format(#dates.createNow(), 'EEEE, dd MMMM yyyy')}">Fecha actual</span>
+                  </small>
+                  <small class="text-muted-flowfit d-flex align-items-center">
+                    <i class="bi bi-clock me-2"></i>
+                    <span id="currentTime">00:00</span>
+                  </small>
+                  <small class="badge bg-success-subtle text-success border border-success border-opacity-50 px-3 py-2" th:if="${diasActivosEsteMes != null and diasActivosEsteMes > 0}">
+                    <i class="bi bi-fire me-2"></i>
+                    <span th:text="${diasActivosEsteMes} + ' días activo este mes'">0 días activo</span>
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="d-flex flex-column gap-2">
+              <a href="/usuario/rutinas" class="btn-flowfit-primary btn-usuario-primary btn-enhanced">
+                <i class="bi bi-play-circle me-2"></i>
+                <span>Empezar Rutina</span>
+              </a>
+              <a href="/usuario/progreso" class="btn-flowfit-outline btn-usuario-outline btn-enhanced">
+                <i class="bi bi-graph-up me-2"></i>
+                <span>Ver Progreso</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Cards -->
+      <div class="row mb-4 g-3">
+        <div class="col-xl-3 col-md-6">
+          <div class="card-base card-usuario" style="min-height: 120px;">
+            <div class="card-body d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div style="width: 48px; height: 48px;" class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-lightning-charge-fill fs-4"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="text-muted-flowfit small mb-1">Rutinas Activas</h6>
+                <h3 class="text-white mb-0 fw-bold counter" th:attr="data-target=${rutinasActivas ?: 0}" th:text="${rutinasActivas ?: 0}">0</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="card-base card-usuario" style="min-height: 120px;">
+            <div class="card-body d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div style="width: 48px; height: 48px;" class="bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-check-circle-fill fs-4"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="text-muted-flowfit small mb-1">Completadas</h6>
+                <h3 class="text-white mb-0 fw-bold counter" th:attr="data-target=${rutinasCompletadas ?: 0}" th:text="${rutinasCompletadas ?: 0}">0</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="card-base card-usuario" style="min-height: 120px;">
+            <div class="card-body d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div style="width: 48px; height: 48px;" class="bg-warning-subtle text-warning rounded-3 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-fire fs-4"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="text-muted-flowfit small mb-1">Racha Actual</h6>
+                <h3 class="text-white mb-0 fw-bold">
+                  <span class="counter" th:attr="data-target=${rachaActual ?: 0}" th:text="${rachaActual ?: 0}">0</span>
+                  <small class="fs-6 text-muted-flowfit">días</small>
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="card-base card-usuario" style="min-height: 120px;">
+            <div class="card-body d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div style="width: 48px; height: 48px;" class="bg-info-subtle text-info rounded-3 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-graph-up fs-4"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="text-muted-flowfit small mb-1">Progreso General</h6>
+                <h3 class="text-white mb-0 fw-bold">
+                  <span th:text="${#numbers.formatDecimal(progresoGeneral ?: 0, 1, 0)}">0</span>%
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Routines & Quick Actions -->
+      <div class="row mb-4">
+        <div class="col-lg-8 mb-4 mb-lg-0">
+          <div class="card-base card-usuario">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center justify-content-between mb-4">
+                <h5 class="text-white fw-bold mb-0">
+                  <i class="bi bi-list-check me-2"></i>Mis Rutinas Activas
+                </h5>
+                <a href="/usuario/rutinas" class="btn btn-sm btn-flowfit-outline btn-usuario-outline">
+                  Ver todas
+                </a>
+              </div>
+              
+              <div th:if="${#lists.isEmpty(rutinasAsignadas)}" class="text-center py-5">
+                <i class="bi bi-journal-x display-1 text-muted-flowfit mb-3"></i>
+                <h5 class="text-white fw-bold mb-2">No tienes rutinas asignadas</h5>
+                <p class="text-muted-flowfit mb-4">Busca un entrenador para que te asigne rutinas personalizadas</p>
+                <a href="/usuario/buscar-entrenador" class="btn btn-flowfit-primary btn-usuario-primary">
+                  <i class="bi bi-person-plus me-2"></i>Buscar Entrenador
+                </a>
+              </div>
+
+              <div th:if="${!#lists.isEmpty(rutinasAsignadas)}" class="list-group list-group-flush">
+                <div th:each="rutinaAsignada, iterStat : ${rutinasAsignadas}" 
+                     th:if="${iterStat.index < 5}"
+                     class="list-group-item bg-transparent border-bottom border-secondary border-opacity-10 px-0 py-3">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                      <div style="width: 48px; height: 48px;" 
+                           th:classappend="${rutinaAsignada.estado.name() == 'ACTIVA'} ? 'bg-success-subtle text-success' : 'bg-primary-subtle text-primary'" 
+                           class="rounded-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-list-check fs-4"></i>
+                      </div>
+                    </div>
+                    <div class="flex-grow-1">
+                      <h6 class="text-white fw-semibold mb-1" th:text="${rutinaAsignada.rutina.nombre}">Rutina</h6>
+                      <p class="small text-muted-flowfit mb-0">
+                        <span th:text="'Asignada por ' + ${rutinaAsignada.asignadoPor != null ? rutinaAsignada.asignadoPor.nombre : 'tu entrenador'}">Por tu entrenador</span>
+                      </p>
+                    </div>
+                    <div class="text-end">
+                      <span class="badge px-3 py-2 mb-1"
+                            th:classappend="${rutinaAsignada.estado.name() == 'ACTIVA'} ? 'bg-success-subtle text-success border border-success border-opacity-50' : 
+                                           ${rutinaAsignada.estado.name() == 'COMPLETADA'} ? 'bg-primary-subtle text-primary border border-primary border-opacity-50' : 
+                                           'bg-warning-subtle text-warning border border-warning border-opacity-50'"
+                            th:text="${rutinaAsignada.estado}">Estado</span><br>
+                      <small class="text-muted-flowfit" th:text="${#temporals.format(rutinaAsignada.fechaAsignacion, 'dd/MM/yyyy')}">01/01/2025</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card-base card-usuario mb-4">
+            <div class="card-body p-4">
+              <h5 class="text-white fw-bold mb-4">
+                <i class="bi bi-lightning me-2"></i>Acciones Rápidas
+              </h5>
+              <div class="d-grid gap-3">
+                <a href="/usuario/rutinas" class="btn btn-flowfit-outline btn-usuario-outline w-100">
+                  <i class="bi bi-list-check me-2"></i>Ver Mis Rutinas
+                </a>
+                <a href="/usuario/progreso" class="btn btn-flowfit-outline btn-usuario-outline w-100">
+                  <i class="bi bi-graph-up me-2"></i>Mi Progreso
+                </a>
+                <a href="/usuario/buscar-entrenador" class="btn btn-flowfit-outline btn-usuario-outline w-100">
+                  <i class="bi bi-person-plus me-2"></i>Buscar Entrenador
+                </a>
+                <a href="/usuario/perfil" class="btn btn-flowfit-outline btn-usuario-outline w-100">
+                  <i class="bi bi-person-circle me-2"></i>Mi Perfil
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mi Entrenador Card -->
+          <div class="card-base card-usuario" th:if="${usuario.entrenadorAsignado != null}">
+            <div class="card-body p-4">
+              <h5 class="text-white fw-bold mb-3">
+                <i class="bi bi-person-badge me-2"></i>Mi Entrenador
+              </h5>
+              <div class="d-flex align-items-center p-3 rounded-3" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                <img src="/assets/perfil_default.png" alt="Entrenador" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #10b981;">
+                <div class="flex-grow-1">
+                  <h6 class="text-white fw-semibold mb-1" th:text="${usuario.entrenadorAsignado.nombre}">Entrenador</h6>
+                  <p class="small text-muted-flowfit mb-0">
+                    <i class="bi bi-envelope me-1"></i>
+                    <span th:text="${usuario.entrenadorAsignado.correo}">email@ejemplo.com</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Chart -->
+      <div class="row mb-4" th:if="${!#lists.isEmpty(rutinasAsignadas)}">
+        <div class="col-12">
+          <div class="card-base card-usuario">
+            <div class="card-body p-4">
+              <h5 class="text-white fw-bold mb-4">
+                <i class="bi bi-graph-up me-2"></i>Tu Progreso Este Mes
+              </h5>
+              <div class="row g-4">
+                <div class="col-lg-8">
+                  <canvas id="progressChart" height="80"></canvas>
+                </div>
+                <div class="col-lg-4">
+                  <div class="d-flex flex-column gap-3 h-100 justify-content-center">
+                    <div class="p-3 rounded-3" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                      <div class="d-flex align-items-center">
+                        <i class="bi bi-fire fs-2 text-warning me-3"></i>
+                        <div>
+                          <small class="text-muted-flowfit d-block">Días Activos</small>
+                          <h3 class="text-white mb-0 fw-bold" th:text="${diasActivosEsteMes ?: 0}">0</h3>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="p-3 rounded-3" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                      <div class="d-flex align-items-center">
+                        <i class="bi bi-trophy fs-2 text-success me-3"></i>
+                        <div>
+                          <small class="text-muted-flowfit d-block">Racha Actual</small>
+                          <h3 class="text-white mb-0 fw-bold" th:text="${rachaActual ?: 0}">0</h3>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer-base">
+        © 2025 FlowFit - Tu camino al éxito. Todos los derechos reservados.
+      </footer>
+    </div>
+  </main>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Custom JavaScript -->
+  <script>
+  //<![CDATA[
+    // Sidebar collapse functionality
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.querySelector('.main-content-base');
+    const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    // Desktop collapse toggle
+    if (sidebarCollapseBtn) {
+      sidebarCollapseBtn.addEventListener('click', function() {
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('sidebar-collapsed');
+        const icon = this.querySelector('i');
+        if (sidebar.classList.contains('collapsed')) {
+          icon.classList.remove('bi-chevron-left');
+          icon.classList.add('bi-chevron-right');
+        } else {
+          icon.classList.remove('bi-chevron-right');
+          icon.classList.add('bi-chevron-left');
+        }
+      });
+    }
+
+    // Mobile toggle
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.add('show');
+        sidebarOverlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      });
+    }
+
+    // Close sidebar overlay
+    if (sidebarOverlay) {
+      sidebarOverlay.addEventListener('click', function() {
+        sidebar.classList.remove('show');
+        sidebarOverlay.classList.remove('show');
+        document.body.style.overflow = '';
+      });
+    }
+
+    // Counter animation
+    document.querySelectorAll('.counter').forEach(counter => {
+      const target = parseInt(counter.getAttribute('data-target'));
+      const duration = 1500;
+      const step = target / (duration / 16);
+      let current = 0;
+      
+      const updateCounter = () => {
+        current += step;
+        if (current < target) {
+          counter.textContent = Math.floor(current);
+          requestAnimationFrame(updateCounter);
+        } else {
+          counter.textContent = target;
+        }
+      };
+      
+      setTimeout(updateCounter, 300);
+    });
+
+    // Live clock
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const timeElement = document.getElementById('currentTime');
+      if (timeElement) {
+        timeElement.textContent = hours + ':' + minutes;
+      }
+    }
+    
+    updateClock();
+    setInterval(updateClock, 60000);
+
+    // Progress Chart (if exists)
+    const chartElement = document.getElementById('progressChart');
+    if (chartElement) {
+      const ctx = chartElement.getContext('2d');
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+      gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+          datasets: [{
+            label: 'Progreso',
+            data: [20, 45, 60, 80],
+            borderColor: '#10b981',
+            backgroundColor: gradient,
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#10b981',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.9)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              borderColor: '#10b981',
+              borderWidth: 1,
+              padding: 12,
+              displayColors: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: {
+                color: 'rgba(255, 255, 255, 0.5)',
+                callback: function(value) {
+                  return value + '%';
+                }
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)',
+                borderColor: 'rgba(255, 255, 255, 0.1)'
+              }
+            },
+            x: {
+              ticks: {
+                color: 'rgba(255, 255, 255, 0.5)'
+              },
+              grid: {
+                display: false,
+                borderColor: 'rgba(255, 255, 255, 0.1)'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    console.log('✨ FlowFit Usuario Dashboard cargado exitosamente! 💪');
+  //]]>
+  </script>
+</body>
+</html>

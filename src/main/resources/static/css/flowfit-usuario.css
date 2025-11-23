@@ -105,25 +105,81 @@
     margin-left: var(--sidebar-collapsed-width);
 }
 
-/* Sidebar específico del usuario - Estilo Elegante */
-.sidebar-usuario {
-    background: linear-gradient(180deg, 
-        rgba(16, 185, 129, 0.95) 0%, 
-        rgba(5, 150, 105, 0.85) 40%,
-        rgba(15, 23, 42, 0.95) 100%);
-    border-right: 2px solid var(--usuario-border);
-    box-shadow: 4px 0 20px rgba(16, 185, 129, 0.1);
+/* ===== DISEÑO MEJORADO - WELCOME HEADER ===== */
+
+/* Welcome Header Enhanced */
+.welcome-header-enhanced {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.05) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Logo específico - Elegante */
+.welcome-header-enhanced::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.user-avatar-enhanced {
+    position: relative;
+    width: 70px;
+    height: 70px;
+}
+
+.user-avatar-enhanced img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border: 3px solid rgba(16, 185, 129, 0.5);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.status-indicator-usuario {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: 3px solid rgba(15, 23, 42, 0.95);
+    border-radius: 50%;
+    animation: pulse-usuario 2s ease-in-out infinite;
+}
+
+@keyframes pulse-usuario {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+    }
+}
+
+/* Sidebar específico del usuario - OSCURO COMO ENTRENADOR */
+.sidebar-usuario {
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-right: 2px solid rgba(16, 185, 129, 0.2);
+    box-shadow: 4px 0 20px rgba(16, 185, 129, 0.15);
+}
+
+/* Logo específico - BLANCO */
 .sidebar-usuario .brand-text {
-    background: var(--usuario-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3));
-    font-weight: 700;
-    letter-spacing: 0.5px;
+    color: white !important;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    font-weight: 800;
+    letter-spacing: -0.025em;
 }
 
 /* Enlaces del usuario - Estilo Elegante como Entrenador */
@@ -262,6 +318,38 @@
 
 .card-usuario:hover {
     border-color: var(--usuario-primary);
+}
+
+/* Status Indicator - Usuario Green */
+.status-indicator-usuario {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: 3px solid rgba(15, 23, 42, 0.95);
+    border-radius: 50%;
+    animation: pulse-green 2s ease-in-out infinite;
+}
+
+@keyframes pulse-green {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+    }
+}
+
+/* Text Gradient - Green */
+.text-gradient-green {
+    background: var(--usuario-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+}
     box-shadow: var(--usuario-glow);
 }
 
@@ -850,7 +938,8 @@
 }
 
 .fade-in-up {
-    animation: fadeInUp 0.6s ease-out;
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 1;
 }
 
 /* Scrollbar personalizado */
@@ -899,4 +988,402 @@
 .sidebar-base.collapsed .nav-link-base:hover::after {
     opacity: 1;
     visibility: visible;
+}
+
+/* ===== MODERN DASHBOARD STYLES ===== */
+
+/* Modern Welcome Header */
+.modern-welcome-header {
+    margin-bottom: 2rem;
+}
+
+.welcome-card,
+.quick-actions-card {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.welcome-card:hover {
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 12px 40px rgba(16, 185, 129, 0.2);
+}
+
+.avatar-wrapper {
+    position: relative;
+}
+
+.avatar-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    object-fit: cover;
+    border: 3px solid rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
+}
+
+.status-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    border-radius: 50%;
+    border: 3px solid #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+}
+
+.welcome-greeting {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.welcome-name {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.welcome-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.meta-item.achievement {
+    color: #fbbf24;
+    font-weight: 600;
+}
+
+.meta-separator {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* Modern Buttons */
+.btn-modern {
+    display: flex;
+    align-items: center;
+    padding: 0.875rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-modern:hover::before {
+    left: 100%;
+}
+
+.btn-modern-primary {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+.btn-modern-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(16, 185, 129, 0.6);
+}
+
+.btn-modern-outline {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1.5px solid rgba(16, 185, 129, 0.3);
+}
+
+.btn-modern-outline:hover {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.5);
+    transform: translateY(-2px);
+}
+
+/* Motivational Banner */
+.motivational-banner {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(52, 211, 153, 0.1) 100%);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.motivational-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #10b981 0%, #34d399 50%, #10b981 100%);
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.banner-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.banner-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.banner-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #10b981;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.banner-subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+.circular-progress {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.circular-progress svg {
+    transform: rotate(-90deg);
+}
+
+.progress-circle {
+    stroke-linecap: round;
+    transition: stroke-dasharray 1s ease;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #10b981;
+}
+
+/* Modern Stat Cards */
+.stat-card {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    border-radius: 20px;
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, var(--stat-color) 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+}
+
+.stat-card-primary { --stat-color: #3b82f6; }
+.stat-card-success { --stat-color: #10b981; }
+.stat-card-warning { --stat-color: #fbbf24; }
+.stat-card-info { --stat-color: #06b6d4; }
+
+.stat-card:hover {
+    border-color: rgba(var(--stat-color-rgb), 0.3);
+}
+
+.stat-card-primary:hover { box-shadow: 0 12px 35px rgba(59, 130, 246, 0.3); }
+.stat-card-success:hover { box-shadow: 0 12px 35px rgba(16, 185, 129, 0.3); }
+.stat-card-warning:hover { box-shadow: 0 12px 35px rgba(251, 191, 36, 0.3); }
+.stat-card-info:hover { box-shadow: 0 12px 35px rgba(6, 182, 212, 0.3); }
+
+.stat-icon-wrapper {
+    margin-bottom: 1.25rem;
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--stat-color);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1) rotate(5deg);
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+    margin-bottom: 0.75rem;
+}
+
+.stat-unit {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
+    margin-left: 0.25rem;
+}
+
+.stat-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.stat-trend-up {
+    color: #10b981;
+}
+
+.stat-trend-hot {
+    color: #fbbf24;
+}
+
+.stat-trend i {
+    font-size: 1.125rem;
+}
+
+.stat-progress {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 0.75rem;
+}
+
+.stat-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+    border-radius: 2px;
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-decoration {
+    position: absolute;
+    right: -20px;
+    bottom: -20px;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .welcome-name {
+        font-size: 1.5rem;
+    }
+    
+    .avatar-img {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .stat-value {
+        font-size: 1.75rem;
+    }
+    
+    .banner-content {
+        flex-direction: column;
+        text-align: center;
+    }
 }

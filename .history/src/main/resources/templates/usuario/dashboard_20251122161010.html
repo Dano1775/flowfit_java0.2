@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Usuario - FlowFit</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- FlowFit CSS System -->
+  <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
+  <link th:href="@{/css/flowfit-usuario.css}" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Desktop Toggle (for collapse) -->
+  <button class="sidebar-collapse-btn d-none d-md-flex" id="sidebarCollapseBtn" title="Contraer/Expandir Sidebar">
+    <i class="bi bi-chevron-left"></i>
+  </button>
+
+  <!-- Mobile Toggle -->
+  <button class="sidebar-toggle-base sidebar-toggle-usuario d-md-none" id="sidebarToggle">
+    <i class="bi bi-list fs-4"></i>
+  </button>
+
+  <!-- Sidebar Overlay for Mobile -->
+  <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
+
+  <!-- FlowFit Sidebar -->
+  <div th:replace="~{fragments/sidebar-usuario :: sidebar}"></div>
+
+  <!-- Main Content -->
+  <main class="main-content-base fade-in-up">
+    <div class="container-fluid p-4">
+      <!-- Welcome Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="text-white mb-1">
+            ¡Bienvenido, <span th:text="${usuario != null ? #strings.substringBefore(usuario.nombre, ' ') : 'Usuario'}" class="text-gradient-green">Usuario</span>! 💪
+          </h1>
+          <p class="text-muted-flowfit mb-0">Tu centro de entrenamiento FlowFit</p>
+        </div>
+        <div class="d-none d-md-flex gap-2">
+          <a href="/usuario/rutinas" class="btn btn-flowfit-primary btn-usuario-primary">
+            <i class="bi bi-play-circle me-2"></i>Empezar Rutina
+          </a>
+          <a href="/usuario/progreso" class="btn btn-flowfit-outline btn-usuario-outline">
+            <i class="bi bi-graph-up me-2"></i>Ver Progreso
+          </a>
+        </div>
+      </div>
+
+      <!-- Statistics Cards -->
+      <div class="row mb-4 g-3">
+        <div class="col-xl-3 col-md-6">
+          <div class="card-base card-usuario">
+            <div class="card-body d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div style="width: 48px; height: 48px;" class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-lightning-charge-fill fs-4"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="text-muted-flowfit small mb-1">Rutinas Activas</h6>
+                <h3 class="text-white mb-0 fw-bold counter" th:attr="data-target=${rutinasActivas ?: 0}">0</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="card-base card-usuario">
+            <div class="card-body d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div style="width: 48px; height: 48px;" class="bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-check-circle-fill fs-4"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="text-muted-flowfit small mb-1">Completadas</h6>
+                <h3 class="text-white mb-0 fw-bold counter" th:attr="data-target=${rutinasCompletadas ?: 0}">0</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="card-base card-usuario">
+            <div class="card-body d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div style="width: 48px; height: 48px;" class="bg-warning-subtle text-warning rounded-3 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-fire fs-4"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="text-muted-flowfit small mb-1">Racha Actual</h6>
+                <h3 class="text-white mb-0 fw-bold counter" th:attr="data-target=${rachaActual ?: 0}">0</h3>
+                <small class="text-muted-flowfit">días</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="card-base card-usuario">
+            <div class="card-body d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div style="width: 48px; height: 48px;" class="bg-info-subtle text-info rounded-3 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-graph-up-arrow fs-4"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="text-muted-flowfit small mb-1">Progreso General</h6>
+                <h3 class="text-white mb-0 fw-bold counter" th:attr="data-target=${progresoGeneral ?: 0}">0</h3>
+                <small class="text-muted-flowfit">%</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Routines -->
+      <div class="row mb-4">
+        <div class="col-lg-8">
+          <div class="card-base card-usuario">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="text-white fw-bold mb-0">
+                  <i class="bi bi-list-check me-2"></i>Mis Rutinas Activas
+                </h5>
+                <a href="/usuario/rutinas" class="btn btn-sm btn-flowfit-outline btn-usuario-outline">Ver todas</a>
+              </div>
+              
+              <div th:if="${rutinasAsignadas == null or #lists.isEmpty(rutinasAsignadas)}" class="text-center py-5">
+                <i class="bi bi-journal-x display-1 text-muted-flowfit mb-3"></i>
+                <h5 class="text-white fw-bold mb-2">No tienes rutinas asignadas</h5>
+                <p class="text-muted-flowfit mb-4">Busca un entrenador para que te asigne rutinas personalizadas</p>
+                <a href="/usuario/buscar-entrenador" class="btn btn-flowfit-primary btn-usuario-primary">
+                  <i class="bi bi-person-plus me-2"></i>Buscar Entrenador
+                </a>
+              </div>
+
+              <div th:if="${rutinasAsignadas != null and !#lists.isEmpty(rutinasAsignadas)}">
+                <div th:each="rutinaAsignada, iterStat : ${rutinasAsignadas}" 
+                     th:if="${iterStat.index < 5}"
+                     class="mb-3">
+                  <div class="d-flex align-items-center p-3 rounded-3" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div class="flex-shrink-0 me-3">
+                      <div style="width: 48px; height: 48px;" class="bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-list-check fs-4"></i>
+                      </div>
+                    </div>
+                    <div class="flex-grow-1">
+                      <h6 class="text-white fw-semibold mb-1" th:text="${rutinaAsignada.rutina.nombre}">Rutina</h6>
+                      <p class="small text-muted-flowfit mb-0" th:text="${#strings.abbreviate(rutinaAsignada.rutina.descripcion, 60)}">Descripción...</p>
+                    </div>
+                    <div class="text-end">
+                      <span class="badge bg-success-subtle text-success border border-success border-opacity-50 px-3 py-2 mb-1" th:text="${rutinaAsignada.rutina.ejercicios?.size() ?: 0} + ' ejercicios'">0 ejercicios</span><br>
+                      <small class="text-muted-flowfit" th:text="${#temporals.format(rutinaAsignada.fechaAsignacion, 'dd/MM/yyyy')}">01/01/2025</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+          <div class="card-base card-usuario">
+            <div class="card-body p-4">
+              <h5 class="text-white fw-bold mb-4"><i class="bi bi-lightning me-2"></i>Acciones Rápidas</h5>
+              <div class="d-grid gap-3">
+                <a href="/usuario/rutinas" class="btn btn-flowfit-outline btn-usuario-outline w-100">
+                  <i class="bi bi-list-check me-2"></i>Ver Mis Rutinas
+                </a>
+                <a href="/usuario/progreso" class="btn btn-flowfit-outline btn-usuario-outline w-100">
+                  <i class="bi bi-graph-up me-2"></i>Mi Progreso
+                </a>
+                <a href="/usuario/buscar-entrenador" class="btn btn-flowfit-outline btn-usuario-outline w-100">
+                  <i class="bi bi-person-plus me-2"></i>Buscar Entrenador
+                </a>
+                <a href="/usuario/perfil" class="btn btn-flowfit-outline btn-usuario-outline w-100">
+                  <i class="bi bi-person-circle me-2"></i>Mi Perfil
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer-base">
+        © 2025 FlowFit - Panel de Usuario. Todos los derechos reservados.
+      </footer>
+    </div>
+  </main>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- FlowFit Usuario Dashboard Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const sidebar = document.getElementById('sidebar');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+      const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+      const mainContent = document.querySelector('.main-content-base');
+
+      function toggleSidebar() {
+        sidebar.classList.toggle('show');
+        sidebarOverlay.classList.toggle('show');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove('show');
+        sidebarOverlay.classList.remove('show');
+      }
+
+      if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
+      if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+
+      if (sidebarCollapseBtn) {
+        sidebarCollapseBtn.addEventListener('click', function() {
+          sidebar.classList.toggle('collapsed');
+          mainContent.classList.toggle('sidebar-collapsed');
+          const icon = this.querySelector('i');
+          icon.classList.toggle('bi-chevron-left');
+          icon.classList.toggle('bi-chevron-right');
+        });
+      }
+
+      function updateTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('currentTime').textContent = `${hours}:${minutes}`;
+      }
+      updateTime();
+      setInterval(updateTime, 60000);
+
+      const counters = document.querySelectorAll('.counter');
+      counters.forEach(counter => {
+        const target = parseFloat(counter.getAttribute('data-target'));
+        const duration = 2000;
+        const increment = target / (duration / 16);
+        let current = 0;
+
+        const updateCounter = () => {
+          current += increment;
+          if (current < target) {
+            counter.textContent = Math.floor(current);
+            requestAnimationFrame(updateCounter);
+          } else {
+            counter.textContent = target % 1 === 0 ? target : target.toFixed(1);
+          }
+        };
+        updateCounter();
+      });
+    });
+  </script>
+</body>
+</html>

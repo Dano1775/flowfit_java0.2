@@ -1,8 +1,0 @@
-version: "2"
-authtoken: TU_TOKEN_AQUI
-tunnels:
-  flowfit:
-    proto: http
-    addr: 8080
-    inspect: false
-    bind_tls: true

@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Rutinas - FlowFit</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- FlowFit VIP CSS -->
+  <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
+  <link th:href="@{/css/flowfit-usuario.css}" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Mobile Toggle -->
+  <button class="sidebar-toggle-base sidebar-toggle-usuario d-md-none" id="sidebarToggle">
+    <i class="bi bi-list fs-4"></i>
+  </button>
+
+  <!-- Sidebar Overlay for Mobile -->
+  <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
+
+  <!-- FlowFit Sidebar -->
+  <nav class="sidebar-base sidebar-usuario d-flex flex-column" id="sidebar">
+    <!-- Logo y Título -->
+    <a th:href="@{/usuario/dashboard}" class="navbar-brand d-flex align-items-center text-decoration-none">
+      <img src="/assets/logo_flowfit_usuario.png" alt="FlowFit" height="40" class="me-3 logo-flowfit">
+      <span class="brand-text">FlowFit</span>
+    </a>
+
+    <!-- Navegación Principal -->
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a th:href="@{/usuario/dashboard}" class="nav-link-base nav-link-usuario" title="Dashboard">
+          <i class="bi bi-speedometer2 me-3"></i>
+          <span class="nav-text">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/usuario/rutinas}" class="nav-link-base nav-link-usuario active" title="Mis Rutinas">
+          <i class="bi bi-journal-text me-3"></i>
+          <span class="nav-text">Mis Rutinas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/usuario/buscar-entrenador}" class="nav-link-base nav-link-usuario" title="Mi Entrenador">
+          <i class="bi bi-search me-3"></i>
+          <span class="nav-text">Mi Entrenador</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/usuario/progreso}" class="nav-link-base nav-link-usuario" title="Mi Progreso">
+          <i class="bi bi-graph-up me-3"></i>
+          <span class="nav-text">Mi Progreso</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/usuario/perfil}" class="nav-link-base nav-link-usuario" title="Mi Perfil">
+          <i class="bi bi-person me-3"></i>
+          <span class="nav-text">Mi Perfil</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Perfil del Usuario -->
+    <div class="border-top pt-3 mt-auto">
+      <div class="dropdown profile-dropdown-base">
+        <div class="profile-icon-base d-flex align-items-center w-100" id="profileDropdownUsuario" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="/assets/perfil_default.png" 
+               alt="Profile" 
+               class="profile-image-base me-2" 
+               style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+          <div class="flex-grow-1">
+            <div class="small fw-bold text-white" th:text="${usuario != null ? #strings.substringBefore(usuario.nombre, ' ') : 'Usuario'}">Usuario</div>
+            <div class="small text-muted-flowfit">Usuario</div>
+          </div>
+          <i class="bi bi-chevron-down text-white"></i>
+        </div>
+        <ul class="dropdown-menu" aria-labelledby="profileDropdownUsuario">
+          <li><a class="dropdown-item" th:href="@{/usuario/perfil}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content-base fade-in-up">
+    <div class="container-fluid">
+      <!-- Page Header - Estilo Moderno -->
+      <div class="mb-4" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(52, 211, 153, 0.08) 100%); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 20px; padding: 2rem; position: relative; overflow: hidden;">
+        <div style="content: ''; position: absolute; top: -50%; right: -20%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #10b981 0%, #34d399 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);">
+              <i class="bi bi-clipboard-check" style="font-size: 1.75rem; color: white;"></i>
+            </div>
+            <div>
+              <h1 class="text-white mb-1 fw-bold" style="font-size: 2rem;">Mis Rutinas</h1>
+              <p class="text-muted-flowfit mb-0">Entrena con propósito, alcanza tus metas 💪</p>
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 600; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+              <i class="bi bi-filter me-2"></i>Filtrar
+            </button>
+          </div>
+        </div>
+      </div>
+
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert" style="background: rgba(74, 222, 128, 0.15); border: 1px solid rgba(74, 222, 128, 0.3); color: #4ade80;">
+      <i class="bi bi-check-circle me-2"></i>
+      <span th:text="${successMessage}"></span>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444;">
+      <i class="bi bi-exclamation-circle me-2"></i>
+      <span th:text="${errorMessage}"></span>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    </div>
+
+      <!-- Statistics Cards - Diseño Mejorado -->
+      <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+          <div class="card-base card-usuario" style="min-height: 130px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%); border: 1px solid rgba(59, 130, 246, 0.3);">
+            <div class="card-body d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 14px; display: flex; align-items-center; justify-content: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);">
+                  <i class="bi bi-lightning-charge-fill" style="font-size: 1.5rem; color: white;"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="text-muted-flowfit small mb-1" style="font-weight: 500;">Rutinas Activas</h6>
+                <h2 class="text-white mb-0 fw-bold" style="font-size: 2rem;" th:text="${rutinasActivasCount ?: 0}">0</h2>
+                <small class="text-muted-flowfit">en progreso</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+          <div class="card-base card-usuario" style="min-height: 130px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%); border: 1px solid rgba(16, 185, 129, 0.3);">
+            <div class="card-body d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 14px; display: flex; align-items-center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);">
+                  <i class="bi bi-check-circle-fill" style="font-size: 1.5rem; color: white;"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="text-muted-flowfit small mb-1" style="font-weight: 500;">Completadas</h6>
+                <h2 class="text-white mb-0 fw-bold" style="font-size: 2rem;" th:text="${rutinasCompletadasCount ?: 0}">0</h2>
+                <small class="text-muted-flowfit">finalizadas</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+          <div class="card-base card-usuario" style="min-height: 130px; background: linear-gradient(135deg, rgba(251, 146, 60, 0.15) 0%, rgba(249, 115, 22, 0.1) 100%); border: 1px solid rgba(251, 146, 60, 0.3);">
+            <div class="card-body d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); border-radius: 14px; display: flex; align-items-center; justify-content: center; box-shadow: 0 4px 12px rgba(251, 146, 60, 0.4);">
+                  <i class="bi bi-collection-fill" style="font-size: 1.5rem; color: white;"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="text-muted-flowfit small mb-1" style="font-weight: 500;">Total Asignadas</h6>
+                <h2 class="text-white mb-0 fw-bold" style="font-size: 2rem;" th:text="${totalRutinas ?: 0}">0</h2>
+                <small class="text-muted-flowfit">disponibles</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+          <div class="card-base card-usuario" style="min-height: 130px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(147, 51, 234, 0.1) 100%); border: 1px solid rgba(168, 85, 247, 0.3);">
+            <div class="card-body d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); border-radius: 14px; display: flex; align-items-center; justify-content: center; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);">
+                  <i class="bi bi-graph-up-arrow" style="font-size: 1.5rem; color: white;"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="text-muted-flowfit small mb-1" style="font-weight: 500;">Progreso</h6>
+                <h2 class="text-white mb-0 fw-bold" style="font-size: 2rem;" th:text="${progresoGeneral != null ? progresoGeneral + '%' : '0%'}">0%</h2>
+                <small class="text-muted-flowfit">general</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rutinas Asignadas por mi Entrenador -->
+      <div class="row mb-5" th:if="${rutinasAsignadasPorEntrenador != null and not #lists.isEmpty(rutinasAsignadasPorEntrenador)}">
+        <div class="col-12">
+          <div class="card-base card-usuario" style="padding: 2.5rem;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h4 class="text-white mb-0 d-flex align-items-center fw-bold">
+                <div style="width: 40px; height: 40px; background: rgba(251, 146, 60, 0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                  <i class="bi bi-award" style="color: #fb923c; font-size: 1.25rem;"></i>
+                </div>
+                Rutinas de mi Entrenador
+              </h4>
+              <span class="badge" style="background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: white; padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3);" th:text="${rutinasEntrenadorCount + ' asignadas'}">0 asignadas</span>
+            </div>
+            
+            <!-- Lista de rutinas del entrenador -->
+            <div class="row g-5">
+              <div th:each="rutinaAsignada : ${rutinasAsignadasPorEntrenador}" class="col-lg-4 col-md-6">
+                <div class="h-100" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(251, 146, 60, 0.3); border-radius: 20px; padding: 2rem; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(251, 146, 60, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                  
+                  <!-- Header de la tarjeta -->
+                  <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="text-white mb-0 fw-bold" style="font-size: 1.25rem; line-height: 1.3;" th:text="${rutinaAsignada.rutina.nombre}">Nombre de la Rutina</h5>
+                    <span class="badge" style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(251, 146, 60, 0.3);">
+                      <i class="bi bi-person-badge me-1"></i>Entrenador
+                    </span>
+                  </div>
+                  
+                  <!-- Descripción -->
+                  <p class="mb-3" style="font-size: 0.875rem; line-height: 1.5; color: #94a3b8; min-height: 60px;" th:text="${rutinaAsignada.rutina.descripcion}">Descripción de la rutina personalizada.</p>
+                  
+                  <!-- Info badges -->
+                  <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3);" th:text="${rutinaAsignada.rutina.categoria}">Categoría</span>
+                    <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                      <i class="bi bi-clock me-1"></i><span th:text="${rutinaAsignada.rutina.duracionMinutos}">30</span> min
+                    </span>
+                    <span class="badge" style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(251, 146, 60, 0.3);">
+                      <i class="bi bi-fire me-1"></i><span th:text="${rutinaAsignada.rutina.caloriasEstimadas}">200</span> kcal
+                    </span>
+                  </div>
+                  
+                  <!-- Progreso -->
+                  <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="text-muted-flowfit small" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Progreso</span>
+                      <span class="fw-bold" style="color: #fb923c; font-size: 1rem;" th:text="${rutinaAsignada.progreso ?: 0} + '%'">0%</span>
+                    </div>
+                    <div class="progress" style="height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 10px; overflow: hidden;">
+                      <div class="progress-bar" style="background: linear-gradient(90deg, #fb923c 0%, #f97316 100%); box-shadow: 0 0 12px rgba(251, 146, 60, 0.5);" th:style="'width: ' + ${rutinaAsignada.progreso ?: 0} + '%'"></div>
+                    </div>
+                  </div>
+                  
+                  <!-- Estado badge -->
+                  <div class="mb-3">
+                    <span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #22c55e; padding: 0.5rem 0.75rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);" th:if="${rutinaAsignada.estado.toString() == 'ACTIVA'}">
+                      <i class="bi bi-check-circle me-1"></i>Activa
+                    </span>
+                    <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.5rem 0.75rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);" th:if="${rutinaAsignada.estado.toString() == 'COMPLETADA'}">
+                      <i class="bi bi-trophy me-1"></i>Completada
+                    </span>
+                  </div>
+                  
+                  <!-- Botones -->
+                  <div class="d-flex gap-2">
+                    <a th:href="@{/usuario/rutina/{id}(id=${rutinaAsignada.id})}" class="btn w-100" style="background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: white; border: none; padding: 0.7rem 1rem; font-weight: 600; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3); text-decoration: none; text-align: center;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                      <i class="bi bi-play-fill me-2"></i>Ver Rutina
+                    </a>
+                    <button class="btn" style="background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); padding: 0.7rem 1rem; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease;" th:onclick="|abrirModalDetalles(${rutinaAsignada.rutina.id})|" onmouseover="this.style.background='rgba(255, 255, 255, 0.12)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'">
+                      <i class="bi bi-info-circle-fill"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rutinas Activas -->
+      <div class="row mb-5">
+        <div class="col-12">
+          <div class="card-base card-usuario" style="padding: 2.5rem;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h4 class="text-white mb-0 d-flex align-items-center">
+                <div style="width: 40px; height: 40px; background: rgba(74, 222, 128, 0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                  <i class="bi bi-play-circle" style="color: #4ade80; font-size: 1.25rem;"></i>
+                </div>
+                Rutinas Activas
+              </h4>
+              <span class="badge rounded-pill px-3 py-2" style="background: rgba(74, 222, 128, 0.2); color: #4ade80; font-size: 0.875rem;" th:text="${rutinasActivasCount + ' activas'}">0 activas</span>
+            </div>            <!-- Mensaje si no hay rutinas activas -->
+            <div th:if="${rutinasActivas == null or #lists.isEmpty(rutinasActivas)}" class="text-center py-5">
+              <div style="width: 80px; height: 80px; background: rgba(74, 222, 128, 0.1); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <i class="bi bi-calendar-plus" style="font-size: 2.5rem; color: #4ade80;"></i>
+              </div>
+              <h4 class="text-white mb-3">¡Comienza tu Journey Fitness!</h4>
+              <p class="text-muted mb-4" style="max-width: 500px; margin: 0 auto;">No tienes rutinas activas aún. Explora nuestras rutinas recomendadas y empieza a entrenar.</p>
+              <a href="#rutinas-recomendadas" class="btn-flowfit-primary btn-usuario-primary rounded-pill px-4 py-2">
+                <i class="bi bi-rocket-takeoff me-2"></i>Explorar Rutinas
+              </a>
+            </div>          <!-- Lista de rutinas activas -->
+          <div th:if="${rutinasActivas != null and not #lists.isEmpty(rutinasActivas)}" class="row g-5">
+            <div th:each="rutinaAsignada : ${rutinasActivas}" class="col-lg-4 col-md-6">
+              <div class="h-100" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; padding: 2rem; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(16, 185, 129, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                
+                <!-- Header de la tarjeta -->
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                  <h5 class="text-white mb-0 fw-bold" style="font-size: 1.25rem; line-height: 1.3;" th:text="${rutinaAsignada.rutina.nombre}">Nombre de la Rutina</h5>
+                </div>
+                
+                <!-- Descripción -->
+                <p class="mb-3" style="font-size: 0.875rem; line-height: 1.5; color: #94a3b8; min-height: 60px;" th:text="${rutinaAsignada.rutina.descripcion}">Descripción de la rutina.</p>
+                
+                <!-- Info badges -->
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                  <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);" th:text="${rutinaAsignada.rutina.categoria}">Categoría</span>
+                  <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                    <i class="bi bi-clock me-1"></i><span th:text="${rutinaAsignada.rutina.duracionMinutos}">30</span> min
+                  </span>
+                  <span class="badge" style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(251, 146, 60, 0.3);">
+                    <i class="bi bi-fire me-1"></i><span th:text="${rutinaAsignada.rutina.caloriasEstimadas}">200</span> kcal
+                  </span>
+                </div>
+                
+                <!-- Barra de progreso -->
+                <div class="mb-4">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span style="color: #94a3b8; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Progreso</span>
+                    <span style="color: #10b981; font-size: 1rem; font-weight: 700;"><span th:text="${rutinaAsignada.progreso}">0</span>%</span>
+                  </div>
+                  <div class="progress" style="height: 8px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden;">
+                    <div class="progress-bar" style="background: linear-gradient(90deg, #10b981 0%, #34d399 100%); border-radius: 10px; box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);" th:style="'width: ' + ${rutinaAsignada.progreso} + '%'"></div>
+                  </div>
+                </div>
+                
+                <!-- Botones -->
+                <div class="d-flex gap-2">
+                  <form th:action="@{/usuario/rutinas/completar}" method="post" class="flex-grow-1">
+                    <input type="hidden" name="rutinaAsignadaId" th:value="${rutinaAsignada.id}">
+                    <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 0.7rem 1rem; font-weight: 600; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                      <i class="bi bi-check-circle-fill me-2"></i>Completar
+                    </button>
+                  </form>
+                  <button class="btn" style="background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); padding: 0.7rem 1rem; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease;" th:onclick="'abrirModalDetalles(' + ${rutinaAsignada.rutina.id} + ')'" onmouseover="this.style.background='rgba(255, 255, 255, 0.12)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'">
+                    <i class="bi bi-eye-fill"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rutinas Recomendadas -->
+      <div class="row mb-5" id="rutinas-recomendadas">
+        <div class="col-12">
+          <div class="card-base card-usuario" style="padding: 2.5rem;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h4 class="text-white mb-0 d-flex align-items-center fw-bold">
+                <div style="width: 40px; height: 40px; background: rgba(59, 130, 246, 0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                  <i class="bi bi-star-fill" style="color: #3b82f6; font-size: 1.25rem;"></i>
+                </div>
+                Rutinas Recomendadas
+              </h4>
+              <span class="badge" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);" th:text="${rutinasDisponibles != null ? rutinasDisponibles.size() + ' disponibles' : '0 disponibles'}">0 disponibles</span>
+            </div>
+          
+            <!-- Mensaje si no hay rutinas disponibles -->
+            <div th:if="${rutinasDisponibles == null or #lists.isEmpty(rutinasDisponibles)}" class="text-center py-5">
+              <div style="width: 80px; height: 80px; background: rgba(251, 191, 36, 0.1); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <i class="bi bi-star" style="font-size: 2.5rem; color: #fbbf24;"></i>
+              </div>
+              <h4 class="text-white mb-3">No hay rutinas disponibles</h4>
+              <p class="text-muted-flowfit">Pronto tendremos más rutinas personalizadas para ti.</p>
+            </div>            <div th:if="${rutinasDisponibles != null and not #lists.isEmpty(rutinasDisponibles)}" class="row g-5">
+              <div th:each="rutina : ${rutinasDisponibles}" class="col-lg-4 col-md-6">
+                <div class="h-100" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 20px; padding: 2rem; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(59, 130, 246, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                  
+                  <!-- Header de la tarjeta -->
+                  <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="text-white mb-0 fw-bold" style="font-size: 1.25rem; line-height: 1.3;" th:text="${rutina.nombre}">Nombre de la Rutina</h5>
+                  </div>
+                  
+                  <!-- Descripción -->
+                  <p class="mb-3" style="font-size: 0.875rem; line-height: 1.5; color: #94a3b8; min-height: 60px;" th:text="${rutina.descripcion}">Descripción de la rutina.</p>
+                  
+                  <!-- Info badges -->
+                  <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);" th:text="${rutina.dificultad}">Nivel</span>
+                    <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3);" th:text="${rutina.categoria}">Categoría</span>
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                      <i class="bi bi-clock me-1"></i><span th:text="${rutina.duracionMinutos}">30</span> min
+                    </span>
+                    <span class="badge" style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(251, 146, 60, 0.3);">
+                      <i class="bi bi-fire me-1"></i><span th:text="${rutina.caloriasEstimadas}">200</span> kcal
+                    </span>
+                  </div>
+                  
+                  <!-- Info adicional -->
+                  <div class="d-flex flex-wrap gap-2 mb-4">
+                    <span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #22c55e; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);" th:if="${rutina.entrenadorId != null}">
+                      <i class="bi bi-award me-1"></i>Con Entrenador
+                    </span>
+                    <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);" th:if="${rutina.entrenadorId == null}">
+                      <i class="bi bi-globe me-1"></i>Global
+                    </span>
+                  </div>
+                  
+                  <!-- Botones -->
+                  <div class="d-flex gap-2">
+                    <form th:action="@{/usuario/rutinas/asignar}" method="post" class="flex-grow-1">
+                      <input type="hidden" name="rutinaId" th:value="${rutina.id}">
+                      <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; padding: 0.7rem 1rem; font-weight: 600; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                        <i class="bi bi-plus-circle-fill me-2"></i>Agregar
+                      </button>
+                    </form>
+                    <button class="btn" style="background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); padding: 0.7rem 1rem; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease;" th:onclick="'abrirModalDetalles(' + ${rutina.id} + ')'" onmouseover="this.style.background='rgba(255, 255, 255, 0.12)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'">
+                      <i class="bi bi-eye-fill"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+      <!-- Rutinas Populares -->
+      <div class="row mb-5" th:if="${rutinasPopulares != null and not #lists.isEmpty(rutinasPopulares)}">
+        <div class="col-12">
+          <div class="card-base card-usuario" style="padding: 2.5rem;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h4 class="text-white mb-0 d-flex align-items-center fw-bold">
+                <div style="width: 40px; height: 40px; background: rgba(239, 68, 68, 0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                  <i class="bi bi-fire" style="color: #ef4444; font-size: 1.25rem;"></i>
+                </div>
+                Rutinas Populares
+              </h4>
+              <span class="badge" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">Más Elegidas</span>
+            </div>
+            
+            <div class="row g-5">
+              <div th:each="rutina : ${rutinasPopulares}" class="col-lg-4 col-md-6">
+                <div class="h-100" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 20px; padding: 2rem; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(239, 68, 68, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                  
+                  <!-- Header de la tarjeta -->
+                  <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="text-white mb-0 fw-bold" style="font-size: 1.25rem; line-height: 1.3;" th:text="${rutina.nombre}">Rutina Popular</h5>
+                    <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                      <i class="bi bi-fire me-1"></i>Popular
+                    </span>
+                  </div>
+                  
+                  <!-- Descripción -->
+                  <p class="mb-3" style="font-size: 0.875rem; line-height: 1.5; color: #94a3b8; min-height: 60px;" th:text="${rutina.descripcion}">Descripción de la rutina.</p>
+                  
+                  <!-- Info badges -->
+                  <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);" th:text="${rutina.dificultad}">Nivel</span>
+                    <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3);" th:text="${rutina.categoria}">Categoría</span>
+                    <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                      <i class="bi bi-clock me-1"></i><span th:text="${rutina.duracionMinutos}">30</span> min
+                    </span>
+                    <span class="badge" style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(251, 146, 60, 0.3);">
+                      <i class="bi bi-fire me-1"></i><span th:text="${rutina.caloriasEstimadas}">200</span> kcal
+                    </span>
+                  </div>
+                  
+                  <!-- Botones -->
+                  <div class="d-flex gap-2 mt-4">
+                    <form th:action="@{/usuario/rutinas/asignar}" method="post" class="flex-grow-1">
+                      <input type="hidden" name="rutinaId" th:value="${rutina.id}">
+                      <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 0.7rem 1rem; font-weight: 600; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                        <i class="bi bi-star me-2"></i>Probar
+                      </button>
+                    </form>
+                    <button class="btn" style="background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); padding: 0.7rem 1rem; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease;" th:onclick="'abrirModalDetalles(' + ${rutina.id} + ')'" onmouseover="this.style.background='rgba(255, 255, 255, 0.12)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'">
+                      <i class="bi bi-eye-fill"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- Cierre container-fluid -->
+
+  </main>
+
+  <!-- Modal de Detalles de Rutina -->
+  <div class="modal fade" id="rutinaDetallesModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content" style="background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(30px); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);">
+        
+        <!-- Header -->
+        <div class="modal-header" style="border-bottom: 1px solid rgba(16, 185, 129, 0.2); background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);">
+          <div class="d-flex align-items-center">
+            <div style="width: 40px; height: 40px;" class="bg-success bg-opacity-25 text-success border border-success border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3">
+              <i class="bi bi-journal-text fs-5"></i>
+            </div>
+            <div>
+              <h5 class="modal-title text-white fw-bold mb-0" id="modalRutinaNombre">Cargando...</h5>
+              <small class="text-muted-flowfit">Detalles de la rutina</small>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        
+        <!-- Body -->
+        <div class="modal-body p-4" style="max-height: 70vh;" id="modalRutinaContenido">
+          <!-- Loading State -->
+          <div class="text-center py-5" id="modalLoading">
+            <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;"></div>
+            <p class="text-muted-flowfit">Cargando detalles de la rutina...</p>
+          </div>
+
+          <!-- Error State -->
+          <div class="alert alert-danger d-none" id="modalError">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <span id="modalErrorMensaje">Error al cargar la rutina</span>
+          </div>
+
+          <!-- Content (will be populated by JS) -->
+          <div class="d-none" id="modalContenido">
+            <!-- Información General -->
+            <div class="card-base card-usuario mb-4">
+              <div class="card-body p-3">
+                <div class="d-flex align-items-center mb-3">
+                  <i class="bi bi-info-circle text-success fs-5 me-2"></i>
+                  <h6 class="text-white mb-0 fw-bold">Información General</h6>
+                </div>
+                <div class="row g-3">
+                  <div class="col-md-8">
+                    <label class="text-muted-flowfit small mb-1">Descripción</label>
+                    <p class="text-white mb-0" id="modalRutinaDescripcion">-</p>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="d-flex flex-column gap-2">
+                      <div class="stat-badge w-100 justify-content-center flex-column text-center">
+                        <i class="bi bi-list-check"></i>
+                        <div>
+                          <div class="fw-bold text-white" id="modalRutinaEjerciciosCount">0</div>
+                          <small class="text-muted-flowfit">Ejercicios</small>
+                        </div>
+                      </div>
+                      <div class="stat-badge w-100 justify-content-center flex-column text-center">
+                        <i class="bi bi-clock"></i>
+                        <div>
+                          <div class="fw-bold text-white" id="modalRutinaDuracion">0</div>
+                          <small class="text-muted-flowfit">Minutos</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ejercicios -->
+            <div class="card-base card-usuario mb-4">
+              <div class="card-body p-3">
+                <div class="d-flex align-items-center mb-3">
+                  <i class="bi bi-list-ol text-success fs-5 me-2"></i>
+                  <h6 class="text-white mb-0 fw-bold">Ejercicios de la Rutina</h6>
+                </div>
+                <div id="modalEjerciciosLista" class="d-flex flex-column gap-2"></div>
+              </div>
+            </div>
+
+            <!-- Mi Progreso (si está asignada) -->
+            <div class="card-base card-usuario d-none" id="modalProgresoContainer">
+              <div class="card-body p-3">
+                <div class="d-flex align-items-center mb-3">
+                  <i class="bi bi-graph-up text-success fs-5 me-2"></i>
+                  <h6 class="text-white mb-0 fw-bold">Mi Progreso</h6>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-muted-flowfit small">Completado</span>
+                  <span class="fw-bold text-success" id="modalProgreso">0%</span>
+                </div>
+                <div class="progress" style="height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 10px;">
+                  <div class="progress-bar bg-success" id="modalProgresoBar"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="modal-footer" style="border-top: 1px solid rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.05);">
+          <button type="button" class="btn-outline-usuario" data-bs-dismiss="modal">
+            <i class="bi bi-x-lg me-2"></i>Cerrar
+          </button>
+          <button type="button" class="btn-primary-usuario d-none" id="modalCompletarBtn">
+            <i class="bi bi-check-circle-fill me-2"></i>Marcar Completada
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .stat-badge {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .stat-badge i {
+      color: #10b981;
+      font-size: 1.125rem;
+    }
+    .ejercicio-item-modal {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 3px solid #10b981;
+      border-radius: 8px;
+      padding: 0.875rem;
+      transition: all 0.3s ease;
+    }
+    .ejercicio-item-modal:hover {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: #10b981;
+    }
+  </style>
+
+  <!-- Custom JavaScript -->
+  <script type="text/javascript">
+    // ===== FUNCIONES GLOBALES (DEBEN ESTAR DISPONIBLES INMEDIATAMENTE) =====
+    
+    // Función para abrir modal de detalles de rutina
+    window.abrirModalDetalles = function(rutinaId) {
+      console.log('🔍 Abriendo modal para rutina ID:', rutinaId);
+      
+      const modalElement = document.getElementById('rutinaDetallesModal');
+      if (!modalElement) {
+        console.error('❌ Modal no encontrado');
+        return;
+      }
+      
+      // Resetear estado
+      document.getElementById('modalLoading').classList.remove('d-none');
+      document.getElementById('modalError').classList.add('d-none');
+      document.getElementById('modalContenido').classList.add('d-none');
+      
+      // Abrir modal
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+      
+      // Cargar datos
+      fetch('/usuario/api/rutinas/' + rutinaId, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(response => {
+          console.log('📡 Response status:', response.status);
+          console.log('📡 Response headers:', response.headers.get('content-type'));
+          
+          // Si no es JSON, probablemente redirigió al login
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('La respuesta no es JSON. Posible redirección al login.');
+          }
+          
+          if (!response.ok) {
+            throw new Error('Error HTTP: ' + response.status);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('✅ Datos recibidos:', data);
+          
+          // Ocultar loading
+          document.getElementById('modalLoading').classList.add('d-none');
+          document.getElementById('modalContenido').classList.remove('d-none');
+          
+          const rutina = data.rutina;
+          const ejercicios = data.ejercicios || [];
+          const rutinaAsignada = data.rutinaAsignada || null;
+          
+          // Información básica
+          document.getElementById('modalRutinaNombre').textContent = rutina.nombre || 'Sin nombre';
+          document.getElementById('modalRutinaDescripcion').textContent = rutina.descripcion || 'Sin descripción';
+          document.getElementById('modalRutinaEjerciciosCount').textContent = ejercicios.length;
+          document.getElementById('modalRutinaDuracion').textContent = rutina.duracionMinutos || 0;
+          
+          // Lista de ejercicios
+          const listaEjercicios = document.getElementById('modalEjerciciosLista');
+          if (ejercicios.length === 0) {
+            listaEjercicios.innerHTML = '<p class="text-muted-flowfit text-center py-3 mb-0"><i class="bi bi-inbox me-2"></i>No hay ejercicios en esta rutina</p>';
+          } else {
+            listaEjercicios.innerHTML = ejercicios.map((ej, idx) => {
+              const nombre = (ej.ejercicioCatalogo && ej.ejercicioCatalogo.nombre) || 'Ejercicio #' + (idx + 1);
+              const desc = (ej.ejercicioCatalogo && ej.ejercicioCatalogo.descripcion) || '';
+              
+              return `
+                <div class="ejercicio-item-modal">
+                  <div class="d-flex gap-3">
+                    <div class="orden-badge flex-shrink-0" style="width: 32px; height: 32px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                      ${ej.orden || (idx + 1)}
+                    </div>
+                    <div class="flex-grow-1">
+                      <h6 class="text-white fw-bold mb-2">${nombre}</h6>
+                      ${desc ? '<p class="text-muted-flowfit small mb-2">' + desc + '</p>' : ''}
+                      <div class="d-flex flex-wrap gap-2">
+                        ${ej.series ? '<span class="stat-badge"><i class="bi bi-repeat me-1"></i>' + ej.series + ' series</span>' : ''}
+                        ${ej.repeticiones ? '<span class="stat-badge"><i class="bi bi-arrow-repeat me-1"></i>' + ej.repeticiones + ' reps</span>' : ''}
+                        ${ej.duracionSegundos ? '<span class="stat-badge"><i class="bi bi-clock me-1"></i>' + ej.duracionSegundos + 's</span>' : ''}
+                        ${ej.descansoSegundos ? '<span class="stat-badge"><i class="bi bi-pause-circle me-1"></i>' + ej.descansoSegundos + 's descanso</span>' : ''}
+                        ${ej.pesoKg ? '<span class="stat-badge"><i class="bi bi-lightning me-1"></i>' + ej.pesoKg + ' kg</span>' : ''}
+                      </div>
+                      ${ej.notas ? '<div class="mt-2"><small class="text-muted-flowfit"><i class="bi bi-sticky me-1"></i>' + ej.notas + '</small></div>' : ''}
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+          
+          // Progreso
+          if (rutinaAsignada) {
+            document.getElementById('modalProgresoContainer').classList.remove('d-none');
+            const progreso = rutinaAsignada.progreso || 0;
+            document.getElementById('modalProgreso').textContent = progreso + '%';
+            document.getElementById('modalProgresoBar').style.width = progreso + '%';
+            
+            const btnCompletar = document.getElementById('modalCompletarBtn');
+            if (rutinaAsignada.estado === 'ACTIVA') {
+              btnCompletar.classList.remove('d-none');
+              btnCompletar.onclick = () => completarRutina(rutinaAsignada.id);
+            } else {
+              btnCompletar.classList.add('d-none');
+            }
+          } else {
+            document.getElementById('modalProgresoContainer').classList.add('d-none');
+            document.getElementById('modalCompletarBtn').classList.add('d-none');
+          }
+        })
+        .catch(error => {
+          console.error('❌ Error:', error);
+          document.getElementById('modalLoading').classList.add('d-none');
+          document.getElementById('modalError').classList.remove('d-none');
+          document.getElementById('modalErrorMensaje').textContent = 'Error al cargar la rutina: ' + error.message;
+        });
+    };
+    
+    window.completarRutina = function(rutinaAsignadaId) {
+      if (confirm('¿Estás seguro de que has completado esta rutina?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/usuario/rutinas/completar';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'rutinaAsignadaId';
+        input.value = rutinaAsignadaId;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+      }
+    };
+    
+    window.agregarRutina = function(rutinaId) {
+      if (confirm('¿Deseas agregar esta rutina a tu plan de entrenamiento?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/usuario/rutinas/asignar';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'rutinaId';
+        input.value = rutinaId;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+      }
+    };
+    
+    window.generarContenidoModal = function(data) {
+      let html = 
+        '<div class="row mb-4">' +
+          '<div class="col-12">' +
+            '<div class="d-flex gap-3 align-items-center mb-3">' +
+              '<span class="badge bg-success px-3 py-2">' + (data.rutina.dificultad || 'Intermedio') + '</span>' +
+              '<small class="text-muted">' +
+                '<i class="bi bi-clock me-1"></i>' + (data.rutina.duracionMinutos || 45) + ' minutos' +
+              '</small>' +
+              '<small class="text-muted">' +
+                '<i class="bi bi-fire me-1"></i>' + (data.rutina.caloriasEstimadas || 300) + ' kcal' +
+              '</small>' +
+            '</div>' +
+            '<p class="text-muted mb-0">' + (data.rutina.descripcion || 'Sin descripción disponible') + '</p>' +
+          '</div>' +
+        '</div>';
+      
+      // Sección de progreso si tiene rutina asignada
+      if (data.tieneRutinaAsignada) {
+        html += 
+          '<div class="modal-progress-section">' +
+            '<h5 class="text-white mb-3">' +
+              '<i class="bi bi-graph-up me-2 text-success"></i>Tu Progreso' +
+            '</h5>' +
+            '<div class="row">' +
+              '<div class="col-md-4 text-center">' +
+                '<h4 class="text-usuario-primary mb-1">' + (data.rutinaAsignada.progreso || 0) + '%</h4>' +
+                '<p class="text-muted mb-0 small">Progreso Actual</p>' +
+                '<div class="progress mt-2" style="height: 8px;">' +
+                  '<div class="progress-bar bg-success" style="width: ' + (data.rutinaAsignada.progreso || 0) + '%"></div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="col-md-4 text-center">' +
+                '<h4 class="text-white mb-1">' + (data.rutinaAsignada.estado || 'ACTIVA') + '</h4>' +
+                '<p class="text-muted mb-0 small">Estado</p>' +
+              '</div>' +
+              '<div class="col-md-4 text-center">' +
+                '<h4 class="text-white mb-1">Asignada</h4>' +
+                '<p class="text-muted mb-0 small">Fecha</p>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+      }
+      
+      // Lista de ejercicios
+      html += 
+        '<div class="mb-4">' +
+          '<h5 class="text-white mb-4 d-flex align-items-center">' +
+            '<i class="bi bi-list-check me-2" style="color: #60a5fa;"></i>' +
+            'Ejercicios de la Rutina (' + data.totalEjercicios + ')' +
+          '</h5>';
+      
+      if (data.ejercicios && data.ejercicios.length > 0) {
+        html += '<div class="row g-3">';
+        data.ejercicios.forEach(function(ejercicio, index) {
+          html += 
+            '<div class="col-12">' +
+              '<div class="p-3" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; transition: all 0.3s ease;">' +
+                '<div class="d-flex align-items-start gap-3 mb-2">' +
+                  '<div class="flex-shrink-0">' +
+                    '<span class="d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border-radius: 50%; font-weight: 600; font-size: 0.875rem;">' + (index + 1) + '</span>' +
+                  '</div>' +
+                  '<div class="flex-grow-1">' +
+                    '<h6 class="mb-2 text-white" style="font-size: 1rem; font-weight: 600;">' + (ejercicio.ejercicioNombre || 'Ejercicio sin nombre') + '</h6>' +
+                    '<div class="d-flex flex-wrap gap-3 mb-2" style="font-size: 0.875rem;">';
+          
+          if (ejercicio.duracionSegundos) {
+            html += '<span style="color: #94a3b8;"><i class="bi bi-clock me-1" style="color: #60a5fa;"></i>' + ejercicio.duracionSegundos + 's</span>';
+          }
+          if (ejercicio.repeticiones) {
+            html += '<span style="color: #94a3b8;"><i class="bi bi-repeat me-1" style="color: #4ade80;"></i>' + ejercicio.repeticiones + ' reps</span>';
+          }
+          if (ejercicio.series) {
+            html += '<span style="color: #94a3b8;"><i class="bi bi-layers me-1" style="color: #fb923c;"></i>' + ejercicio.series + ' series</span>';
+          }
+          
+          html += 
+                    '</div>' +
+                    '<p class="mb-2" style="font-size: 0.875rem; line-height: 1.5; color: #94a3b8;">' + (ejercicio.ejercicioDescripcion || 'Sin descripción disponible') + '</p>';
+          
+          if (ejercicio.notas) {
+            html += 
+              '<div class="p-2 mt-2" style="background: rgba(251, 191, 36, 0.1); border-left: 3px solid #fbbf24; border-radius: 6px;">' +
+                '<small style="color: #fbbf24;">' +
+                  '<i class="bi bi-lightbulb-fill me-1"></i>' +
+                  '<strong>Nota:</strong> ' + ejercicio.notas +
+                '</small>' +
+              '</div>';
+          }
+          
+          html += 
+                  '</div>' +
+                '</div>';
+          
+          // Agregar imagen del ejercicio si existe
+          if (ejercicio.ejercicioImagen) {
+            html += 
+              '<div class="mt-3">' +
+                '<img src="/images/ejercicios/' + ejercicio.ejercicioImagen + '" ' +
+                     'alt="' + (ejercicio.ejercicioNombre || 'Ejercicio') + '" ' +
+                     'style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" ' +
+                     'onerror="this.style.display=\'none\'">' +
+              '</div>';
+          }
+          
+          html += 
+              '</div>' +
+            '</div>';
+        });
+        html += '</div>';
+      } else {
+        html += 
+          '<div class="text-center py-5" style="opacity: 0.7;">' +
+            '<i class="bi bi-inbox" style="font-size: 3rem; color: #64748b;"></i>' +
+            '<h5 class="text-white mb-2">Esta rutina no tiene ejercicios configurados</h5>' +
+            '<p style="color: #94a3b8; font-size: 0.875rem;">Esta rutina está en proceso de configuración.</p>' +
+          '</div>';
+      }
+      
+      html += '</div>';
+      
+      return html;
+    }
+    
+    function generarFooterModal(data) {
+                <div class="col-md-6">
+                  <div class="d-flex gap-3 p-3 rounded-3" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease;">
+                    <div class="flex-shrink-0">
+                      <div style="width: 36px; height: 36px; background: rgba(74, 222, 128, 0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: #4ade80; font-weight: 600; font-size: 0.875rem;">${index + 1}</span>
+                      </div>
+                    </div>
+                    <div class="flex-grow-1">
+                      <h6 class="mb-1 text-white" style="font-size: 0.9375rem;">${ejercicio.nombre || 'Ejercicio'}</h6>
+                      <div class="d-flex flex-wrap gap-2 mb-2">
+                        ${ejercicio.series ? '<span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; font-size: 0.75rem; padding: 0.25rem 0.5rem;"><i class="bi bi-layers me-1"></i>' + ejercicio.series + ' series</span>' : ''}
+                        ${ejercicio.repeticiones ? '<span class="badge" style="background: rgba(251, 146, 60, 0.15); color: #fb923c; font-size: 0.75rem; padding: 0.25rem 0.5rem;"><i class="bi bi-repeat me-1"></i>' + ejercicio.repeticiones + ' reps</span>' : ''}
+                        ${ejercicio.duracion ? '<span class="badge" style="background: rgba(168, 85, 247, 0.15); color: #a855f7; font-size: 0.75rem; padding: 0.25rem 0.5rem;"><i class="bi bi-clock me-1"></i>' + ejercicio.duracion + 's</span>' : ''}
+                      </div>
+                      ${ejercicio.descripcion ? '<p class="small text-muted mb-0" style="font-size: 0.8125rem; line-height: 1.4;">' + ejercicio.descripcion + '</p>' : ''}
+                    </div>
+                  </div>
+                </div>
+              `;
+            });
+            ejerciciosHTML += '</div></div>';
+          } else {
+            ejerciciosHTML = '<div class="mt-4 text-center py-4 rounded-3" style="background: rgba(251, 146, 60, 0.1); border: 1px solid rgba(251, 146, 60, 0.2);"><i class="bi bi-info-circle text-muted d-block mb-2" style="font-size: 2rem; color: #fb923c !important;"></i><p class="text-muted mb-0">Esta rutina no tiene ejercicios asignados aún.</p></div>';
+          }
+          
+          detallesContent.innerHTML = `
+            <div class="row g-4">
+              <div class="col-md-4 text-center">
+                <div class="rounded-3 d-flex align-items-center justify-content-center mb-3" style="height:200px; background: linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%); border: 1px solid rgba(74, 222, 128, 0.2);">
+                  <i class="bi bi-clipboard-check" style="font-size: 4rem; color: #4ade80;"></i>
+                </div>
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                  <span class="badge rounded-pill" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; padding: 0.5rem 0.875rem; font-size: 0.875rem;">${data.categoria || 'General'}</span>
+                  <span class="badge rounded-pill" style="background: rgba(34, 197, 94, 0.2); color: #22c55e; padding: 0.5rem 0.875rem; font-size: 0.875rem;">${data.dificultad || 'Media'}</span>
+                </div>
+              </div>
+              <div class="col-md-8">
+                <h4 class="mb-3 text-white">${data.nombre}</h4>
+                <p class="text-muted mb-4">${data.descripcion || 'Sin descripción disponible.'}</p>
+                <div class="row g-3">
+                  <div class="col-6">
+                    <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
+                      <div style="width: 44px; height: 44px; background: rgba(59, 130, 246, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bi bi-clock" style="color: #3b82f6; font-size: 1.25rem;"></i>
+                      </div>
+                      <div>
+                        <small class="text-muted d-block" style="font-size: 0.75rem;">Duración</small>
+                        <strong class="text-white">${data.duracionMinutos || 0} min</strong>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background: rgba(251, 146, 60, 0.1); border: 1px solid rgba(251, 146, 60, 0.2);">
+                      <div style="width: 44px; height: 44px; background: rgba(251, 146, 60, 0.2); border-radius: 10px; display: flex; align-items-center; justify-content: center; flex-shrink: 0;">
+                        <i class="bi bi-fire" style="color: #fb923c; font-size: 1.25rem;"></i>
+                      </div>
+                      <div>
+                        <small class="text-muted d-block" style="font-size: 0.75rem;">Calorías</small>
+                        <strong class="text-white">${data.caloriasEstimadas || 0} kcal</strong>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2);">
+                      <div style="width: 44px; height: 44px; background: rgba(168, 85, 247, 0.2); border-radius: 10px; display: flex; align-items-center; justify-content: center; flex-shrink: 0;">
+                        <i class="bi bi-person" style="color: #a855f7; font-size: 1.25rem;"></i>
+                      </div>
+                      <div>
+                        <small class="text-muted d-block" style="font-size: 0.75rem;">Entrenador</small>
+                        <strong class="text-white">${data.entrenador || 'Global'}</strong>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2);">
+                      <div style="width: 44px; height: 44px; background: rgba(251, 191, 36, 0.2); border-radius: 10px; display: flex; align-items-center; justify-content: center; flex-shrink: 0;">
+                        <i class="bi bi-star" style="color: #fbbf24; font-size: 1.25rem;"></i>
+                      </div>
+                      <div>
+                        <small class="text-muted d-block" style="font-size: 0.75rem;">Categoría</small>
+                        <strong class="text-white">${data.categoria || 'General'}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            ${ejerciciosHTML}
+          `;
+          
+          // Generar botones del footer
+          modalFooter.innerHTML = `
+            <div class="d-flex gap-2 w-100">
+              ${data.estaAsignada ? 
+                '<button type="button" class="btn flex-fill rounded-pill" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border: none; padding: 0.625rem 1.5rem; font-weight: 500;" onclick="completarRutina(' + data.rutinaAsignadaId + ')"><i class="bi bi-check-circle me-2"></i>Marcar como Completada</button>' :
+                '<button type="button" class="btn flex-fill rounded-pill" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; padding: 0.625rem 1.5rem; font-weight: 500;" onclick="agregarRutina(' + rutinaId + ')"><i class="bi bi-plus-circle me-2"></i>Agregar a Mis Rutinas</button>'
+              }
+              <button type="button" class="btn rounded-pill" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); padding: 0.625rem 1.5rem;" data-bs-dismiss="modal"><i class="bi bi-x me-2"></i>Cerrar</button>
+            </div>
+          `;
+        })
+        .catch(error => {
+          console.error('Error al cargar detalles:', error);
+          detallesContent.innerHTML = `
+            <div class="text-center py-5">
+              <i class="bi bi-exclamation-triangle fs-1 text-warning mb-3 d-block"></i>
+              <h5 class="text-white mb-2">Error al cargar los detalles</h5>
+              <p class="text-muted">No se pudieron cargar los detalles de esta rutina. Intenta de nuevo.</p>
+            </div>
+          `;
+          modalFooter.innerHTML = '<button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal"><i class="bi bi-x me-1"></i>Cerrar</button>';
+        });
+    }
+    
+    function completarRutina(rutinaAsignadaId) {
+      if (confirm('¿Estás seguro de que has completado esta rutina?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/usuario/rutinas/completar';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'rutinaAsignadaId';
+        input.value = rutinaAsignadaId;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+    
+    function agregarRutina(rutinaId) {
+      if (confirm('¿Deseas agregar esta rutina a tu plan de entrenamiento?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/usuario/rutinas/asignar';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'rutinaId';
+        input.value = rutinaId;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+    
+    function generarContenidoModal(data) {
+      let html = 
+        '<div class="row mb-4">' +
+          '<div class="col-12">' +
+            '<div class="d-flex gap-3 align-items-center mb-3">' +
+              '<span class="badge bg-success px-3 py-2">' + (data.rutina.dificultad || 'Intermedio') + '</span>' +
+              '<small class="text-muted">' +
+                '<i class="bi bi-clock me-1"></i>' + (data.rutina.duracionMinutos || 45) + ' minutos' +
+              '</small>' +
+              '<small class="text-muted">' +
+                '<i class="bi bi-fire me-1"></i>' + (data.rutina.caloriasEstimadas || 300) + ' kcal' +
+              '</small>' +
+            '</div>' +
+            '<p class="text-muted mb-0">' + (data.rutina.descripcion || 'Sin descripción disponible') + '</p>' +
+          '</div>' +
+        '</div>';
+      
+      // Sección de progreso si tiene rutina asignada
+      if (data.tieneRutinaAsignada) {
+        html += 
+          '<div class="modal-progress-section">' +
+            '<h5 class="text-white mb-3">' +
+              '<i class="bi bi-graph-up me-2 text-success"></i>Tu Progreso' +
+            '</h5>' +
+            '<div class="row">' +
+              '<div class="col-md-4 text-center">' +
+                '<h4 class="text-usuario-primary mb-1">' + (data.rutinaAsignada.progreso || 0) + '%</h4>' +
+                '<p class="text-muted mb-0 small">Progreso Actual</p>' +
+                '<div class="progress mt-2" style="height: 8px;">' +
+                  '<div class="progress-bar bg-success" style="width: ' + (data.rutinaAsignada.progreso || 0) + '%"></div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="col-md-4 text-center">' +
+                '<h4 class="text-white mb-1">' + (data.rutinaAsignada.estado || 'ACTIVA') + '</h4>' +
+                '<p class="text-muted mb-0 small">Estado</p>' +
+              '</div>' +
+              '<div class="col-md-4 text-center">' +
+                '<h4 class="text-white mb-1">Asignada</h4>' +
+                '<p class="text-muted mb-0 small">Fecha</p>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+      }
+      
+      // Lista de ejercicios
+      html += 
+        '<div class="mb-4">' +
+          '<h5 class="text-white mb-4 d-flex align-items-center">' +
+            '<i class="bi bi-list-check me-2" style="color: #60a5fa;"></i>' +
+            'Ejercicios de la Rutina (' + data.totalEjercicios + ')' +
+          '</h5>';
+      
+      if (data.ejercicios && data.ejercicios.length > 0) {
+        html += '<div class="row g-3">';
+        data.ejercicios.forEach(function(ejercicio, index) {
+          html += 
+            '<div class="col-12">' +
+              '<div class="p-3" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; transition: all 0.3s ease;">' +
+                '<div class="d-flex align-items-start gap-3 mb-2">' +
+                  '<div class="flex-shrink-0">' +
+                    '<span class="d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border-radius: 50%; font-weight: 600; font-size: 0.875rem;">' + (index + 1) + '</span>' +
+                  '</div>' +
+                  '<div class="flex-grow-1">' +
+                    '<h6 class="mb-2 text-white" style="font-size: 1rem; font-weight: 600;">' + (ejercicio.ejercicioNombre || 'Ejercicio sin nombre') + '</h6>' +
+                    '<div class="d-flex flex-wrap gap-3 mb-2" style="font-size: 0.875rem;">';
+          
+          if (ejercicio.duracionSegundos) {
+            html += '<span style="color: #94a3b8;"><i class="bi bi-clock me-1" style="color: #60a5fa;"></i>' + ejercicio.duracionSegundos + 's</span>';
+          }
+          if (ejercicio.repeticiones) {
+            html += '<span style="color: #94a3b8;"><i class="bi bi-repeat me-1" style="color: #4ade80;"></i>' + ejercicio.repeticiones + ' reps</span>';
+          }
+          if (ejercicio.series) {
+            html += '<span style="color: #94a3b8;"><i class="bi bi-layers me-1" style="color: #fb923c;"></i>' + ejercicio.series + ' series</span>';
+          }
+          
+          html += 
+                    '</div>' +
+                    '<p class="mb-2" style="font-size: 0.875rem; line-height: 1.5; color: #94a3b8;">' + (ejercicio.ejercicioDescripcion || 'Sin descripción disponible') + '</p>';
+          
+          if (ejercicio.notas) {
+            html += 
+              '<div class="p-2 mt-2" style="background: rgba(251, 191, 36, 0.1); border-left: 3px solid #fbbf24; border-radius: 6px;">' +
+                '<small style="color: #fbbf24;">' +
+                  '<i class="bi bi-lightbulb-fill me-1"></i>' +
+                  '<strong>Nota:</strong> ' + ejercicio.notas +
+                '</small>' +
+              '</div>';
+          }
+          
+          html += 
+                  '</div>' +
+                '</div>';
+          
+          // Agregar imagen del ejercicio si existe
+          if (ejercicio.ejercicioImagen) {
+            html += 
+              '<div class="mt-3">' +
+                '<img src="/images/ejercicios/' + ejercicio.ejercicioImagen + '" ' +
+                     'alt="' + (ejercicio.ejercicioNombre || 'Ejercicio') + '" ' +
+                     'style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" ' +
+                     'onerror="this.style.display=\'none\'">' +
+              '</div>';
+          }
+          
+          html += 
+              '</div>' +
+            '</div>';
+        });
+        html += '</div>';
+      } else {
+        html += 
+          '<div class="text-center py-5" style="background: rgba(30, 41, 59, 0.4); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">' +
+            '<i class="bi bi-exclamation-triangle mb-3 d-block" style="font-size: 3rem; color: #fbbf24;"></i>' +
+            '<h5 class="text-white mb-2">Esta rutina no tiene ejercicios configurados</h5>' +
+            '<p style="color: #94a3b8; font-size: 0.875rem;">Esta rutina está en proceso de configuración.</p>' +
+          '</div>';
+      }
+      
+      html += '</div>';
+      
+      return html;
+    }
+    
+    function generarFooterModal(data) {
+      let html = '<div class="d-flex justify-content-between align-items-center w-100">';
+      
+      if (data.tieneRutinaAsignada) {
+        html += 
+          '<div>' +
+            '<form action="/usuario/rutinas/completar" method="post" class="d-inline" onsubmit="return confirm(\'¿Estás seguro de que has completado esta rutina?\')">' +
+              '<input type="hidden" name="rutinaAsignadaId" value="' + data.rutinaAsignada.id + '">' +
+              '<button type="submit" class="btn btn-success">' +
+                '<i class="bi bi-check-circle me-2"></i>Marcar como Completada' +
+              '</button>' +
+            '</form>' +
+          '</div>';
+      } else {
+        html += 
+          '<div>' +
+            '<form action="/usuario/rutinas/asignar" method="post" class="d-inline" onsubmit="return confirm(\'¿Deseas agregar esta rutina a tu plan de entrenamiento?\')">' +
+              '<input type="hidden" name="rutinaId" value="' + data.rutina.id + '">' +
+              '<button type="submit" class="btn btn-usuario-primary">' +
+                '<i class="bi bi-plus me-2"></i>Agregar a Mis Rutinas' +
+              '</button>' +
+            '</form>' +
+          '</div>';
+      }
+      
+      html += 
+        '<div>' +
+          '<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">' +
+            '<i class="bi bi-x me-2"></i>Cerrar' +
+          '</button>' +
+        '</div>' +
+      '</div>';
+      
+      return html;
+    };
+    
+    // ===== EVENT LISTENERS =====
+    // Ejecutar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+      // Auto-hide alerts after 5 seconds
+      setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+          if (alert.classList.contains('show')) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+          }
+        });
+      }, 5000);
+
+      // Smooth scroll to recommended routines
+      const exploreBtn = document.querySelector('a[href="#rutinas-recomendadas"]');
+      if (exploreBtn) {
+        exploreBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const target = document.getElementById('rutinas-recomendadas');
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      }
+
+      // Confirm completion on form submit
+      document.querySelectorAll('form[action*="completar"] button').forEach(button => {
+        button.addEventListener('click', function(e) {
+          if (!confirm('¿Estás seguro de que has completado esta rutina?')) {
+            e.preventDefault();
+          }
+        });
+      });
+    });
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

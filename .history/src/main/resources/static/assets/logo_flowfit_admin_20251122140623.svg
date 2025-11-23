@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <!-- Gradient Definition - Azul Admin -->
+  <defs>
+    <linearGradient id="logoGradientAdmin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Icon - Shield with checkmark -->
+  <g transform="translate(5, 10)">
+    <path d="M15,5 L25,10 L25,20 Q25,28 15,35 Q5,28 5,20 L5,10 Z" fill="url(#logoGradientAdmin)" stroke="#1e40af" stroke-width="1"/>
+    <polyline points="10,18 14,22 20,14" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="45" y="38" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#3b82f6">Flow</text>
+  <text x="110" y="38" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff">Fit</text>
+  <text x="160" y="30" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#94a3b8">ADMIN</text>
+</svg>

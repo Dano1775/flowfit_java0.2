@@ -1,0 +1,29 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Compile FlowFit",
+			"type": "shell",
+			"command": "./mvnw",
+			"args": [
+				"clean",
+				"compile",
+				"-DskipTests=true"
+			],
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Compile FlowFit Windows",
+			"type": "shell",
+			"command": "mvnw.cmd",
+			"args": [
+				"clean",
+				"compile",
+				"-DskipTests=true"
+			],
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

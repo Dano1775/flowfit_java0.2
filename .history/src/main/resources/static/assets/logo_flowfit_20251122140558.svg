@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <!-- Gradient Definition -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#34d399;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Icon - Dumbbell -->
+  <g transform="translate(5, 15)">
+    <circle cx="5" cy="15" r="5" fill="url(#logoGradient)"/>
+    <rect x="8" y="13" width="14" height="4" fill="url(#logoGradient)" rx="2"/>
+    <circle cx="25" cy="15" r="5" fill="url(#logoGradient)"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="45" y="38" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff">FlowFit</text>
+</svg>
