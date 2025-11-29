@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat - FlowFit</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- FlowFit CSS System -->
+  <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
+  <link th:href="@{/css/flowfit-usuario.css}" rel="stylesheet" th:if="${esUsuario}">
+  <link th:href="@{/css/flowfit-entrenador.css}" rel="stylesheet" th:unless="${esUsuario}">
+  
+  <style>
+    .chat-container {
+      height: calc(100vh - 250px);
+      display: flex;
+      flex-direction: column;
+    }
+    .mensajes-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    .mensaje-item {
+      display: flex;
+      margin-bottom: 1rem;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .mensaje-item.enviado {
+      justify-content: flex-end;
+    }
+    .mensaje-bubble {
+      max-width: 70%;
+      padding: 0.75rem 1rem;
+      border-radius: 16px;
+      position: relative;
+    }
+    .mensaje-item.recibido .mensaje-bubble {
+      background: rgba(102, 126, 234, 0.15);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      border-top-left-radius: 4px;
+    }
+    .mensaje-item.enviado .mensaje-bubble {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-top-right-radius: 4px;
+    }
+    .mensaje-sistema {
+      text-align: center;
+      margin: 1.5rem 0;
+    }
+    .mensaje-sistema .badge {
+      padding: 0.5rem 1rem;
+      font-weight: 500;
+    }
+    
+    /* Propuesta Card */
+    .propuesta-card {
+      background: rgba(102, 126, 234, 0.1);
+      border: 2px solid rgba(102, 126, 234, 0.3);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      max-width: 500px;
+    }
+    .propuesta-card.enviada {
+      margin-left: auto;
+      border-color: rgba(118, 75, 162, 0.5);
+    }
+    .propuesta-precio {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #667eea;
+      margin: 0.5rem 0;
+    }
+    
+    /* Input Area */
+    .chat-input-area {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    .form-control:focus {
+      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+      border-color: #667eea;
+    }
+    
+    /* Escrow Status Badge */
+    .escrow-badge {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      z-index: 1000;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .escrow-badge.retenido {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    .escrow-badge.esperando {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    .escrow-badge.liberado {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+    
+    @media (max-width: 768px) {
+      .mensaje-bubble {
+        max-width: 85%;
+      }
+      .propuesta-card {
+        max-width: 90%;
+      }
+      .escrow-badge {
+        position: static;
+        margin-bottom: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Desktop Toggle (for collapse) -->
+  <button class="sidebar-collapse-btn d-none d-md-flex" id="sidebarCollapseBtn" title="Contraer/Expandir Sidebar">
+    <i class="bi bi-chevron-left"></i>
+  </button>
+
+  <!-- Mobile Toggle -->
+  <button class="sidebar-toggle-base d-md-none" id="sidebarToggle" 
+          th:classappend="${esUsuario} ? 'sidebar-toggle-usuario' : 'sidebar-toggle-entrenador'">
+    <i class="bi bi-list fs-4"></i>
+  </button>
+
+  <!-- Sidebar Overlay for Mobile -->
+  <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
+
+  <!-- FlowFit Sidebar -->
+  <div th:replace="~{${esUsuario ? 'fragments/sidebar-usuario' : 'fragments/sidebar-entrenador'} :: sidebar}"></div>
+
+  <!-- Main Content -->
+  <main class="main-content-base fade-in-up">
+    <div class="container-fluid p-4">
+      
+      <!-- Escrow Status Badge (si hay contratación activa) -->
+      <div th:if="${contratacion != null && contratacion.pago != null}" 
+           class="escrow-badge"
+           th:classappend="${contratacion.pago.estadoEscrow.name() == 'RETENIDO' ? 'retenido' : 
+                           (contratacion.pago.estadoEscrow.name() == 'LIBERADO' ? 'liberado' : 'esperando')}">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-shield-check fs-4"></i>
+          <div>
+            <div class="fw-bold">Estado del Pago</div>
+            <small th:text="${contratacion.pago.estadoEscrow.name()}">RETENIDO</small>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Header del Chat -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <a th:href="@{/chat}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i>
+              </a>
+              <img src="/assets/perfil_default.png" class="rounded-circle me-3" width="50" height="50" alt="Avatar">
+              <div>
+                <h4 class="text-white mb-0 fw-bold">
+                  <span th:if="${esUsuario}" th:text="${conversacion.entrenador.nombre}">Entrenador</span>
+                  <span th:unless="${esUsuario}" th:text="${conversacion.usuario.nombre}">Usuario</span>
+                </h4>
+                <small class="text-muted-flowfit">
+                  <i class="bi bi-circle-fill text-success" style="font-size: 0.5rem;"></i>
+                  En línea
+                </small>
+              </div>
+            </div>
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary" data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li th:if="${!esUsuario}">
+                  <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalEnviarPropuesta">
+                    <i class="bi bi-send me-2"></i>Enviar Propuesta
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" onclick="archivarConversacion()">
+                  <i class="bi bi-archive me-2"></i>Archivar
+                </a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Chat Container -->
+      <div class="chat-container">
+        
+        <!-- Mensajes -->
+        <div class="mensajes-container" id="mensajesContainer">
+          
+          <div th:each="mensaje : ${mensajes}">
+            
+            <!-- Mensaje de Sistema -->
+            <div th:if="${mensaje.tipoMensaje.name() == 'SISTEMA'}" class="mensaje-sistema">
+              <span class="badge bg-secondary">
+                <i class="bi bi-info-circle me-1"></i>
+                <span th:text="${mensaje.contenido}">Mensaje del sistema</span>
+              </span>
+            </div>
+            
+            <!-- Mensaje de Propuesta -->
+            <div th:if="${mensaje.tipoMensaje.name() == 'PROPUESTA_PLAN'}" 
+                 th:classappend="${mensaje.remitenteId == usuario.id ? 'enviada' : ''}">
+              <div class="propuesta-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                  <h5 class="text-white mb-0">
+                    <i class="bi bi-file-text me-2"></i>
+                    Propuesta de Plan
+                  </h5>
+                  <span class="badge bg-warning text-dark" th:if="${mensaje.metadata != null}">
+                    <span th:text="'Versión ' + ${mensaje.metadata.get('version')}">v1</span>
+                  </span>
+                </div>
+                
+                <div class="mb-3">
+                  <h6 class="text-muted-flowfit mb-1">Plan:</h6>
+                  <p class="text-white mb-0" th:text="${mensaje.metadata != null ? mensaje.metadata.get('nombrePlan') : 'Plan personalizado'}">
+                    Plan Premium
+                  </p>
+                </div>
+                
+                <div class="mb-3">
+                  <h6 class="text-muted-flowfit mb-1">Precio:</h6>
+                  <div class="propuesta-precio">
+                    $<span th:text="${mensaje.metadata != null ? #numbers.formatDecimal(mensaje.metadata.get('precioFinal'), 0, 'COMMA', 0, 'POINT') : '0'}">
+                      50.000
+                    </span>
+                    <small class="fs-6 text-muted-flowfit">COP/mes</small>
+                  </div>
+                </div>
+                
+                <div class="mb-3" th:if="${mensaje.metadata != null && mensaje.metadata.get('duracionDias') != null}">
+                  <h6 class="text-muted-flowfit mb-1">Duración:</h6>
+                  <p class="text-white mb-0">
+                    <i class="bi bi-calendar me-1"></i>
+                    <span th:text="${mensaje.metadata.get('duracionDias')} + ' días'">30 días</span>
+                  </p>
+                </div>
+                
+                <div class="mb-3" th:if="${mensaje.contenido != null && !mensaje.contenido.isEmpty()}">
+                  <h6 class="text-muted-flowfit mb-1">Comentarios:</h6>
+                  <p class="text-white small mb-0" th:text="${mensaje.contenido}">
+                    Comentarios adicionales...
+                  </p>
+                </div>
+                
+                <!-- Botones de Acción -->
+                <div class="d-flex gap-2 mt-3" 
+                     th:if="${mensaje.remitenteId != usuario.id}">
+                  <button class="btn btn-success flex-fill" 
+                          th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
+                          onclick="aceptarPropuesta(this)">
+                    <i class="bi bi-check-circle me-1"></i>Aceptar
+                  </button>
+                  <button class="btn btn-danger flex-fill"
+                          th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
+                          onclick="rechazarPropuesta(this)">
+                    <i class="bi bi-x-circle me-1"></i>Rechazar
+                  </button>
+                  <button class="btn btn-warning flex-fill"
+                          th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
+                          data-bs-toggle="modal" 
+                          data-bs-target="#modalContraoferta">
+                    <i class="bi bi-arrow-repeat me-1"></i>Contraoferta
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Mensaje Normal de Texto -->
+            <div th:if="${mensaje.tipoMensaje.name() == 'TEXTO'}" 
+                 class="mensaje-item"
+                 th:classappend="${mensaje.remitenteId == usuario.id ? 'enviado' : 'recibido'}">
+              <div class="mensaje-bubble">
+                <p class="mb-1 text-white" th:text="${mensaje.contenido}">Contenido del mensaje</p>
+                <small class="text-muted-flowfit" style="font-size: 0.75rem;">
+                  <span th:text="${#temporals.format(mensaje.fechaEnvio, 'HH:mm')}">12:34</span>
+                </small>
+              </div>
+            </div>
+            
+            <!-- Confirmación de Servicio -->
+            <div th:if="${mensaje.tipoMensaje.name() == 'CONFIRMACION_SERVICIO'}" class="mensaje-sistema">
+              <span class="badge bg-success">
+                <i class="bi bi-check-circle-fill me-1"></i>
+                <span th:text="${mensaje.contenido}">Servicio confirmado</span>
+              </span>
+            </div>
+            
+            <!-- Disputa Iniciada -->
+            <div th:if="${mensaje.tipoMensaje.name() == 'DISPUTA_INICIADA'}" class="mensaje-sistema">
+              <span class="badge bg-danger">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                <span th:text="${mensaje.contenido}">Disputa iniciada</span>
+              </span>
+            </div>
+            
+          </div>
+          
+          <!-- Empty State -->
+          <div th:if="${mensajes == null || #lists.isEmpty(mensajes)}" class="text-center py-5">
+            <i class="bi bi-chat-dots text-muted-flowfit" style="font-size: 4rem; opacity: 0.3;"></i>
+            <p class="text-muted-flowfit mt-3">No hay mensajes aún. ¡Inicia la conversación!</p>
+          </div>
+          
+        </div>
+        
+        <!-- Botones de Confirmación de Escrow (si aplica) -->
+        <div th:if="${contratacion != null && contratacion.pago != null && contratacion.pago.estadoEscrow.name() == 'RETENIDO'}"
+             class="mb-3">
+          <div class="alert alert-info d-flex align-items-center justify-content-between">
+            <div>
+              <i class="bi bi-shield-lock me-2"></i>
+              <strong>Pago Protegido:</strong> El dinero está retenido de forma segura.
+            </div>
+            <button class="btn btn-sm btn-success" 
+                    th:attr="data-pago-id=${contratacion.pago.id}"
+                    onclick="confirmarServicio(this)">
+              <i class="bi bi-check-circle me-1"></i>
+              Confirmar Servicio Recibido
+            </button>
+          </div>
+        </div>
+        
+        <!-- Input de Mensaje -->
+        <div class="chat-input-area">
+          <form id="formEnviarMensaje" th:action="@{/chat/enviar}" method="post">
+            <input type="hidden" name="conversacionId" th:value="${conversacion.id}">
+            <div class="input-group">
+              <input type="text" 
+                     class="form-control bg-dark text-white border-secondary" 
+                     name="contenido"
+                     id="mensajeInput"
+                     placeholder="Escribe un mensaje..." 
+                     required
+                     autocomplete="off">
+              <button class="btn btn-primary" type="submit">
+                <i class="bi bi-send-fill"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+        
+      </div>
+      
+    </div>
+  </main>
+  
+  <!-- Modal Enviar Propuesta (Solo Entrenadores) -->
+  <div class="modal fade" id="modalEnviarPropuesta" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title fw-bold">Enviar Propuesta de Plan</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form th:action="@{/negociacion/enviar-propuesta}" method="post">
+          <input type="hidden" name="usuarioId" th:value="${conversacion.usuario.id}">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Seleccionar Plan Base</label>
+              <select class="form-select bg-dark text-white border-secondary" name="planId" id="planSelect" required>
+                <option value="">-- Selecciona un plan --</option>
+                <option th:each="plan : ${planesEntrenador}" 
+                        th:value="${plan.id}"
+                        th:attr="data-precio=${plan.precioMensual}, data-duracion=${plan.duracionDias}, data-nombre=${plan.nombre}"
+                        th:text="${plan.nombre} + ' - $' + ${#numbers.formatDecimal(plan.precioMensual, 0, 'COMMA', 0, 'POINT')} + ' COP'">
+                </option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Precio Final (COP)</label>
+              <input type="number" class="form-control bg-dark text-white border-secondary" 
+                     name="precioFinal" id="precioFinalInput" required min="0">
+              <small class="text-muted-flowfit">Puedes ajustar el precio según la negociación</small>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Duración (días)</label>
+              <input type="number" class="form-control bg-dark text-white border-secondary" 
+                     name="duracionDias" id="duracionInput" value="30" required min="1">
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Comentarios Adicionales</label>
+              <textarea class="form-control bg-dark text-white border-secondary" 
+                        name="comentarios" rows="3" 
+                        placeholder="Agrega detalles sobre esta propuesta..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer border-secondary">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-send me-2"></i>Enviar Propuesta
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Contraoferta -->
+  <div class="modal fade" id="modalContraoferta" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title fw-bold">Hacer Contraoferta</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="formContraoferta" th:action="@{/negociacion/responder}" method="post">
+          <input type="hidden" name="contratacionId" id="contraofertaContratacionId">
+          <input type="hidden" name="accion" value="CONTRAOFERTA">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Nuevo Precio (COP)</label>
+              <input type="number" class="form-control bg-dark text-white border-secondary" 
+                     name="precioFinal" required min="0">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Comentarios</label>
+              <textarea class="form-control bg-dark text-white border-secondary" 
+                        name="comentarios" rows="3" 
+                        placeholder="Explica tu contraoferta..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer border-secondary">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-warning">
+              <i class="bi bi-arrow-repeat me-2"></i>Enviar Contraoferta
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- FlowFit Common JS -->
+  <script th:src="@{/js/sidebar-common.js}"></script>
+  
+  <script>
+    // Auto-scroll al último mensaje
+    function scrollToBottom() {
+      const container = document.getElementById('mensajesContainer');
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+    
+    // Scroll al cargar
+    document.addEventListener('DOMContentLoaded', scrollToBottom);
+    
+    // Auto-refresh cada 10 segundos
+    setInterval(() => {
+      location.reload();
+    }, 10000);
+    
+    // Actualizar precio cuando se selecciona un plan
+    document.getElementById('planSelect')?.addEventListener('change', function() {
+      const selected = this.options[this.selectedIndex];
+      const precio = selected.getAttribute('data-precio');
+      const duracion = selected.getAttribute('data-duracion');
+      
+      document.getElementById('precioFinalInput').value = precio;
+      document.getElementById('duracionInput').value = duracion;
+    });
+    
+    // Aceptar propuesta
+    function aceptarPropuesta(button) {
+      const contratacionId = button.getAttribute('data-contratacion-id');
+      if (confirm('¿Estás seguro de aceptar esta propuesta? Se procederá al pago.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/negociacion/responder';
+        
+        const inputId = document.createElement('input');
+        inputId.type = 'hidden';
+        inputId.name = 'contratacionId';
+        inputId.value = contratacionId;
+        form.appendChild(inputId);
+        
+        const inputAccion = document.createElement('input');
+        inputAccion.type = 'hidden';
+        inputAccion.name = 'accion';
+        inputAccion.value = 'ACEPTAR';
+        form.appendChild(inputAccion);
+        
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+    
+    // Rechazar propuesta
+    function rechazarPropuesta(button) {
+      const contratacionId = button.getAttribute('data-contratacion-id');
+      if (confirm('¿Estás seguro de rechazar esta propuesta?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/negociacion/responder';
+        
+        const inputId = document.createElement('input');
+        inputId.type = 'hidden';
+        inputId.name = 'contratacionId';
+        inputId.value = contratacionId;
+        form.appendChild(inputId);
+        
+        const inputAccion = document.createElement('input');
+        inputAccion.type = 'hidden';
+        inputAccion.name = 'accion';
+        inputAccion.value = 'RECHAZAR';
+        form.appendChild(inputAccion);
+        
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+    
+    // Preparar contraoferta
+    document.querySelectorAll('[data-bs-target="#modalContraoferta"]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const contratacionId = this.getAttribute('data-contratacion-id');
+        document.getElementById('contraofertaContratacionId').value = contratacionId;
+      });
+    });
+    
+    // Confirmar servicio (Escrow)
+    function confirmarServicio(button) {
+      const pagoId = button.getAttribute('data-pago-id');
+      if (confirm('¿Confirmas que has recibido/entregado el servicio correctamente?')) {
+        const esUsuario = [[${esUsuario}]];
+        const endpoint = esUsuario ? '/negociacion/confirmar-servicio/usuario' : '/negociacion/confirmar-servicio/entrenador';
+        
+        fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ pagoId: pagoId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          alert(data.mensaje || 'Confirmación registrada');
+          location.reload();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error al confirmar el servicio');
+        });
+      }
+    }
+    
+    // Focus en input al cargar
+    document.getElementById('mensajeInput')?.focus();
+  </script>
+</body>
+</html>

@@ -1,0 +1,953 @@
+/* ===== FLOWFIT - ENTRENADOR SPECIFIC CSS ===== */
+
+/* Variables específicas del Entrenador */
+:root {
+    --entrenador-primary: #1e40af;      /* Azul mar oscuro */
+    --entrenador-primary-light: #3b82f6; /* Azul mar medio */
+    --entrenador-primary-dark: #1e3a8a;  /* Azul mar profundo */
+    --entrenador-gradient: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #1e3a8a 100%);
+    --entrenador-shadow: 0 8px 25px rgba(30, 64, 175, 0.4);
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 80px;
+}
+
+/* ===== SIDEBAR COLAPSABLE ===== */
+.sidebar-base {
+    width: var(--sidebar-width);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-base.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+.sidebar-base.collapsed .brand-text,
+.sidebar-base.collapsed .nav-text {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.sidebar-base.collapsed .navbar-brand {
+    justify-content: center;
+}
+
+.sidebar-base.collapsed .logo-flowfit {
+    margin-right: 0 !important;
+}
+
+.sidebar-base.collapsed .nav-link-base {
+    justify-content: center;
+}
+
+.sidebar-base.collapsed .nav-link-base i {
+    margin-right: 0 !important;
+}
+
+.sidebar-base.collapsed .profile-icon-base {
+    justify-content: center;
+    padding: 12px 4px;
+}
+
+.sidebar-base.collapsed .profile-icon-base .flex-grow-1,
+.sidebar-base.collapsed .profile-icon-base .bi-chevron-down {
+    display: none;
+}
+
+/* Main content ajuste */
+.main-content-base {
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-content-base.sidebar-collapsed {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/* ===== DISEÑO MEJORADO ===== */
+
+/* Welcome Header Enhanced */
+.welcome-header-enhanced {
+    background: linear-gradient(135deg, rgba(30, 64, 175, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+    border: 1px solid rgba(30, 64, 175, 0.2);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-header-enhanced::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(30, 64, 175, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.user-avatar-enhanced {
+    position: relative;
+    width: 70px;
+    height: 70px;
+}
+
+.user-avatar-enhanced img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border: 3px solid rgba(30, 64, 175, 0.5);
+    box-shadow: 0 8px 20px rgba(30, 64, 175, 0.3);
+}
+
+.status-indicator {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: 3px solid rgba(15, 23, 42, 0.95);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+    }
+}
+
+.text-gradient-blue {
+    background: var(--entrenador-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+}
+
+/* Botones mejorados */
+.btn-enhanced {
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-enhanced:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-enhanced:active {
+    transform: scale(0.95);
+}
+
+/* Stats Cards Mejoradas */
+.stat-card-enhanced {
+    background: var(--flowfit-glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--flowfit-glass-border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100%;
+}
+
+.stat-card-hover:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(30, 64, 175, 0.3);
+    border-color: rgba(30, 64, 175, 0.4);
+}
+
+.stat-card-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--entrenador-gradient);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.stat-card-enhanced:hover::before {
+    opacity: 1;
+}
+
+.stat-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background: rgba(30, 64, 175, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.stat-card-enhanced:hover .stat-icon-wrapper {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.stat-icon {
+    font-size: 2rem;
+}
+
+.stat-content {
+    margin-bottom: 1rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    margin: 0;
+    line-height: 1;
+}
+
+.stat-label {
+    color: var(--flowfit-text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+.stat-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.stat-progress {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.stat-progress .progress-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+}
+
+.bg-success-subtle {
+    background: rgba(16, 185, 129, 0.1) !important;
+}
+
+.bg-info-subtle {
+    background: rgba(6, 182, 212, 0.1) !important;
+}
+
+.bg-warning-subtle {
+    background: rgba(245, 158, 11, 0.1) !important;
+}
+
+/* Sidebar específico del entrenador */
+.sidebar-entrenador {
+    background: var(--flowfit-glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-right: 2px solid rgba(59, 130, 246, 0.2);
+    box-shadow: 4px 0 20px rgba(59, 130, 246, 0.1);
+}
+
+/* Logo específico - Elegante en BLANCO */
+.sidebar-entrenador .brand-text {
+    color: white !important;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+}
+
+/* Enlaces del entrenador - Estilo Elegante */
+.sidebar-entrenador .nav-pills .nav-link-entrenador {
+    background: transparent;
+    border: 1px solid transparent;
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    margin: 4px 0;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.sidebar-entrenador .nav-pills .nav-link-entrenador:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: white;
+    transform: translateX(3px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.sidebar-entrenador .nav-pills .nav-link-entrenador.active {
+    background: var(--entrenador-gradient) !important;
+    border: 1px solid var(--entrenador-primary) !important;
+    color: white !important;
+    box-shadow: var(--entrenador-glow);
+    font-weight: 600;
+}
+
+.sidebar-entrenador .nav-pills .nav-link-entrenador.active::before {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--entrenador-accent);
+    border-radius: 0 4px 4px 0;
+    box-shadow: var(--entrenador-glow);
+}
+
+/* Submenu styles */
+.submenu-arrow {
+    font-size: 0.75rem;
+    transition: transform 0.3s ease;
+}
+
+.nav-link-entrenador[aria-expanded="true"] .submenu-arrow {
+    transform: rotate(180deg);
+}
+
+.submenu-item {
+    padding: 10px 16px 10px 48px !important;
+    font-size: 0.9rem;
+    background: rgba(15, 23, 42, 0.3);
+    margin: 2px 0;
+}
+
+.submenu-item:hover {
+    background: rgba(30, 64, 175, 0.2) !important;
+    transform: translateX(4px);
+}
+
+.submenu-item.active {
+    background: rgba(30, 64, 175, 0.3) !important;
+    border-left: 3px solid var(--entrenador-primary);
+}
+
+.btn-toggle-nav {
+    padding-left: 0;
+    margin-top: 4px;
+}
+
+/* Botón toggle específico */
+.sidebar-toggle-entrenador {
+    background: var(--entrenador-gradient);
+    box-shadow: var(--entrenador-shadow);
+}
+
+/* Stats cards del entrenador */
+.stat-card-entrenador {
+    position: relative;
+}
+
+.stat-card-entrenador::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--entrenador-gradient);
+    border-radius: 16px 16px 0 0;
+}
+
+.stat-card-entrenador:hover::before {
+    height: 6px;
+    box-shadow: 0 2px 8px rgba(30, 64, 175, 0.5);
+}
+
+/* Botones específicos del entrenador */
+.btn-entrenador-primary {
+    background: var(--entrenador-gradient);
+    box-shadow: var(--entrenador-shadow);
+}
+
+.btn-entrenador-primary:hover {
+    box-shadow: 0 12px 35px rgba(30, 64, 175, 0.6);
+    filter: brightness(1.1);
+}
+
+.btn-entrenador-outline {
+    border-color: var(--entrenador-primary);
+    color: var(--entrenador-primary);
+}
+
+.btn-entrenador-outline:hover {
+    background: var(--entrenador-gradient);
+    border-color: var(--entrenador-primary-light);
+    color: white;
+    box-shadow: var(--entrenador-shadow);
+}
+
+/* Cards específicas del entrenador */
+.card-entrenador .card-header h5 {
+    background: var(--entrenador-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Iconos específicos del entrenador */
+.icon-entrenador {
+    color: var(--entrenador-primary);
+    filter: drop-shadow(0 2px 4px rgba(30, 64, 175, 0.3));
+}
+
+/* Efectos hover específicos */
+.stat-card-entrenador:hover {
+    box-shadow: var(--flowfit-shadow-lg), var(--entrenador-shadow);
+}
+
+.card-entrenador:hover {
+    border-color: rgba(30, 64, 175, 0.3) !important;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 767.98px) {
+    .sidebar-collapse-btn {
+        display: none;
+    }
+    
+    .main-content-base {
+        margin-left: 0;
+    }
+    
+    .welcome-header-enhanced {
+        padding: 1.5rem;
+    }
+    
+    .user-avatar-enhanced {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .user-avatar-enhanced img {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .stat-card-enhanced {
+        margin-bottom: 1rem;
+    }
+}
+
+/* ===== ANIMACIONES ADICIONALES ===== */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: slideInUp 0.6s ease-out;
+}
+
+/* Rutinas y Usuarios Cards Mejoradas */
+.card-base.card-entrenador {
+    position: relative;
+}
+
+.card-base.card-entrenador::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 16px;
+    background: var(--entrenador-gradient);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.card-base.card-entrenador:hover::after {
+    opacity: 0.05;
+}
+
+/* Badge personalizado */
+.badge-admin-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.badge-entrenador-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Mejorar scrollbar */
+.sidebar-base::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-base::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-base::-webkit-scrollbar-thumb {
+    background: rgba(30, 64, 175, 0.5);
+    border-radius: 3px;
+}
+
+.sidebar-base::-webkit-scrollbar-thumb:hover {
+    background: rgba(30, 64, 175, 0.7);
+}
+
+/* Tooltip para sidebar colapsado */
+.sidebar-base.collapsed .nav-link-base {
+    position: relative;
+}
+
+.sidebar-base.collapsed .nav-link-base::after {
+    content: attr(title);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(15, 23, 42, 0.95);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    margin-left: 10px;
+    font-size: 0.85rem;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-base.collapsed .nav-link-base:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Empty state mejorado */
+.text-center.py-5 {
+    padding: 3rem 1.5rem !important;
+}
+
+.text-center.py-5 i {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* ===== DROPDOWN MENU DEL PERFIL ===== */
+/* Estilo del menú desplegable del perfil */
+.sidebar-base .dropdown-menu {
+    background: rgba(15, 23, 42, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    border-radius: 12px !important;
+    padding: 8px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.2) !important;
+    margin-top: 8px !important;
+    min-width: 200px !important;
+}
+
+.sidebar-base .dropdown-menu .dropdown-item {
+    color: rgba(255, 255, 255, 0.9) !important;
+    padding: 10px 16px !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    font-weight: 500 !important;
+    margin: 2px 0 !important;
+}
+
+.sidebar-base .dropdown-menu .dropdown-item:hover {
+    background: rgba(59, 130, 246, 0.15) !important;
+    color: white !important;
+    transform: translateX(4px);
+}
+
+.sidebar-base .dropdown-menu .dropdown-item i {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.sidebar-base .dropdown-menu .dropdown-item.text-primary {
+    color: #60a5fa !important;
+}
+
+.sidebar-base .dropdown-menu .dropdown-item.text-primary:hover {
+    background: rgba(96, 165, 250, 0.15) !important;
+    color: #93c5fd !important;
+}
+
+.sidebar-base .dropdown-divider {
+    border-color: rgba(59, 130, 246, 0.2) !important;
+    margin: 8px 0 !important;
+    opacity: 1 !important;
+}
+
+/* Animación de entrada del dropdown */
+.sidebar-base .dropdown-menu.show {
+    animation: dropdownFadeIn 0.3s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== COLORES ESPECÍFICOS PARA DASHBOARD (MÁS CLAROS) ===== */
+/* Variables para el contenido del dashboard - azul más claro y vibrante */
+:root {
+    --dashboard-primary: #3b82f6;       /* Azul vibrante para dashboard */
+    --dashboard-primary-light: #60a5fa; /* Azul claro para dashboard */
+    --dashboard-gradient: linear-gradient(135deg, #3b82f6 0%, #60a5fa 50%, #3b82f6 100%);
+    --dashboard-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+/* Botones del dashboard con azul más claro */
+.btn-entrenador-primary {
+    background: var(--dashboard-gradient) !important;
+    box-shadow: var(--dashboard-shadow) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+    padding: 12px 24px !important;
+    border-radius: 12px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+}
+
+.btn-entrenador-primary:hover {
+    box-shadow: 0 12px 35px rgba(59, 130, 246, 0.6) !important;
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    color: white !important;
+}
+
+/* Stats cards del dashboard */
+.stat-card-enhanced .stat-icon-wrapper {
+    background: rgba(59, 130, 246, 0.15) !important;
+}
+
+.stat-card-hover:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.35) !important;
+    border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+.stat-card-enhanced::before {
+    background: var(--dashboard-gradient) !important;
+}
+
+/* Iconos del dashboard */
+.main-content-base .icon-entrenador {
+    color: var(--dashboard-primary) !important;
+    filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.4)) !important;
+}
+
+/* Welcome header del dashboard */
+.welcome-header-enhanced {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(96, 165, 250, 0.08) 100%) !important;
+    border: 1px solid rgba(59, 130, 246, 0.25) !important;
+}
+
+.welcome-header-enhanced::before {
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%) !important;
+}
+
+.user-avatar-enhanced img {
+    border: 3px solid rgba(59, 130, 246, 0.6) !important;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4) !important;
+}
+
+.text-gradient-blue {
+    background: var(--dashboard-gradient) !important;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+    font-weight: 800;
+}
+
+/* Asegurar que el span con el nombre no tenga fondo */
+.text-gradient-blue {
+    position: relative;
+}
+
+.display-6 .text-gradient-blue {
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+/* Botones outline del dashboard */
+.btn-entrenador-outline {
+    border: 2px solid var(--dashboard-primary) !important;
+    color: var(--dashboard-primary) !important;
+    background: transparent !important;
+    font-weight: 600 !important;
+    padding: 10px 22px !important;
+    border-radius: 12px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+}
+
+.btn-entrenador-outline:hover {
+    background: var(--dashboard-gradient) !important;
+    border-color: var(--dashboard-primary-light) !important;
+    color: white !important;
+    box-shadow: var(--dashboard-shadow) !important;
+    transform: translateY(-2px);
+}
+
+/* Cards del dashboard con bordes más claros */
+.main-content-base .card-entrenador:hover {
+    border-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Rutinas y usuarios del dashboard */
+.main-content-base .rounded-3[style*="rgba(30, 64, 175"] {
+    background: rgba(59, 130, 246, 0.12) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Progress bars del dashboard */
+.stat-card-enhanced .progress-bar.bg-primary {
+    background: var(--dashboard-gradient) !important;
+}
+
+/* ===== BOTONES ENTRENADOR ===== */
+
+/* Botón Primario Entrenador */
+.btn-primary-entrenador {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary-entrenador::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.btn-primary-entrenador:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+    color: white;
+}
+
+.btn-primary-entrenador:hover::before {
+    opacity: 1;
+}
+
+.btn-primary-entrenador:active {
+    transform: translateY(0);
+}
+
+.btn-primary-entrenador i {
+    font-size: 1.1rem;
+}
+
+/* Botón Outline Entrenador */
+.btn-outline-entrenador {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    color: #3b82f6;
+    border: 2px solid rgba(59, 130, 246, 0.5);
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-outline-entrenador::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.btn-outline-entrenador:hover {
+    color: white;
+    border-color: #3b82f6;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.btn-outline-entrenador:hover::before {
+    opacity: 1;
+}
+
+.btn-outline-entrenador i {
+    font-size: 1.1rem;
+}
+
+/* Botón Danger FlowFit */
+.btn-danger-flowfit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    cursor: pointer;
+}
+
+.btn-danger-flowfit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
+    color: white;
+}
+
+/* Badge Entrenador */
+.badge-primary-entrenador {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.badge-secondary-entrenador {
+    background: rgba(148, 163, 184, 0.2);
+    color: #cbd5e1;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Botones en cards más pequeños */
+.card-base .btn-primary-entrenador,
+.card-base .btn-outline-entrenador {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+}
+
+.card-base .btn-primary-entrenador i,
+.card-base .btn-outline-entrenador i {
+    font-size: 1rem;
+}
+
+/* Mensajes enviados - azul para entrenador */
+.mensaje-item.enviado .mensaje-bubble {
+  background: var(--entrenador-primary);
+  color: #fff;
+  border: none;
+}

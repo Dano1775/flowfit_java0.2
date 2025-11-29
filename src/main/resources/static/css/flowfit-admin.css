@@ -418,7 +418,7 @@
 }
 
 .metric-card-usuario .metric-label {
-    color: var(--flowfit-text-muted);
+    color: #fff;
     font-size: 0.9rem;
     font-weight: 500;
 }

@@ -87,6 +87,24 @@
           <span class="nav-text">Progreso de Usuarios</span>
         </a>
       </li>
+      
+      <li class="nav-item">
+        <a th:href="@{/entrenador/mis-planes}" 
+           th:class="${currentPage == 'mis-planes'} ? 'nav-link-base nav-link-entrenador active' : 'nav-link-base nav-link-entrenador'" 
+           title="Mis Planes">
+          <i class="bi bi-briefcase me-3"></i>
+          <span class="nav-text">Mis Planes</span>
+        </a>
+      </li>
+      
+      <li class="nav-item">
+        <a th:href="@{/chat}" 
+           th:class="${currentPage == 'chat'} ? 'nav-link-base nav-link-entrenador active' : 'nav-link-base nav-link-entrenador'" 
+           title="Mensajes">
+          <i class="bi bi-chat-dots me-3"></i>
+          <span class="nav-text">Mensajes</span>
+        </a>
+      </li>
     </ul>
 
     <!-- Perfil del Entrenador -->

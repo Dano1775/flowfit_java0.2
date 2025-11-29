@@ -45,11 +45,19 @@
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/usuario/perfil}" 
-           th:class="${currentPage == 'perfil'} ? 'nav-link-base nav-link-usuario active' : 'nav-link-base nav-link-usuario'" 
-           title="Mi Perfil">
-          <i class="bi bi-person me-3"></i>
-          <span class="nav-text">Mi Perfil</span>
+        <a th:href="@{/chat}" 
+           th:class="${currentPage == 'chat'} ? 'nav-link-base nav-link-usuario active' : 'nav-link-base nav-link-usuario'" 
+           title="Mensajes">
+          <i class="bi bi-chat-dots me-3"></i>
+          <span class="nav-text">Mensajes</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/usuario/mapa}" 
+           th:class="${currentPage == 'mapa'} ? 'nav-link-base nav-link-usuario active' : 'nav-link-base nav-link-usuario'" 
+           title="Mapa de Gimnasios">
+          <i class="bi bi-geo-alt me-3"></i>
+          <span class="nav-text">Mapa de Gimnasios</span>
         </a>
       </li>
     </ul>

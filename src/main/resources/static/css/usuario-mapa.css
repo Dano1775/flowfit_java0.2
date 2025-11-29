@@ -1,45 +1,262 @@
-/* Estilos para la vista de mapa de usuario */
-:root{
-  --map-min-height: 400px;
-}
+/* === Estilos para la vista de mapa de usuario === */
 
-.card-usuario .card-body{
-  padding: 0.5rem;
-}
-
-#map{
+/* Mapa Principal */
+#map {
   width: 100%;
-  height: calc(100vh - 220px); /* ocupa la mayor parte de la pantalla */
-  min-height: var(--map-min-height);
-  border-radius: 6px;
+  height: 100%;
+  min-height: 500px;
+  border-radius: 8px;
   overflow: hidden;
+  background: #1a1a1a;
 }
 
-@media (max-width: 768px){
-  #map{ height: calc(100vh - 200px);} 
+/* Lista de Gimnasios */
+.gym-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* Botón de control personalizado */
-.map-locate-btn{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  background: #0d6efd;
-  color: #fff;
-  border: none;
+.gym-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s ease;
   cursor: pointer;
 }
 
-.map-locate-btn:focus{ outline: none; box-shadow: 0 0 0 3px rgba(13,110,253,0.2); }
-
-.gm-style .gm-style-mtc{ /* asegure margen del control en dispositivos */
-  margin-top: 8px !important;
+.gym-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--usuario-primary);
+  transform: translateX(4px);
 }
 
-.map-info-window{
-  font-size: 0.95rem;
+.gym-card.active {
+  background: rgba(var(--usuario-primary-rgb), 0.15);
+  border-color: var(--usuario-primary);
+}
+
+.gym-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.gym-icon.publico {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.gym-icon.privado {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.gym-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.gym-type {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  font-weight: 500;
+}
+
+.gym-type.publico {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.gym-type.privado {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.gym-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.gym-info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.gym-info-item i {
+  color: var(--usuario-primary);
+  width: 16px;
+}
+
+.gym-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gym-rating i {
+  color: #fbbf24;
+  font-size: 14px;
+}
+
+/* Botones del Mapa */
+.map-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.map-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.map-btn:hover {
+  background: #fff;
+  transform: scale(1.05);
+}
+
+.map-btn:active {
+  transform: scale(0.95);
+}
+
+/* Info Window Personalizada */
+.custom-info-window {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 280px;
+  color: #fff;
+}
+
+.custom-info-window h6 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.custom-info-window p {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 4px;
+}
+
+.custom-info-window .btn-directions {
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px;
+  background: var(--usuario-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-info-window .btn-directions:hover {
+  background: var(--usuario-primary-hover);
+  transform: translateY(-2px);
+}
+
+/* Estados Vacíos */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.empty-state i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Loading State */
+#mapLoading {
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .gym-list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .gym-card {
+    padding: 12px;
+  }
+  
+  .gym-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  .gym-name {
+    font-size: 14px;
+  }
+  
+  .custom-info-window {
+    min-width: 240px;
+    padding: 12px;
+  }
+}
+
+/* Scroll personalizado */
+.gym-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.gym-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.gym-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.gym-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }

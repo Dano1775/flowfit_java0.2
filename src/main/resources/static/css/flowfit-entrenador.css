@@ -234,7 +234,7 @@
 }
 
 .stat-label {
-    color: var(--flowfit-text-muted);
+    color: #fff;
     font-size: 0.9rem;
     font-weight: 500;
     margin-top: 0.5rem;
@@ -943,4 +943,11 @@
 .card-base .btn-primary-entrenador i,
 .card-base .btn-outline-entrenador i {
     font-size: 1rem;
+}
+
+/* Mensajes enviados - azul para entrenador */
+.mensaje-item.enviado .mensaje-bubble {
+  background: var(--entrenador-primary);
+  color: #fff;
+  border: none;
 }
