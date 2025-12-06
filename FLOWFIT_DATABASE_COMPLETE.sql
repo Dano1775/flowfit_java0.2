@@ -226,6 +226,13 @@ CREATE TABLE mensaje (
     remitente_id INT NOT NULL,
     contenido TEXT NOT NULL,
     tipo_mensaje ENUM('TEXTO', 'IMAGEN', 'ARCHIVO', 'PROPUESTA_PLAN', 'PAGO_GENERADO', 'SISTEMA') DEFAULT 'TEXTO',
+    
+    -- Campos para envío de archivos
+    archivo_url VARCHAR(500) DEFAULT NULL COMMENT 'URL del archivo subido',
+    archivo_nombre VARCHAR(255) DEFAULT NULL COMMENT 'Nombre original del archivo',
+    archivo_tipo VARCHAR(100) DEFAULT NULL COMMENT 'MIME type del archivo',
+    archivo_tamano BIGINT DEFAULT NULL COMMENT 'Tamaño del archivo en bytes',
+    
     fecha_envio DATETIME DEFAULT CURRENT_TIMESTAMP,
     leido BOOLEAN DEFAULT FALSE,
     fecha_lectura DATETIME DEFAULT NULL,
