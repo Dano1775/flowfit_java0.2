@@ -29,11 +29,11 @@
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/usuario/buscar-entrenador}" 
-           th:class="${currentPage == 'entrenador'} ? 'nav-link-base nav-link-usuario active' : 'nav-link-base nav-link-usuario'" 
-           title="Mi Entrenador">
-          <i class="bi bi-search me-3"></i>
-          <span class="nav-text">Mi Entrenador</span>
+        <a th:href="@{/entrenador/planes/explorar}" 
+           th:class="${currentPage == 'explorar-planes' or currentPage == 'marketplace'} ? 'nav-link-base nav-link-usuario active' : 'nav-link-base nav-link-usuario'" 
+           title="Marketplace">
+          <i class="bi bi-shop-window me-3"></i>
+          <span class="nav-text">Marketplace</span>
         </a>
       </li>
       <li class="nav-item">

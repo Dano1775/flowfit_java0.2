@@ -1,12 +1,22 @@
 /* ===== FLOWFIT - ENTRENADOR SPECIFIC CSS ===== */
 
-/* Variables específicas del Entrenador */
+/* Variables específicas del Entrenador - AZUL THEME */
 :root {
-    --entrenador-primary: #1e40af;      /* Azul mar oscuro */
-    --entrenador-primary-light: #3b82f6; /* Azul mar medio */
-    --entrenador-primary-dark: #1e3a8a;  /* Azul mar profundo */
-    --entrenador-gradient: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #1e3a8a 100%);
-    --entrenador-shadow: 0 8px 25px rgba(30, 64, 175, 0.4);
+    --entrenador-primary: #1e40af;      /* Azul principal */
+    --entrenador-primary-light: #3b82f6; /* Azul medio */
+    --entrenador-primary-dark: #1e3a8a;  /* Azul profundo */
+    --entrenador-accent: #60a5fa;        /* Azul accent claro */
+    --entrenador-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+    --entrenador-shadow: 0 8px 32px rgba(30, 64, 175, 0.3);
+    --entrenador-glow: 0 0 20px rgba(30, 64, 175, 0.4);
+    --entrenador-border: rgba(30, 64, 175, 0.3);
+    
+    /* Colores de fondo */
+    --entrenador-bg-dark: #0f172a;
+    --entrenador-bg-card: rgba(15, 23, 42, 0.8);
+    --entrenador-bg-accent: rgba(30, 64, 175, 0.1);
+    
+    /* Sidebar */
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
 }
@@ -304,11 +314,11 @@
 }
 
 .sidebar-entrenador .nav-pills .nav-link-entrenador:hover {
-    background: rgba(59, 130, 246, 0.15);
-    border-color: rgba(59, 130, 246, 0.3);
+    background: var(--entrenador-bg-accent);
+    border-color: var(--entrenador-border);
     color: white;
     transform: translateX(3px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
 }
 
 .sidebar-entrenador .nav-pills .nav-link-entrenador.active {
@@ -349,12 +359,12 @@
 }
 
 .submenu-item:hover {
-    background: rgba(30, 64, 175, 0.2) !important;
+    background: rgba(16, 185, 129, 0.2) !important;
     transform: translateX(4px);
 }
 
 .submenu-item.active {
-    background: rgba(30, 64, 175, 0.3) !important;
+    background: rgba(16, 185, 129, 0.3) !important;
     border-left: 3px solid var(--entrenador-primary);
 }
 

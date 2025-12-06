@@ -1,3 +1,4 @@
+com\example\flowfit\dto\MensajeDTO$1.class
 com\example\flowfit\model\PagoContratacion$EstadoEscrow.class
 com\example\flowfit\repository\ContratacionEntrenadorRepository.class
 com\example\flowfit\model\Usuario.class
@@ -27,6 +28,7 @@ com\example\flowfit\model\AsignacionEntrenador.class
 com\example\flowfit\service\NegociacionService.class
 com\example\flowfit\service\RutinaService.class
 com\example\flowfit\controller\ChatController.class
+com\example\flowfit\controller\PagosController.class
 com\example\flowfit\service\UsuarioService.class
 com\example\flowfit\service\UsuarioGroupService.class
 com\example\flowfit\model\ContratacionEntrenador$PropuestaDe.class
@@ -61,6 +63,7 @@ com\example\flowfit\controller\ProfileController.class
 com\example\flowfit\repository\PasswordResetTokenRepository.class
 com\example\flowfit\controller\MapaController.class
 com\example\flowfit\service\EmailService$2.class
+com\example\flowfit\service\FileUploadService.class
 com\example\flowfit\repository\RegistroAprobacionesRepository.class
 com\example\flowfit\model\Mensaje$TipoMensaje.class
 com\example\flowfit\model\HistorialNegociacion$EstadoPropuesta.class
@@ -76,6 +79,7 @@ com\example\flowfit\controller\BoletinController.class
 com\example\flowfit\controller\UsuarioGroupController.class
 com\example\flowfit\dto\EjercicioRutinaDto.class
 com\example\flowfit\controller\NegociacionController.class
+com\example\flowfit\model\ContratacionEntrenador$TipoContratacion.class
 com\example\flowfit\dto\RutinaAsignadaDto.class
 com\example\flowfit\repository\HistorialEdicionesRepository.class
 com\example\flowfit\config\WebConfig.class

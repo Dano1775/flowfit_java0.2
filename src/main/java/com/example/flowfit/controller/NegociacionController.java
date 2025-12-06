@@ -12,7 +12,8 @@ import jakarta.servlet.http.HttpSession;
 import java.util.*;
 
 /**
- * Controlador para gestionar el sistema de negociación y escrow (protección anti-estafas)
+ * Controlador para gestionar el sistema de negociación y escrow (protección
+ * anti-estafas)
  */
 @Controller
 @RequestMapping("/negociacion")
@@ -20,10 +21,10 @@ public class NegociacionController {
 
     @Autowired
     private NegociacionService negociacionService;
-    
+
     @Autowired
     private EscrowService escrowService;
-    
+
     /**
      * Entrenador envía propuesta inicial
      */
@@ -33,7 +34,7 @@ public class NegociacionController {
             @RequestBody PropuestaDTO propuesta,
             @RequestParam Long conversacionId,
             HttpSession session) {
-        
+
         try {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             if (usuario == null || !usuario.getPerfilUsuario().name().equals("Entrenador")) {
@@ -42,12 +43,12 @@ public class NegociacionController {
                 error.put("message", "No tienes permiso para enviar propuestas");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
             }
-            
+
             Map<String, Object> response = negociacionService.enviarPropuestaInicial(
-                conversacionId, usuario.getId(), propuesta);
-            
+                    conversacionId, usuario.getId(), propuesta);
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
@@ -55,7 +56,7 @@ public class NegociacionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
      * Usuario/Entrenador responde a propuesta
      */
@@ -64,7 +65,7 @@ public class NegociacionController {
     public ResponseEntity<Map<String, Object>> responderPropuesta(
             @RequestBody Map<String, Object> requestBody,
             HttpSession session) {
-        
+
         try {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             if (usuario == null) {
@@ -73,28 +74,28 @@ public class NegociacionController {
                 error.put("message", "Sesión no válida");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
-            
+
             Long contratacionId = ((Number) requestBody.get("contratacionId")).longValue();
             String accion = (String) requestBody.get("accion");
-            
+
             PropuestaDTO contraoferta = null;
             if (requestBody.containsKey("propuesta")) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> propuestaMap = (Map<String, Object>) requestBody.get("propuesta");
                 contraoferta = mapToPropuestaDTO(propuestaMap);
             }
-            
+
             Map<String, Object> response;
             if (usuario.getPerfilUsuario().name().equals("Entrenador")) {
                 response = negociacionService.entrenadorRespondeContraoferta(
-                    contratacionId, usuario.getId(), accion, contraoferta);
+                        contratacionId, usuario.getId(), accion, contraoferta);
             } else {
                 response = negociacionService.responderPropuesta(
-                    contratacionId, usuario.getId(), accion, contraoferta);
+                        contratacionId, usuario.getId(), accion, contraoferta);
             }
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
@@ -102,7 +103,36 @@ public class NegociacionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
+    /**
+     * Generar link de pago de MercadoPago después de aceptar propuesta
+     */
+    @GetMapping("/generar-pago")
+    public String generarPago(@RequestParam Long contratacionId, HttpSession session) {
+        try {
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            if (usuario == null) {
+                return "redirect:/login";
+            }
+
+            // Obtener el link de pago desde el historial
+            Map<String, Object> datosPago = negociacionService.obtenerDatosPago(contratacionId);
+
+            if (datosPago != null && datosPago.containsKey("linkPago")) {
+                String linkPago = (String) datosPago.get("linkPago");
+                return "redirect:" + linkPago;
+            } else {
+                // Si no hay link, generar uno nuevo
+                String linkPago = negociacionService.generarNuevoLinkPago(contratacionId);
+                return "redirect:" + linkPago;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/chat/conversaciones?error=" + e.getMessage();
+        }
+    }
+
     /**
      * Usuario confirma que recibió el servicio (sistema ESCROW)
      */
@@ -111,7 +141,7 @@ public class NegociacionController {
     public ResponseEntity<Map<String, Object>> usuarioConfirmaServicio(
             @RequestBody Map<String, Object> requestBody,
             HttpSession session) {
-        
+
         try {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             if (usuario == null) {
@@ -120,15 +150,15 @@ public class NegociacionController {
                 error.put("message", "Sesión no válida");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
-            
+
             Long pagoId = ((Number) requestBody.get("pagoId")).longValue();
             String comentario = (String) requestBody.get("comentario");
-            
+
             Map<String, Object> response = escrowService.usuarioConfirmaServicio(
-                pagoId, usuario.getId(), comentario);
-            
+                    pagoId, usuario.getId(), comentario);
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
@@ -136,7 +166,7 @@ public class NegociacionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
      * Entrenador confirma que cumplió con el servicio (sistema ESCROW)
      */
@@ -145,7 +175,7 @@ public class NegociacionController {
     public ResponseEntity<Map<String, Object>> entrenadorConfirmaServicio(
             @RequestBody Map<String, Object> requestBody,
             HttpSession session) {
-        
+
         try {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             if (usuario == null || !usuario.getPerfilUsuario().name().equals("Entrenador")) {
@@ -154,15 +184,15 @@ public class NegociacionController {
                 error.put("message", "No tienes permiso");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
             }
-            
+
             Long pagoId = ((Number) requestBody.get("pagoId")).longValue();
             String comentario = (String) requestBody.get("comentario");
-            
+
             Map<String, Object> response = escrowService.entrenadorConfirmaServicio(
-                pagoId, usuario.getId(), comentario);
-            
+                    pagoId, usuario.getId(), comentario);
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
@@ -170,7 +200,7 @@ public class NegociacionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
      * Iniciar disputa (usuario o entrenador)
      */
@@ -180,7 +210,7 @@ public class NegociacionController {
             @RequestParam Long pagoId,
             @RequestParam String razon,
             HttpSession session) {
-        
+
         try {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             if (usuario == null) {
@@ -189,12 +219,12 @@ public class NegociacionController {
                 error.put("message", "Sesión no válida");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
-            
+
             Map<String, Object> response = escrowService.iniciarDisputa(
-                pagoId, usuario.getId(), razon);
-            
+                    pagoId, usuario.getId(), razon);
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
@@ -202,7 +232,7 @@ public class NegociacionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
      * Obtener estado del escrow
      */
@@ -211,7 +241,7 @@ public class NegociacionController {
     public ResponseEntity<Map<String, Object>> obtenerEstadoEscrow(
             @PathVariable Long pagoId,
             HttpSession session) {
-        
+
         try {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             if (usuario == null) {
@@ -220,12 +250,12 @@ public class NegociacionController {
                 error.put("message", "Sesión no válida");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
-            
+
             Map<String, Object> estado = escrowService.obtenerEstadoEscrow(pagoId);
             estado.put("success", true);
-            
+
             return ResponseEntity.ok(estado);
-            
+
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
@@ -233,11 +263,11 @@ public class NegociacionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     // Método auxiliar para convertir Map a PropuestaDTO
     private PropuestaDTO mapToPropuestaDTO(Map<String, Object> map) {
         PropuestaDTO dto = new PropuestaDTO();
-        
+
         if (map.get("precio") != null) {
             dto.setPrecio(new java.math.BigDecimal(map.get("precio").toString()));
         }
@@ -262,7 +292,7 @@ public class NegociacionController {
         if (map.get("mensaje") != null) {
             dto.setMensaje((String) map.get("mensaje"));
         }
-        
+
         return dto;
     }
 }

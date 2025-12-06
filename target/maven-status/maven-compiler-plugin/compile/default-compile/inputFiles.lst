@@ -12,6 +12,7 @@ C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\Ent
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\LoginController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\MapaController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\NegociacionController.java
+C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\PagosController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\PasswordResetController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\PlanEntrenadorController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\ProfileController.java
@@ -66,6 +67,7 @@ C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\EmailM
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\EmailService.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\EscrowService.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\ExcelExportService.java
+C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\FileUploadService.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\MercadoPagoService.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\NegociacionService.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\PasswordResetService.java

@@ -7,10 +7,13 @@ import java.util.List;
 
 @Repository
 public interface HistorialNegociacionRepository extends JpaRepository<HistorialNegociacion, Long> {
-    
+
     List<HistorialNegociacion> findByContratacionIdOrderByVersionAsc(Long contratacionId);
-    
+
     HistorialNegociacion findTopByContratacionIdOrderByVersionDesc(Long contratacionId);
-    
+
+    HistorialNegociacion findTopByContratacionIdAndEstadoPropuestaOrderByVersionDesc(Long contratacionId,
+            HistorialNegociacion.EstadoPropuesta estadoPropuesta);
+
     Long countByContratacionId(Long contratacionId);
 }

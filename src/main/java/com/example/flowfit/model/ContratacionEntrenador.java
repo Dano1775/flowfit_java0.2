@@ -14,113 +14,125 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContratacionEntrenador {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(name = "usuario_id", nullable = false)
     private Integer usuarioId;
-    
+
     @Column(name = "entrenador_id", nullable = false)
     private Integer entrenadorId;
-    
+
     @Column(name = "plan_base_id")
     private Integer planBaseId;
-    
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_contratacion")
+    private TipoContratacion tipoContratacion = TipoContratacion.PLAN_FIJO;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EstadoContratacion estado = EstadoContratacion.PENDIENTE_APROBACION;
-    
+
     @Column(name = "precio_acordado", nullable = false, precision = 10, scale = 2)
     private BigDecimal precioAcordado;
-    
+
     @Column(name = "descuento_aplicado", precision = 10, scale = 2)
     private BigDecimal descuentoAplicado = BigDecimal.ZERO;
-    
+
     @Column(name = "comision_plataforma_porcentaje", precision = 5, scale = 2)
     private BigDecimal comisionPlataformaPorcentaje = new BigDecimal("10.00");
-    
+
     @Column(name = "monto_entrenador", precision = 10, scale = 2)
     private BigDecimal montoEntrenador;
-    
+
     @Column(name = "monto_comision", precision = 10, scale = 2)
     private BigDecimal montoComision;
-    
+
     @Column(name = "duracion_dias_acordada", nullable = false)
     private Integer duracionDiasAcordada;
-    
+
     @Column(name = "rutinas_mes_acordadas")
     private Integer rutinasMesAcordadas;
-    
+
     @Column(name = "seguimiento_semanal_acordado")
     private Boolean seguimientoSemanalAcordado = false;
-    
+
     @Column(name = "chat_directo_acordado")
     private Boolean chatDirectoAcordado = true;
-    
+
     @Column(name = "videollamadas_mes_acordadas")
     private Integer videollamadasMesAcordadas = 0;
-    
+
     @Column(name = "plan_nutricional_acordado")
     private Boolean planNutricionalAcordado = false;
-    
+
     @Column(name = "servicios_adicionales", columnDefinition = "TEXT")
     private String serviciosAdicionales;
-    
+
     @Column(name = "version_negociacion")
     private Integer versionNegociacion = 1;
-    
+
+    @Column(name = "rondas_negociacion")
+    private Integer rondasNegociacion = 0;
+
+    @Column(name = "porcentaje_variacion_permitido", precision = 5, scale = 2)
+    private BigDecimal porcentajeVariacionPermitido = new BigDecimal("30.00");
+
     @Enumerated(EnumType.STRING)
     @Column(name = "ultima_propuesta_de")
     private PropuestaDe ultimaPropuestaDe;
-    
+
     @Column(name = "fecha_solicitud", nullable = false)
     private LocalDateTime fechaSolicitud = LocalDateTime.now();
-    
+
     @Column(name = "fecha_aprobacion")
     private LocalDateTime fechaAprobacion;
-    
+
     @Column(name = "fecha_inicio")
     private LocalDateTime fechaInicio;
-    
+
     @Column(name = "fecha_fin")
     private LocalDateTime fechaFin;
-    
+
     @Column(name = "fecha_cancelacion")
     private LocalDateTime fechaCancelacion;
-    
+
     @Column(name = "nota_usuario", columnDefinition = "TEXT")
     private String notaUsuario;
-    
+
     @Column(name = "nota_entrenador", columnDefinition = "TEXT")
     private String notaEntrenador;
-    
+
     @Column(name = "razon_cancelacion", columnDefinition = "TEXT")
     private String razonCancelacion;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", insertable = false, updatable = false)
     private Usuario usuario;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entrenador_id", insertable = false, updatable = false)
     private Usuario entrenador;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_base_id", insertable = false, updatable = false)
     private PlanEntrenador planBase;
-    
+
     @OneToMany(mappedBy = "contratacionId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<HistorialNegociacion> historialNegociaciones;
-    
-    // Relación con PagoContratacion - NO usar mappedBy porque contratacionId es un campo simple
+
+    // Relación con PagoContratacion - NO usar mappedBy porque contratacionId es un
+    // campo simple
     @Transient
     private PagoContratacion pago;
-    
+
     public enum EstadoContratacion {
         PENDIENTE_APROBACION,
         NEGOCIACION,
+        PROPUESTA_FINAL,
         PENDIENTE_PAGO,
         PAGO_PROCESANDO,
         ACTIVA,
@@ -129,9 +141,14 @@ public class ContratacionEntrenador {
         CANCELADA,
         RECHAZADA
     }
-    
+
     public enum PropuestaDe {
         USUARIO,
         ENTRENADOR
+    }
+
+    public enum TipoContratacion {
+        PLAN_FIJO,
+        PERSONALIZADO
     }
 }

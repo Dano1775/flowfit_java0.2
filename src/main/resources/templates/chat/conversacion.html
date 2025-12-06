@@ -52,25 +52,27 @@
     }
     
     .chat-container {
-      height: calc(100vh - 80px);
+      height: 100vh;
       display: flex;
       flex-direction: column;
-      max-width: 1400px;
-      margin: 0 auto;
+      width: 100%;
+      margin: 0;
       background: var(--bg-primary);
+      padding: 0;
     }
     
     /* Container de mensajes - Estilo oscuro minimalista */
     .mensajes-container {
       flex: 1;
       overflow-y: auto;
-      padding: 2rem 3rem;
+      padding: 2rem 5%;
       background: var(--bg-secondary);
       border-radius: 0;
       margin-bottom: 0;
       border: none;
       border-top: 1px solid var(--border-color);
       border-bottom: 1px solid var(--border-color);
+      min-height: 0;
     }
     
     .mensajes-container::-webkit-scrollbar {
@@ -107,37 +109,47 @@
       justify-content: flex-end;
     }
     
-    /* Burbujas minimalistas */
+    /* Burbujas minimalistas - SIEMPRE VISIBLES */
     .mensaje-bubble {
       max-width: 65%;
       padding: 0.9rem 1.3rem;
       border-radius: 18px;
       position: relative;
       word-wrap: break-word;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
     
-    /* Mensajes recibidos - fondo oscuro */
+    /* Mensajes recibidos - fondo oscuro con borde */
     .mensaje-item.recibido .mensaje-bubble {
       background: var(--bg-tertiary);
       border: 1px solid var(--border-color);
       color: var(--text-primary);
     }
     
-    /* Mensajes enviados - azul para entrenador, verde para usuario */
+    /* Mensajes enviados - Fondo azul sólido SIEMPRE VISIBLE */
     .mensaje-item.enviado .mensaje-bubble {
-      background: var(--accent-color);
-      color: var(--text-primary);
-      border: none;
+      background: #2563eb !important;
+      color: #ffffff !important;
+      border: 1px solid #3b82f6 !important;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
     }
     
     .mensaje-bubble p {
       margin: 0;
       line-height: 1.5;
+      color: inherit;
     }
     
     .mensaje-bubble small {
-      opacity: 0.7;
+      opacity: 0.85;
       font-size: 0.75rem;
+      color: inherit;
+    }
+    
+    /* Asegurar que el texto sea visible en mensajes enviados */
+    .mensaje-item.enviado .mensaje-bubble p,
+    .mensaje-item.enviado .mensaje-bubble small {
+      color: #ffffff !important;
     }
     
     /* Mensajes del sistema */
@@ -183,7 +195,8 @@
       border: none;
       border-top: 1px solid var(--border-color);
       border-radius: 0;
-      padding: 1rem 3rem;
+      padding: 1rem 5%;
+      flex-shrink: 0;
     }
     
     .chat-input-wrapper {
@@ -243,6 +256,126 @@
     #mensajeInput::placeholder {
       color: var(--text-secondary);
       opacity: 0.6;
+    }
+    
+    /* File Preview Styles */
+    #filePreview {
+      padding: 0.5rem 0;
+      background: transparent;
+    }
+    
+    .file-preview-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.6rem 1rem;
+    }
+    
+    .file-preview-item img {
+      max-width: 80px;
+      max-height: 80px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+    
+    .file-preview-item video {
+      max-width: 120px;
+      max-height: 80px;
+      border-radius: 6px;
+    }
+    
+    .file-preview-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .file-preview-name {
+      color: var(--text-primary);
+      font-weight: 500;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .file-preview-size {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+    }
+    
+    .file-preview-remove {
+      padding: 0.4rem 0.6rem;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .file-preview-remove:hover {
+      background: #dc3545;
+      border-color: #dc3545;
+      color: white;
+    }
+    
+    /* Mensaje con archivo adjunto */
+    .mensaje-archivo {
+      background: transparent;
+      max-width: 400px;
+    }
+    
+    .mensaje-archivo img {
+      max-width: 100%;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .mensaje-archivo img:hover {
+      transform: scale(1.02);
+    }
+    
+    .mensaje-archivo video {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    
+    .archivo-documento {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.8rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+    
+    .archivo-documento i {
+      font-size: 2rem;
+      color: var(--accent-color);
+    }
+    
+    .archivo-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .archivo-nombre {
+      color: var(--text-primary);
+      font-weight: 500;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .archivo-tamano {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
     }
     
     .btn-icon {
@@ -312,11 +445,12 @@
       border: none;
       border-bottom: 1px solid var(--border-color);
       border-radius: 0;
-      padding: 1.2rem 3rem;
+      padding: 1.2rem 5%;
       margin-bottom: 0;
       display: flex;
       align-items: center;
       gap: 1rem;
+      flex-shrink: 0;
     }
     
     .chat-header h4 {
@@ -615,77 +749,259 @@
             
             <!-- Mensaje de Propuesta -->
             <div th:if="${mensaje.tipoMensaje.name() == 'PROPUESTA_PLAN'}" 
-                 th:classappend="${mensaje.remitenteId == usuario.id ? 'enviada' : ''}">
-              <div class="propuesta-card">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                  <h5 class="text-white mb-0">
-                    <i class="bi bi-file-text me-2"></i>
-                    Propuesta de Plan
-                  </h5>
-                  <span class="badge bg-warning text-dark" th:if="${mensaje.metadata != null}">
-                    <span th:text="'Versión ' + ${mensaje.metadata.get('version')}">v1</span>
+                 th:classappend="${mensaje.remitenteId == usuario.id ? 'enviada' : ''}"
+                 style="margin: 1.5rem 0;">
+              <div class="propuesta-card" style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border: 2px solid var(--accent-color); border-radius: 16px; padding: 1.8rem; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+                
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                  <div>
+                    <h5 class="text-white mb-1" style="font-size: 1.4rem; font-weight: 600;">
+                      <i class="bi bi-star-fill me-2" style="color: #fbbf24;"></i>
+                      Propuesta de Plan
+                    </h5>
+                    <p class="text-white mb-0" style="opacity: 0.7; font-size: 0.9rem;">
+                      Plan personalizado para ti
+                    </p>
+                  </div>
+                  <span class="badge" style="background: var(--accent-color); color: white; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem;" th:if="${mensaje.metadata != null}">
+                    <i class="bi bi-layer-forward me-1"></i>
+                    <span th:text="'V' + ${mensaje.metadata.get('version')}">v1</span>
                   </span>
                 </div>
                 
-                <div class="mb-3">
-                  <h6 class="text-muted-flowfit mb-1">Plan:</h6>
-                  <p class="text-white mb-0" th:text="${mensaje.metadata != null ? mensaje.metadata.get('nombrePlan') : 'Plan personalizado'}">
-                    Plan Premium
-                  </p>
-                </div>
-                
-                <div class="mb-3">
-                  <h6 class="text-muted-flowfit mb-1">Precio:</h6>
-                  <div class="propuesta-precio">
-                    $<span th:text="${mensaje.metadata != null ? #numbers.formatDecimal(mensaje.metadata.get('precioFinal'), 0, 'COMMA', 0, 'POINT') : '0'}">
-                      50.000
-                    </span>
-                    <small class="fs-6 text-muted-flowfit">COP/mes</small>
+                <!-- Contenido Principal -->
+                <div class="row g-3 mb-4">
+                  <!-- Precio Destacado -->
+                  <div class="col-12">
+                    <div style="background: var(--bg-primary); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border-color);">
+                      <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                          <small class="text-white" style="opacity: 0.6; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Precio</small>
+                          <div class="d-flex align-items-baseline mt-1">
+                            <span style="font-size: 2.5rem; font-weight: 700; color: var(--accent-color);">
+                              $<span th:text="${mensaje.metadata != null ? #numbers.formatDecimal(mensaje.metadata.get('precioFinal'), 0, 'COMMA', 0, 'POINT') : '0'}">50.000</span>
+                            </span>
+                            <span class="text-white ms-2" style="opacity: 0.7; font-size: 1rem;">COP</span>
+                          </div>
+                        </div>
+                        <div class="text-end">
+                          <small class="text-white" style="opacity: 0.6; font-size: 0.85rem;">Duración</small>
+                          <div class="text-white mt-1" style="font-size: 1.2rem; font-weight: 600;" th:if="${mensaje.metadata != null && mensaje.metadata.get('duracionDias') != null}">
+                            <i class="bi bi-calendar3 me-1" style="color: var(--accent-color);"></i>
+                            <span th:text="${mensaje.metadata.get('duracionDias')}">30</span> días
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Plan Info -->
+                  <div class="col-md-12" th:if="${mensaje.metadata != null && mensaje.metadata.get('nombrePlan') != null}">
+                    <div style="background: var(--bg-primary); border-radius: 10px; padding: 1rem; border-left: 4px solid var(--accent-color);">
+                      <small class="text-white" style="opacity: 0.6; font-size: 0.85rem;">
+                        <i class="bi bi-award me-1"></i>Plan incluido
+                      </small>
+                      <p class="text-white mb-0 mt-1" style="font-weight: 500;" th:text="${mensaje.metadata.get('nombrePlan')}">
+                        Plan Premium
+                      </p>
+                    </div>
                   </div>
                 </div>
                 
-                <div class="mb-3" th:if="${mensaje.metadata != null && mensaje.metadata.get('duracionDias') != null}">
-                  <h6 class="text-muted-flowfit mb-1">Duración:</h6>
-                  <p class="text-white mb-0">
-                    <i class="bi bi-calendar me-1"></i>
-                    <span th:text="${mensaje.metadata.get('duracionDias')} + ' días'">30 días</span>
-                  </p>
-                </div>
-                
-                <div class="mb-3" th:if="${mensaje.contenido != null && !mensaje.contenido.isEmpty()}">
-                  <h6 class="text-muted-flowfit mb-1">Comentarios:</h6>
-                  <p class="text-white small mb-0" th:text="${mensaje.contenido}">
+                <!-- Comentarios -->
+                <div class="mb-4" th:if="${mensaje.contenido != null && !mensaje.contenido.isEmpty()}">
+                  <small class="text-white" style="opacity: 0.6; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">
+                    <i class="bi bi-chat-left-quote me-1"></i>Comentarios del entrenador
+                  </small>
+                  <p class="text-white mt-2 mb-0" style="font-size: 0.95rem; line-height: 1.6; background: var(--bg-primary); padding: 1rem; border-radius: 10px; border-left: 3px solid var(--accent-color);" th:text="${mensaje.contenido}">
                     Comentarios adicionales...
                   </p>
                 </div>
                 
-                <!-- Botones de Acción -->
-                <div class="d-flex gap-2 mt-3" 
-                     th:if="${mensaje.remitenteId != usuario.id}">
-                  <button class="btn btn-success flex-fill" 
-                          th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
-                          onclick="aceptarPropuesta(this)">
-                    <i class="bi bi-check-circle me-1"></i>Aceptar
-                  </button>
-                  <button class="btn btn-danger flex-fill"
-                          th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
-                          onclick="rechazarPropuesta(this)">
-                    <i class="bi bi-x-circle me-1"></i>Rechazar
-                  </button>
-                  <button class="btn btn-warning flex-fill"
-                          th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
-                          data-bs-toggle="modal" 
-                          data-bs-target="#modalContraoferta">
-                    <i class="bi bi-arrow-repeat me-1"></i>Contraoferta
-                  </button>
+                <!-- Botones de Acción (Solo para el receptor) -->
+                <div th:if="${mensaje.remitenteId != usuario.id}">
+                  <div class="d-flex gap-2" th:if="${!esUsuario}">
+                    <!-- Botones para Entrenador (cuando recibe contraoferta) -->
+                    <button class="btn text-white flex-fill" 
+                            style="background: #10b981; border: none; padding: 0.8rem; border-radius: 10px; font-weight: 500; transition: all 0.2s;"
+                            th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
+                            onclick="aceptarPropuesta(this)"
+                            onmouseover="this.style.background='#059669'"
+                            onmouseout="this.style.background='#10b981'">
+                      <i class="bi bi-check-circle-fill me-2"></i>Aceptar
+                    </button>
+                    <button class="btn text-dark flex-fill"
+                            style="background: #fbbf24; border: none; padding: 0.8rem; border-radius: 10px; font-weight: 500; transition: all 0.2s;"
+                            th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalContraoferta"
+                            onmouseover="this.style.background='#f59e0b'"
+                            onmouseout="this.style.background='#fbbf24'">
+                      <i class="bi bi-arrow-left-right me-2"></i>Contraoferta
+                    </button>
+                  </div>
+                  
+                  <div th:if="${esUsuario}">
+                    <!-- Botones para Usuario -->
+                    <div class="d-flex gap-2">
+                      <!-- Solo mostrar Aceptar si NO soy el remitente (la propuesta viene del entrenador) -->
+                      <button th:if="${mensaje.remitenteId != usuario.id}" 
+                              class="btn text-white flex-fill" 
+                              style="background: #10b981; border: none; padding: 0.8rem; border-radius: 10px; font-weight: 500; transition: all 0.2s;"
+                              th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
+                              onclick="aceptarPropuesta(this)"
+                              onmouseover="this.style.background='#059669'"
+                              onmouseout="this.style.background='#10b981'">
+                        <i class="bi bi-check-circle-fill me-2"></i>Aceptar y Pagar
+                      </button>
+                      <!-- Solo mostrar Contraoferta si NO soy el remitente -->
+                      <button th:if="${mensaje.remitenteId != usuario.id}"
+                              class="btn text-dark flex-fill"
+                              style="background: #fbbf24; border: none; padding: 0.8rem; border-radius: 10px; font-weight: 500; transition: all 0.2s;"
+                              th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
+                              data-bs-toggle="modal" 
+                              data-bs-target="#modalContraoferta"
+                              onmouseover="this.style.background='#f59e0b'"
+                              onmouseout="this.style.background='#fbbf24'">
+                        <i class="bi bi-arrow-left-right me-2"></i>Hacer Contraoferta
+                      </button>
+                      <!-- Mensaje si es mi propia propuesta -->
+                      <div th:if="${mensaje.remitenteId == usuario.id}"
+                           class="propuesta-estado-usuario"
+                           th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
+                           style="width: 100%; text-align: center; padding: 1rem; background: rgba(251, 191, 36, 0.1); border: 1px solid #fbbf24; border-radius: 10px; color: #fbbf24;">
+                        <i class="bi bi-clock-history me-2"></i>
+                        <strong>Esperando respuesta del entrenador</strong>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
-                <!-- Botón Mercado Pago -->
-                <div class="d-flex gap-2 mt-3" th:if="${mensaje.metadata != null && mensaje.metadata.get('linkPago') != null}">
-                  <a class="btn btn-primary flex-fill" th:href="${mensaje.metadata.get('linkPago')}" target="_blank">
-                    <i class="bi bi-credit-card me-1"></i>Pagar con Mercado Pago
-                  </a>
+                <!-- Mensaje cuando es mi propia propuesta (Entrenador) -->
+                <div th:if="${mensaje.remitenteId == usuario.id && !esUsuario}">
+                  <div style="width: 100%; text-align: center; padding: 1rem; background: rgba(251, 191, 36, 0.1); border: 1px solid #fbbf24; border-radius: 10px; color: #fbbf24;">
+                    <i class="bi bi-clock-history me-2"></i>
+                    <strong>Esperando respuesta del usuario</strong>
+                  </div>
                 </div>
+                
+                <!-- Timestamp -->
+                <div class="text-end mt-3">
+                  <small class="text-white" style="opacity: 0.5; font-size: 0.8rem;">
+                    <i class="bi bi-clock me-1"></i>
+                    <span th:text="${#temporals.format(mensaje.fechaEnvio, 'dd/MM/yyyy HH:mm')}">01/12/2024 10:30</span>
+                  </small>
+                </div>
+                
+              </div>
+            </div>
+            
+            <!-- Mensaje con Imagen -->
+            <div th:if="${mensaje.tipoMensaje.name() == 'IMAGEN'}" 
+                 class="mensaje-item"
+                 th:classappend="${mensaje.remitenteId == usuario.id ? 'enviado' : 'recibido'}">
+              <div class="mensaje-bubble">
+                <div class="mensaje-archivo">
+                  <img th:src="${mensaje.archivoUrl}" 
+                       th:alt="${mensaje.archivoNombre}"
+                       onclick="window.open(this.src, '_blank')">
+                  <p class="mb-1 mt-2" th:if="${mensaje.contenido != null && !mensaje.contenido.isEmpty()}" 
+                     th:text="${mensaje.contenido}"></p>
+                </div>
+                <small style="font-size: 0.75rem; margin-top: 0.5rem; display: block;">
+                  <span th:text="${#temporals.format(mensaje.fechaEnvio, 'HH:mm')}">12:34</span>
+                </small>
+              </div>
+            </div>
+            
+            <!-- Mensaje con Archivo/Video -->
+            <div th:if="${mensaje.tipoMensaje.name() == 'ARCHIVO'}" 
+                 class="mensaje-item"
+                 th:classappend="${mensaje.remitenteId == usuario.id ? 'enviado' : 'recibido'}">
+              <div class="mensaje-bubble">
+                <div class="mensaje-archivo">
+                  <!-- Si es video -->
+                  <div th:if="${mensaje.archivoTipo != null && mensaje.archivoTipo.startsWith('video/')}">
+                    <video controls th:src="${mensaje.archivoUrl}">
+                      Tu navegador no soporta el elemento de video.
+                    </video>
+                  </div>
+                  <!-- Si es documento -->
+                  <div th:if="${mensaje.archivoTipo == null || !mensaje.archivoTipo.startsWith('video/')}" 
+                       class="archivo-documento">
+                    <i class="bi bi-file-earmark-pdf" th:if="${mensaje.archivoTipo != null && mensaje.archivoTipo.contains('pdf')}"></i>
+                    <i class="bi bi-file-earmark-word" th:if="${mensaje.archivoTipo != null && (mensaje.archivoTipo.contains('word') || mensaje.archivoTipo.contains('msword'))}"></i>
+                    <i class="bi bi-file-earmark-excel" th:if="${mensaje.archivoTipo != null && mensaje.archivoTipo.contains('excel')}"></i>
+                    <i class="bi bi-file-earmark-text" th:if="${mensaje.archivoTipo == null || (!mensaje.archivoTipo.contains('pdf') && !mensaje.archivoTipo.contains('word') && !mensaje.archivoTipo.contains('excel'))}"></i>
+                    <div class="archivo-info">
+                      <div class="archivo-nombre" th:text="${mensaje.archivoNombre}">documento.pdf</div>
+                      <div class="archivo-tamano" th:text="${#numbers.formatDecimal(mensaje.archivoTamano / 1024.0, 1, 2)} + ' KB'">0 KB</div>
+                    </div>
+                    <a th:href="${mensaje.archivoUrl}" download class="btn btn-sm btn-primary">
+                      <i class="bi bi-download"></i>
+                    </a>
+                  </div>
+                  <p class="mb-0 mt-2" th:if="${mensaje.contenido != null && !mensaje.contenido.isEmpty() && !mensaje.contenido.startsWith('📎')}" 
+                     th:text="${mensaje.contenido}"></p>
+                </div>
+                <small style="font-size: 0.75rem; margin-top: 0.5rem; display: block;">
+                  <span th:text="${#temporals.format(mensaje.fechaEnvio, 'HH:mm')}">12:34</span>
+                </small>
+              </div>
+            </div>
+            
+            <!-- Mensaje con Imagen -->
+            <div th:if="${mensaje.tipoMensaje.name() == 'IMAGEN'}" 
+                 class="mensaje-item"
+                 th:classappend="${mensaje.remitenteId == usuario.id ? 'enviado' : 'recibido'}">
+              <div class="mensaje-bubble">
+                <div class="mensaje-archivo">
+                  <img th:src="${mensaje.archivoUrl}" 
+                       th:alt="${mensaje.archivoNombre}"
+                       onclick="window.open(this.src, '_blank')">
+                  <p class="mb-1 mt-2" th:if="${mensaje.contenido != null && !mensaje.contenido.isEmpty() && !mensaje.contenido.startsWith('📎')}" 
+                     th:text="${mensaje.contenido}"></p>
+                </div>
+                <small style="font-size: 0.75rem; margin-top: 0.5rem; display: block;">
+                  <span th:text="${#temporals.format(mensaje.fechaEnvio, 'HH:mm')}">12:34</span>
+                </small>
+              </div>
+            </div>
+            
+            <!-- Mensaje con Archivo/Video -->
+            <div th:if="${mensaje.tipoMensaje.name() == 'ARCHIVO'}" 
+                 class="mensaje-item"
+                 th:classappend="${mensaje.remitenteId == usuario.id ? 'enviado' : 'recibido'}">
+              <div class="mensaje-bubble">
+                <div class="mensaje-archivo">
+                  <!-- Si es video -->
+                  <div th:if="${mensaje.archivoTipo != null && mensaje.archivoTipo.startsWith('video/')}">
+                    <video controls th:src="${mensaje.archivoUrl}">
+                      Tu navegador no soporta el elemento de video.
+                    </video>
+                  </div>
+                  <!-- Si es documento -->
+                  <div th:if="${mensaje.archivoTipo == null || !mensaje.archivoTipo.startsWith('video/')}" 
+                       class="archivo-documento">
+                    <i class="bi bi-file-earmark-pdf" th:if="${mensaje.archivoTipo != null && mensaje.archivoTipo.contains('pdf')}"></i>
+                    <i class="bi bi-file-earmark-word" th:if="${mensaje.archivoTipo != null && (mensaje.archivoTipo.contains('word') || mensaje.archivoTipo.contains('msword'))}"></i>
+                    <i class="bi bi-file-earmark-excel" th:if="${mensaje.archivoTipo != null && mensaje.archivoTipo.contains('excel'))}"></i>
+                    <i class="bi bi-file-earmark-text" th:if="${mensaje.archivoTipo == null || (!mensaje.archivoTipo.contains('pdf') && !mensaje.archivoTipo.contains('word') && !mensaje.archivoTipo.contains('excel'))}"></i>
+                    <div class="archivo-info">
+                      <div class="archivo-nombre" th:text="${mensaje.archivoNombre}">documento.pdf</div>
+                      <div class="archivo-tamano" th:text="${#numbers.formatDecimal(mensaje.archivoTamano / 1024.0, 1, 2)} + ' KB'">0 KB</div>
+                    </div>
+                    <a th:href="${mensaje.archivoUrl}" download class="btn btn-sm btn-primary">
+                      <i class="bi bi-download"></i>
+                    </a>
+                  </div>
+                  <p class="mb-0 mt-2" th:if="${mensaje.contenido != null && !mensaje.contenido.isEmpty() && !mensaje.contenido.startsWith('📎')}" 
+                     th:text="${mensaje.contenido}"></p>
+                </div>
+                <small style="font-size: 0.75rem; margin-top: 0.5rem; display: block;">
+                  <span th:text="${#temporals.format(mensaje.fechaEnvio, 'HH:mm')}">12:34</span>
+                </small>
               </div>
             </div>
             
@@ -694,8 +1010,8 @@
                  class="mensaje-item"
                  th:classappend="${mensaje.remitenteId == usuario.id ? 'enviado' : 'recibido'}">
               <div class="mensaje-bubble">
-                <p class="mb-1 text-white" th:text="${mensaje.contenido}">Contenido del mensaje</p>
-                <small class="text-muted-flowfit" style="font-size: 0.75rem;">
+                <p class="mb-1" th:text="${mensaje.contenido}">Contenido del mensaje</p>
+                <small style="font-size: 0.75rem;">
                   <span th:text="${#temporals.format(mensaje.fechaEnvio, 'HH:mm')}">12:34</span>
                 </small>
               </div>
@@ -746,35 +1062,28 @@
         
         <!-- Input de Mensaje Compacto -->
         <div class="chat-input-area">
+          <!-- Preview de archivo -->
+          <div id="filePreview" style="display: none;" class="mb-2"></div>
+          
           <!-- Formulario de mensaje de texto -->
-          <form id="formEnviarMensaje" th:action="@{/chat/enviar}" method="post">
+          <form id="formEnviarMensaje" th:action="@{/chat/enviar}" method="post" enctype="multipart/form-data">
             <input type="hidden" name="conversacionId" th:value="${conversacion.id}">
+            
+            <!-- Inputs ocultos para archivos -->
+            <input type="file" id="archivoInput" name="archivo" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" style="display: none;" onchange="handleFileSelect(this)">
+            
             <div class="chat-input-wrapper">
-              <!-- Botón de Archivos (Dropdown) -->
-              <div class="dropdown">
-                <button type="button" class="action-btn dropdown-toggle" data-bs-toggle="dropdown" title="Adjuntar archivo">
-                  <i class="bi bi-paperclip"></i>
-                </button>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#" onclick="document.getElementById('imagenInput').click(); return false;">
-                    <i class="bi bi-image me-2"></i>Imagen
-                  </a></li>
-                  <li><a class="dropdown-item" href="#" onclick="document.getElementById('videoInput').click(); return false;">
-                    <i class="bi bi-camera-video me-2"></i>Video
-                  </a></li>
-                  <li><a class="dropdown-item" href="#" onclick="document.getElementById('archivoInput').click(); return false;">
-                    <i class="bi bi-file-earmark me-2"></i>Archivo
-                  </a></li>
-                </ul>
-              </div>
+              <!-- Botón de Archivos -->
+              <button type="button" class="action-btn" onclick="document.getElementById('archivoInput').click()" title="Adjuntar archivo">
+                <i class="bi bi-paperclip"></i>
+              </button>
 
               <!-- Input de texto -->
               <input type="text" 
                      class="form-control" 
                      name="contenido"
                      id="mensajeInput"
-                     placeholder="Escribe un mensaje..." 
-                     required
+                     placeholder="Escribe un mensaje..."
                      autocomplete="off">
               
               <!-- Botón de Enviar Plan (solo entrenadores) -->
@@ -788,11 +1097,6 @@
               </button>
             </div>
           </form>
-          
-          <!-- Inputs ocultos para archivos (fuera del form principal) -->
-          <input type="file" id="imagenInput" class="file-input" accept="image/*" onchange="enviarArchivo(this, 'imagen')">
-          <input type="file" id="videoInput" class="file-input" accept="video/*" onchange="enviarArchivo(this, 'video')">
-          <input type="file" id="archivoInput" class="file-input" onchange="enviarArchivo(this, 'archivo')">
         </div>
         
       </div>
@@ -801,51 +1105,94 @@
   </main>
   
   <!-- Modal Enviar Propuesta (Solo Entrenadores) -->
+  <!-- Modal Enviar Propuesta -->
   <div class="modal fade" id="modalEnviarPropuesta" tabindex="-1">
     <div class="modal-dialog modal-lg">
-      <div class="modal-content bg-dark text-white">
-        <div class="modal-header border-secondary">
-          <h5 class="modal-title fw-bold">Enviar Propuesta de Plan</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      <div class="modal-content" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px;">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding: 1.5rem;">
+          <div>
+            <h5 class="modal-title fw-bold" style="color: var(--text-primary); font-size: 1.5rem; margin: 0;">
+              <i class="bi bi-send-check me-2" style="color: var(--accent-color);"></i>Enviar Propuesta de Plan
+            </h5>
+            <p class="text-white mb-0 mt-1" style="font-size: 0.9rem; opacity: 0.7;">Selecciona un plan y personaliza la oferta</p>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="opacity: 0.7;"></button>
         </div>
         <form id="formEnviarPropuesta" onsubmit="enviarPropuesta(event)">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Seleccionar Plan Base</label>
-              <select class="form-select" name="planId" id="planSelect" required>
-                <option value="">-- Selecciona un plan --</option>
+          <div class="modal-body" style="padding: 1.5rem;">
+            
+            <!-- Seleccionar Plan -->
+            <div class="mb-4">
+              <label class="form-label text-white fw-semibold mb-2">
+                <i class="bi bi-clipboard-check me-2"></i>Plan Base
+              </label>
+              <select class="form-select text-white" name="planId" id="planSelect" required
+                      style="background: var(--bg-tertiary); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 10px;">
+                <option value="" style="background: var(--bg-tertiary);">-- Selecciona un plan --</option>
                 <option th:each="plan : ${planesEntrenador}" 
                         th:value="${plan.id}"
                         th:attr="data-precio=${plan.precioMensual}, data-duracion=${plan.duracionDias}, data-nombre=${plan.nombre}"
-                        th:text="${plan.nombre} + ' - $' + ${#numbers.formatDecimal(plan.precioMensual, 0, 'COMMA', 0, 'POINT')} + ' COP'">
+                        th:text="${plan.nombre} + ' - $' + ${#numbers.formatDecimal(plan.precioMensual, 0, 'COMMA', 0, 'POINT')} + ' COP'"
+                        style="background: var(--bg-tertiary);">
                 </option>
               </select>
+              <small class="text-white" style="opacity: 0.6; font-size: 0.85rem;">
+                <i class="bi bi-info-circle me-1"></i>Tus planes disponibles para ofrecer
+              </small>
             </div>
             
-            <div class="mb-3">
-              <label class="form-label">Precio Final (COP)</label>
-              <input type="number" class="form-control" 
-                     name="precioFinal" id="precioFinalInput" required min="0">
-              <small class="text-muted">Puedes ajustar el precio según la negociación</small>
+            <!-- Precio y Duración en fila -->
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label text-white fw-semibold mb-2">
+                  <i class="bi bi-currency-dollar me-2"></i>Precio Final (COP)
+                </label>
+                <input type="number" class="form-control text-white" 
+                       name="precioFinal" id="precioFinalInput" required min="0"
+                       style="background: var(--bg-tertiary); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 10px;"
+                       placeholder="0">
+                <small class="text-white" style="opacity: 0.6; font-size: 0.85rem;">
+                  <i class="bi bi-wallet2 me-1"></i>Ajusta según la negociación
+                </small>
+              </div>
+              
+              <div class="col-md-6">
+                <label class="form-label text-white fw-semibold mb-2">
+                  <i class="bi bi-calendar-range me-2"></i>Duración (días)
+                </label>
+                <input type="number" class="form-control text-white" 
+                       name="duracionDias" id="duracionInput" value="30" required min="1"
+                       style="background: var(--bg-tertiary); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 10px;"
+                       placeholder="30">
+                <small class="text-white" style="opacity: 0.6; font-size: 0.85rem;">
+                  <i class="bi bi-clock me-1"></i>Duración del servicio
+                </small>
+              </div>
             </div>
             
+            <!-- Comentarios -->
             <div class="mb-3">
-              <label class="form-label">Duración (días)</label>
-              <input type="number" class="form-control" 
-                     name="duracionDias" id="duracionInput" value="30" required min="1">
+              <label class="form-label text-white fw-semibold mb-2">
+                <i class="bi bi-chat-left-text me-2"></i>Comentarios Adicionales
+              </label>
+              <textarea class="form-control text-white" 
+                        name="comentarios" id="comentariosInput" rows="4" 
+                        style="background: var(--bg-tertiary); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 10px; resize: none;"
+                        placeholder="Agrega detalles sobre esta propuesta, beneficios incluidos, etc..."></textarea>
+              <small class="text-white" style="opacity: 0.6; font-size: 0.85rem;">
+                <i class="bi bi-pencil me-1"></i>Opcional: Destaca lo que incluye tu oferta
+              </small>
             </div>
             
-            <div class="mb-3">
-              <label class="form-label">Comentarios Adicionales</label>
-              <textarea class="form-control" 
-                        name="comentarios" id="comentariosInput" rows="3" 
-                        placeholder="Agrega detalles sobre esta propuesta..."></textarea>
-            </div>
           </div>
-          <div class="modal-footer border-secondary">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">
-              <i class="bi bi-send me-2"></i>Enviar Propuesta
+          <div class="modal-footer" style="border-top: 1px solid var(--border-color); padding: 1.5rem; gap: 0.8rem;">
+            <button type="button" class="btn text-white" data-bs-dismiss="modal"
+                    style="background: var(--bg-tertiary); border: 1px solid var(--border-color); padding: 0.6rem 1.5rem; border-radius: 10px; transition: all 0.2s;">
+              <i class="bi bi-x-circle me-2"></i>Cancelar
+            </button>
+            <button type="submit" class="btn text-white"
+                    style="background: var(--accent-color); border: 1px solid var(--accent-color); padding: 0.6rem 1.8rem; border-radius: 10px; font-weight: 500; transition: all 0.2s;">
+              <i class="bi bi-send-fill me-2"></i>Enviar Propuesta
             </button>
           </div>
         </form>
@@ -856,29 +1203,54 @@
   <!-- Modal Contraoferta -->
   <div class="modal fade" id="modalContraoferta" tabindex="-1">
     <div class="modal-dialog">
-      <div class="modal-content bg-dark text-white">
-        <div class="modal-header border-secondary">
-          <h5 class="modal-title fw-bold">Hacer Contraoferta</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      <div class="modal-content" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px;">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding: 1.5rem;">
+          <div>
+            <h5 class="modal-title fw-bold" style="color: var(--text-primary); font-size: 1.3rem; margin: 0;">
+              <i class="bi bi-arrow-repeat me-2" style="color: #ffc107;"></i>Hacer Contraoferta
+            </h5>
+            <p class="text-white mb-0 mt-1" style="font-size: 0.9rem; opacity: 0.7;">Propón un precio alternativo</p>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="opacity: 0.7;"></button>
         </div>
         <form id="formContraoferta">
           <input type="hidden" name="contratacionId" id="contraofertaContratacionId">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Nuevo Precio (COP)</label>
-              <input type="number" class="form-control bg-dark text-white border-secondary" 
-                     name="precioFinal" id="contraofertaPrecio" required min="0">
+          <div class="modal-body" style="padding: 1.5rem;">
+            
+            <div class="mb-4">
+              <label class="form-label text-white fw-semibold mb-2">
+                <i class="bi bi-currency-dollar me-2"></i>Nuevo Precio (COP)
+              </label>
+              <input type="number" class="form-control text-white" 
+                     name="precioFinal" id="contraofertaPrecio" required min="0"
+                     style="background: var(--bg-tertiary); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 10px;"
+                     placeholder="Ingresa tu contraoferta">
+              <small class="text-white" style="opacity: 0.6; font-size: 0.85rem;">
+                <i class="bi bi-info-circle me-1"></i>Tu precio propuesto
+              </small>
             </div>
+            
             <div class="mb-3">
-              <label class="form-label">Comentarios</label>
-              <textarea class="form-control bg-dark text-white border-secondary" 
-                        name="comentarios" id="contraofertaComentarios" rows="3" 
-                        placeholder="Explica tu contraoferta..."></textarea>
+              <label class="form-label text-white fw-semibold mb-2">
+                <i class="bi bi-chat-left-text me-2"></i>Comentarios
+              </label>
+              <textarea class="form-control text-white" 
+                        name="comentarios" id="contraofertaComentarios" rows="4"
+                        style="background: var(--bg-tertiary); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 10px; resize: none;"
+                        placeholder="Explica tu contraoferta y por qué consideras este precio..."></textarea>
+              <small class="text-white" style="opacity: 0.6; font-size: 0.85rem;">
+                <i class="bi bi-pencil me-1"></i>Opcional: Justifica tu propuesta
+              </small>
             </div>
+            
           </div>
-          <div class="modal-footer border-secondary">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-warning">
+          <div class="modal-footer" style="border-top: 1px solid var(--border-color); padding: 1.5rem; gap: 0.8rem;">
+            <button type="button" class="btn text-white" data-bs-dismiss="modal"
+                    style="background: var(--bg-tertiary); border: 1px solid var(--border-color); padding: 0.6rem 1.5rem; border-radius: 10px;">
+              <i class="bi bi-x-circle me-2"></i>Cancelar
+            </button>
+            <button type="submit" class="btn text-white"
+                    style="background: #ffc107; border: 1px solid #ffc107; padding: 0.6rem 1.8rem; border-radius: 10px; font-weight: 500; color: #000 !important;">
               <i class="bi bi-arrow-repeat me-2"></i>Enviar Contraoferta
             </button>
           </div>
@@ -929,7 +1301,13 @@
         // Suscribirse a mensajes de esta conversación
         stompClient.subscribe('/topic/conversacion/' + conversacionId, function(mensaje) {
           const data = JSON.parse(mensaje.body);
-          agregarMensajeAlDOM(data);
+          
+          // Si es notificación de propuesta aceptada, actualizar UI
+          if (data.tipo === 'PROPUESTA_ACEPTADA') {
+            actualizarPropuestaAceptada(data.contratacionId, data.mensaje, data.precioFinal);
+          } else {
+            agregarMensajeAlDOM(data);
+          }
         });
       }, function(error) {
         console.error('Error WebSocket:', error);
@@ -943,13 +1321,175 @@
       const container = document.getElementById('mensajesContainer');
       const esEnviado = data.remitenteId === usuarioId;
       
+      let contenidoHtml = '';
+      
+      // Si es una propuesta de plan
+      if (data.tipoMensaje === 'PROPUESTA_PLAN' && data.metadata) {
+        const metadata = typeof data.metadata === 'string' ? JSON.parse(data.metadata) : data.metadata;
+        const precioFormateado = metadata.precioFinal ? metadata.precioFinal.toLocaleString('es-CO') : '0';
+        
+        contenidoHtml = `
+          <div class="propuesta-plan-card" style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border: 2px solid var(--accent-color); border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 8px rgba(0,0,0,0.3); max-width: 500px;">
+            
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.8rem;">
+                <i class="bi bi-file-text-fill" style="font-size: 1.8rem; color: var(--accent-color);"></i>
+                <div>
+                  <div style="color: var(--text-primary); font-weight: 700; font-size: 1.1rem;">Propuesta de Plan</div>
+                  <div style="color: var(--text-secondary); font-size: 0.85rem;">Versión ${metadata.version || 1}</div>
+                </div>
+              </div>
+              <span style="background: var(--accent-color); color: #000; padding: 0.3rem 0.8rem; border-radius: 8px; font-weight: 600; font-size: 0.8rem;">
+                v${metadata.version || 1}
+              </span>
+            </div>
+            
+            <!-- Precio y Duración -->
+            <div style="text-align: center; margin-bottom: 1.5rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 12px;">
+              <div style="font-size: 2.5rem; font-weight: 800; color: var(--accent-color); letter-spacing: -1px;">
+                $${precioFormateado} <span style="font-size: 1rem; font-weight: 400;">COP</span>
+              </div>
+              <div style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.5rem;">
+                <i class="bi bi-calendar-check me-1"></i>${metadata.duracionDias || 0} días de entrenamiento
+              </div>
+            </div>
+            
+            <!-- Información del Plan -->
+            <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(0,0,0,0.15); border-left: 4px solid var(--accent-color); border-radius: 8px;">
+              <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.5rem;">
+                <i class="bi bi-award me-2" style="color: var(--accent-color);"></i>${escapeHtml(metadata.nombrePlan || 'Plan Personalizado')}
+              </div>
+            </div>
+            
+            <!-- Comentarios -->
+            ${data.contenido ? `
+              <div style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid var(--border-color); border-radius: 10px; background: rgba(0,0,0,0.1);">
+                <div style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.5rem;">
+                  <i class="bi bi-chat-quote me-1"></i>Comentarios
+                </div>
+                <div style="color: var(--text-primary); line-height: 1.5; font-size: 0.95rem;">
+                  ${escapeHtml(data.contenido)}
+                </div>
+              </div>
+            ` : ''}
+            
+            <!-- Botones de Acción -->
+            ${esUsuario ? `
+              ${data.remitenteId !== usuarioId ? `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+                  <button onclick="aceptarPropuesta(${metadata.contratacionId})" 
+                          style="background: #10b981; border: none; color: white; padding: 0.9rem; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s;"
+                          onmouseover="this.style.background='#059669'" 
+                          onmouseout="this.style.background='#10b981'">
+                    <i class="bi bi-check-circle-fill me-2"></i>Aceptar y Pagar
+                  </button>
+                  <button onclick="abrirContraoferta(${metadata.contratacionId}, ${metadata.precioFinal})" 
+                          style="background: #fbbf24; border: none; color: #000; padding: 0.9rem; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s;"
+                          onmouseover="this.style.background='#f59e0b'" 
+                          onmouseout="this.style.background='#fbbf24'">
+                    <i class="bi bi-arrow-repeat me-2"></i>Contraoferta
+                  </button>
+                </div>
+              ` : `
+                <div class="propuesta-estado-usuario" data-contratacion-id="${metadata.contratacionId}" style="text-align: center; padding: 1rem; background: rgba(251, 191, 36, 0.1); border: 1px solid #fbbf24; border-radius: 10px; color: #fbbf24;">
+                  <i class="bi bi-clock-history me-2"></i>
+                  <strong>Esperando respuesta del entrenador</strong>
+                </div>
+              `}
+            ` : `
+              ${data.remitenteId !== usuarioId ? `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+                  <button onclick="aceptarPropuesta(${metadata.contratacionId})" 
+                          style="background: #10b981; border: none; color: white; padding: 0.8rem; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                          onmouseover="this.style.background='#059669'" 
+                          onmouseout="this.style.background='#10b981'">
+                    <i class="bi bi-check-circle me-1"></i>Aceptar
+                  </button>
+                  <button onclick="abrirContraoferta(${metadata.contratacionId}, ${metadata.precioFinal})" 
+                          style="background: #fbbf24; border: none; color: #000; padding: 0.8rem; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                          onmouseover="this.style.background='#f59e0b'" 
+                          onmouseout="this.style.background='#fbbf24'">
+                    <i class="bi bi-arrow-repeat me-1"></i>Contraoferta
+                  </button>
+                </div>
+              ` : `
+                <div style="text-align: center; padding: 1rem; background: rgba(251, 191, 36, 0.1); border: 1px solid #fbbf24; border-radius: 10px; color: #fbbf24;">
+                  <i class="bi bi-clock-history me-2"></i>
+                  <strong>Esperando respuesta del usuario</strong>
+                </div>
+              `}
+            `}
+            
+            <!-- Timestamp -->
+            <div style="margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--border-color); text-align: center;">
+              <small style="color: var(--text-secondary); font-size: 0.8rem;">
+                <i class="bi bi-clock me-1"></i>${formatearHora(data.fechaEnvio)}
+              </small>
+            </div>
+          </div>
+        `;
+      }
+      // Si es una imagen
+      else if (data.tipoMensaje === 'IMAGEN' && data.archivoUrl) {
+        contenidoHtml = `
+          <div class="mensaje-archivo">
+            <img src="${data.archivoUrl}" alt="${escapeHtml(data.archivoNombre || 'Imagen')}" 
+                 onclick="window.open(this.src, '_blank')" style="max-width: 100%; border-radius: 8px; cursor: pointer;">
+            ${data.contenido && !data.contenido.startsWith('📎') ? `<p class="mb-1 mt-2">${escapeHtml(data.contenido)}</p>` : ''}
+          </div>`;
+      }
+      // Si es un archivo o video
+      else if (data.tipoMensaje === 'ARCHIVO' && data.archivoUrl) {
+        if (data.archivoTipo && data.archivoTipo.startsWith('video/')) {
+          contenidoHtml = `
+            <div class="mensaje-archivo">
+              <video controls src="${data.archivoUrl}" style="max-width: 100%; border-radius: 8px;">
+                Tu navegador no soporta el elemento de video.
+              </video>
+              ${data.contenido && !data.contenido.startsWith('📎') ? `<p class="mb-0 mt-2">${escapeHtml(data.contenido)}</p>` : ''}
+            </div>`;
+        } else {
+          const iconClass = data.archivoTipo?.includes('pdf') ? 'bi-file-earmark-pdf' :
+                           data.archivoTipo?.includes('word') ? 'bi-file-earmark-word' :
+                           data.archivoTipo?.includes('excel') ? 'bi-file-earmark-excel' :
+                           'bi-file-earmark-text';
+          const tamanoKB = data.archivoTamano ? (data.archivoTamano / 1024).toFixed(2) : '0';
+          
+          contenidoHtml = `
+            <div class="mensaje-archivo">
+              <div class="archivo-documento">
+                <i class="bi ${iconClass}" style="font-size: 2rem; color: var(--accent-color);"></i>
+                <div class="archivo-info" style="flex: 1; min-width: 0;">
+                  <div class="archivo-nombre" style="color: var(--text-primary); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${escapeHtml(data.archivoNombre || 'Archivo')}
+                  </div>
+                  <div class="archivo-tamano" style="color: var(--text-secondary); font-size: 0.75rem;">
+                    ${tamanoKB} KB
+                  </div>
+                </div>
+                <a href="${data.archivoUrl}" download class="btn btn-sm btn-primary">
+                  <i class="bi bi-download"></i>
+                </a>
+              </div>
+              ${data.contenido && !data.contenido.startsWith('📎') ? `<p class="mb-0 mt-2">${escapeHtml(data.contenido)}</p>` : ''}
+            </div>`;
+        }
+      }
+      // Mensaje de texto normal
+      else {
+        contenidoHtml = `<p class="mb-1">${escapeHtml(data.contenido)}</p>`;
+      }
+      
       const mensajeHTML = `
         <div class="mensaje-item ${esEnviado ? 'enviado' : 'recibido'}">
-          <div class="mensaje-bubble">
-            <p class="mb-1 text-white">${escapeHtml(data.contenido)}</p>
-            <small class="text-muted-flowfit" style="font-size: 0.75rem;">
-              ${formatearHora(data.fechaEnvio)}
-            </small>
+          <div class="mensaje-bubble" style="${data.tipoMensaje === 'PROPUESTA_PLAN' ? 'background: transparent; box-shadow: none; padding: 0;' : ''}">
+            ${contenidoHtml}
+            ${data.tipoMensaje !== 'PROPUESTA_PLAN' ? `
+              <small style="font-size: 0.75rem; ${data.tipoMensaje !== 'TEXTO' ? 'margin-top: 0.5rem; display: block;' : ''}">
+                ${formatearHora(data.fechaEnvio)}
+              </small>
+            ` : ''}
           </div>
         </div>
       `;
@@ -971,6 +1511,161 @@
       return div.innerHTML;
     }
     
+    // Variables para manejo de archivos
+    let selectedFile = null;
+    
+    // Manejar selección de archivo
+    function handleFileSelect(input) {
+      const file = input.files[0];
+      if (!file) return;
+      
+      selectedFile = file;
+      
+      // Validar tamaño (50MB)
+      if (file.size > 50 * 1024 * 1024) {
+        alert('El archivo no puede superar los 50MB');
+        input.value = '';
+        selectedFile = null;
+        return;
+      }
+      
+      // Mostrar preview
+      showFilePreview(file);
+      
+      // Hacer opcional el campo de texto cuando hay archivo
+      document.getElementById('mensajeInput').removeAttribute('required');
+    }
+    
+    // Mostrar preview del archivo
+    function showFilePreview(file) {
+      const preview = document.getElementById('filePreview');
+      const fileSize = (file.size / 1024).toFixed(2);
+      
+      let previewContent = '';
+      
+      // Preview de imagen
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewContent = `
+            <div class="file-preview-item">
+              <img src="${e.target.result}" alt="Preview">
+              <div class="file-preview-info">
+                <div class="file-preview-name">${file.name}</div>
+                <div class="file-preview-size">${fileSize} KB</div>
+              </div>
+              <button type="button" class="file-preview-remove" onclick="removeFilePreview()">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          `;
+          preview.innerHTML = previewContent;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+      // Preview de video
+      else if (file.type.startsWith('video/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewContent = `
+            <div class="file-preview-item">
+              <video src="${e.target.result}"></video>
+              <div class="file-preview-info">
+                <div class="file-preview-name">${file.name}</div>
+                <div class="file-preview-size">${fileSize} KB</div>
+              </div>
+              <button type="button" class="file-preview-remove" onclick="removeFilePreview()">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          `;
+          preview.innerHTML = previewContent;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+      // Preview de documento
+      else {
+        const iconClass = file.type.includes('pdf') ? 'bi-file-earmark-pdf' :
+                         file.type.includes('word') ? 'bi-file-earmark-word' :
+                         file.type.includes('excel') ? 'bi-file-earmark-excel' :
+                         'bi-file-earmark-text';
+        
+        previewContent = `
+          <div class="file-preview-item">
+            <i class="bi ${iconClass}" style="font-size: 2rem; color: var(--accent-color);"></i>
+            <div class="file-preview-info">
+              <div class="file-preview-name">${file.name}</div>
+              <div class="file-preview-size">${fileSize} KB</div>
+            </div>
+            <button type="button" class="file-preview-remove" onclick="removeFilePreview()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        `;
+        preview.innerHTML = previewContent;
+        preview.style.display = 'block';
+      }
+    }
+    
+    // Remover preview de archivo
+    function removeFilePreview() {
+      const preview = document.getElementById('filePreview');
+      const fileInput = document.getElementById('archivoInput');
+      
+      preview.innerHTML = '';
+      preview.style.display = 'none';
+      fileInput.value = '';
+      selectedFile = null;
+      
+      // Volver a requerir el campo de texto
+      const mensajeInput = document.getElementById('mensajeInput');
+      if (!selectedFile) {
+        mensajeInput.setAttribute('required', 'required');
+      }
+    }
+    
+    // Interceptar el submit del formulario para enviar con FormData
+    document.getElementById('formEnviarMensaje').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const contenido = document.getElementById('mensajeInput').value.trim();
+      
+      // Validar que haya contenido o archivo
+      if (!contenido && !selectedFile) {
+        alert('Escribe un mensaje o adjunta un archivo');
+        return;
+      }
+      
+      // Deshabilitar botón de envío
+      const btnEnviar = this.querySelector('button[type="submit"]');
+      btnEnviar.disabled = true;
+      
+      fetch('/chat/enviar', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Limpiar formulario
+          document.getElementById('mensajeInput').value = '';
+          removeFilePreview();
+        } else {
+          alert(data.message || 'Error al enviar mensaje');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Error al enviar mensaje');
+      })
+      .finally(() => {
+        btnEnviar.disabled = false;
+      });
+    });
+    
     // Ya NO necesitamos auto-refresh porque tenemos WebSocket
     // setInterval(() => { location.reload(); }, 10000); // ELIMINADO
     
@@ -985,9 +1680,30 @@
     });
     
     // Aceptar propuesta
-    function aceptarPropuesta(button) {
-      const contratacionId = button.getAttribute('data-contratacion-id');
-      if (confirm('¿Estás seguro de aceptar esta propuesta? Se procederá al pago.')) {
+    function aceptarPropuesta(contratacionIdOrButton) {
+      let contratacionId;
+      
+      // Soportar tanto el ID directo como un botón
+      if (typeof contratacionIdOrButton === 'object') {
+        contratacionId = contratacionIdOrButton.getAttribute('data-contratacion-id');
+      } else {
+        contratacionId = contratacionIdOrButton;
+      }
+      
+      console.log('Aceptando propuesta:', contratacionId);
+      
+      const mensajeConfirmacion = esUsuario 
+        ? '¿Estás seguro de aceptar esta propuesta? Se procederá al pago.'
+        : '¿Estás seguro de aceptar esta contraoferta del usuario?';
+      
+      if (confirm(mensajeConfirmacion)) {
+        // Mostrar loading
+        const btnAceptar = document.querySelector(`button[onclick*="aceptarPropuesta(${contratacionId})"]`);
+        if (btnAceptar) {
+          btnAceptar.disabled = true;
+          btnAceptar.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Procesando...';
+        }
+        
         fetch('/negociacion/responder', {
           method: 'POST',
           headers: {
@@ -998,26 +1714,121 @@
             accion: 'ACEPTAR'
           })
         })
-        .then(response => response.json())
+        .then(response => {
+          console.log('Response status:', response.status);
+          return response.json();
+        })
         .then(data => {
+          console.log('Response data:', data);
           if (data.success) {
-            alert(data.message || 'Propuesta aceptada correctamente');
-            location.reload();
+            // Solo redirigir al pago si es USUARIO
+            if (esUsuario) {
+              window.location.href = '/negociacion/generar-pago?contratacionId=' + contratacionId;
+            } else {
+              // Si es entrenador, mostrar mensaje de éxito y recargar chat
+              alert('Contraoferta aceptada. El usuario recibirá notificación para proceder al pago.');
+              location.reload();
+            }
           } else {
             alert(data.message || 'Error al aceptar la propuesta');
+            if (btnAceptar) {
+              btnAceptar.disabled = false;
+              const textoBoton = esUsuario ? 'Aceptar y Pagar' : 'Aceptar';
+              btnAceptar.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>' + textoBoton;
+            }
           }
         })
         .catch(error => {
-          console.error('Error:', error);
-          alert('Error al procesar la solicitud');
+          console.error('Error completo:', error);
+          alert('Error al procesar la solicitud: ' + error.message);
+          if (btnAceptar) {
+            btnAceptar.disabled = false;
+            const textoBoton = esUsuario ? 'Aceptar y Pagar' : 'Aceptar';
+            btnAceptar.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>' + textoBoton;
+          }
+        });
+      }
+    }
+    
+    // Actualizar UI cuando el entrenador acepta la contraoferta del usuario
+    function actualizarPropuestaAceptada(contratacionId, mensaje, precioFinal) {
+      console.log('Actualizando propuesta aceptada:', contratacionId);
+      
+      // Buscar el div de estado de la propuesta en Thymeleaf
+      const estadoDiv = document.querySelector(`.propuesta-estado-usuario[data-contratacion-id="${contratacionId}"]`);
+      
+      if (estadoDiv) {
+        estadoDiv.style.background = 'rgba(16, 185, 129, 0.1)';
+        estadoDiv.style.borderColor = '#10b981';
+        estadoDiv.style.color = '#10b981';
+        estadoDiv.innerHTML = `
+          <div style="margin-bottom: 0.8rem;">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>¡Propuesta Aceptada!</strong>
+          </div>
+          <button onclick="window.location.href='/negociacion/generar-pago?contratacionId=${contratacionId}'" 
+                  style="background: #10b981; border: none; color: white; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s;"
+                  onmouseover="this.style.background='#059669'" 
+                  onmouseout="this.style.background='#10b981'">
+            <i class="bi bi-credit-card me-2"></i>Pagar con MercadoPago - $${precioFinal}
+          </button>
+        `;
+      }
+      
+      // También buscar en los mensajes dinámicos (si fue contraoferta del usuario)
+      const mensajesContainer = document.getElementById('mensajesContainer');
+      if (mensajesContainer) {
+        const esperandoDivs = mensajesContainer.querySelectorAll('div[style*="Esperando respuesta del entrenador"]');
+        esperandoDivs.forEach(div => {
+          const parentCard = div.closest('.propuesta-card, [style*="rgba(30, 41, 59"]');
+          if (parentCard && parentCard.textContent.includes('$' + precioFinal)) {
+            div.style.background = 'rgba(16, 185, 129, 0.1)';
+            div.style.borderColor = '#10b981';
+            div.style.color = '#10b981';
+            div.innerHTML = `
+              <div style="margin-bottom: 0.8rem;">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong>¡Propuesta Aceptada!</strong>
+              </div>
+              <button onclick="window.location.href='/negociacion/generar-pago?contratacionId=${contratacionId}'" 
+                      style="background: #10b981; border: none; color: white; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s;"
+                      onmouseover="this.style.background='#059669'" 
+                      onmouseout="this.style.background='#10b981'">
+                <i class="bi bi-credit-card me-2"></i>Pagar con MercadoPago - $${precioFinal}
+              </button>
+            `;
+          }
+        });
+      }
+      
+      // Mostrar notificación toast
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          icon: 'success',
+          title: '¡Propuesta Aceptada!',
+          text: mensaje,
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 4000
         });
       }
     }
     
     // Rechazar propuesta
-    function rechazarPropuesta(button) {
-      const contratacionId = button.getAttribute('data-contratacion-id');
-      if (confirm('¿Estás seguro de rechazar esta propuesta?')) {
+    function rechazarPropuesta(contratacionIdOrButton) {
+      let contratacionId;
+      
+      // Soportar tanto el ID directo como un botón
+      if (typeof contratacionIdOrButton === 'object') {
+        contratacionId = contratacionIdOrButton.getAttribute('data-contratacion-id');
+      } else {
+        contratacionId = contratacionIdOrButton;
+      }
+      
+      console.log('Rechazando propuesta:', contratacionId);
+      
+      if (confirm('¿Estás seguro de rechazar esta propuesta? Esta acción no se puede deshacer.')) {
         fetch('/negociacion/responder', {
           method: 'POST',
           headers: {
@@ -1028,20 +1839,39 @@
             accion: 'RECHAZAR'
           })
         })
-        .then(response => response.json())
+        .then(response => {
+          console.log('Response status:', response.status);
+          return response.json();
+        })
         .then(data => {
+          console.log('Response data:', data);
           if (data.success) {
-            alert(data.message || 'Propuesta rechazada');
-            location.reload();
+            // Ocultar los botones de la propuesta rechazada
+            const botonesDiv = document.querySelector(`button[onclick*="rechazarPropuesta(${contratacionId})"]`)?.closest('div[style*="grid"], div[style*="flex"]');
+            if (botonesDiv) {
+              botonesDiv.innerHTML = '<div style="text-align: center; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 10px; color: #ef4444; font-weight: 600;"><i class="bi bi-x-circle me-2"></i>Propuesta Rechazada</div>';
+            }
+            
+            alert('Propuesta rechazada. Puedes continuar conversando para ajustar términos.');
           } else {
             alert(data.message || 'Error al rechazar la propuesta');
           }
         })
         .catch(error => {
-          console.error('Error:', error);
-          alert('Error al procesar la solicitud');
+          console.error('Error completo:', error);
+          alert('Error al procesar la solicitud: ' + error.message);
         });
       }
+    }
+    
+    // Abrir modal de contraoferta
+    function abrirContraoferta(contratacionId, precioActual) {
+      document.getElementById('contraofertaContratacionId').value = contratacionId;
+      if (precioActual) {
+        document.getElementById('contraofertaPrecio').value = precioActual;
+      }
+      const modal = new bootstrap.Modal(document.getElementById('modalContraoferta'));
+      modal.show();
     }
     
     // Preparar contraoferta
@@ -1060,34 +1890,72 @@
       const precio = document.getElementById('contraofertaPrecio').value;
       const comentarios = document.getElementById('contraofertaComentarios').value;
       
+      console.log('=== ENVIANDO CONTRAOFERTA ===');
+      console.log('ContratacionId:', contratacionId);
+      console.log('Precio:', precio);
+      console.log('Comentarios:', comentarios);
+      
+      // Construir propuesta completa con todos los campos necesarios
       const propuesta = {
-        precio: parseFloat(precio)
+        precio: parseFloat(precio),
+        duracionDias: 30, // Valor por defecto
+        rutinasMes: 4,
+        seguimientoSemanal: true,
+        videollamadasMes: 0,
+        planNutricional: false,
+        chatDirecto: true,
+        mensaje: comentarios || ''
       };
+      
+      const requestBody = {
+        contratacionId: parseInt(contratacionId),
+        accion: 'CONTRAOFERTA',
+        propuesta: propuesta
+      };
+      
+      console.log('Request body:', JSON.stringify(requestBody, null, 2));
+      
+      // Deshabilitar botón
+      const btnSubmit = this.querySelector('button[type="submit"]');
+      if (btnSubmit) {
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Enviando...';
+      }
       
       fetch('/negociacion/responder', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          contratacionId: parseInt(contratacionId),
-          accion: 'CONTRAOFERTA',
-          propuesta: propuesta
-        })
+        body: JSON.stringify(requestBody)
       })
-      .then(response => response.json())
+      .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+      })
       .then(data => {
+        console.log('Response data:', data);
         if (data.success) {
           alert(data.message || 'Contraoferta enviada correctamente');
-          bootstrap.Modal.getInstance(document.getElementById('modalContraoferta')).hide();
-          location.reload();
+          const modal = bootstrap.Modal.getInstance(document.getElementById('modalContraoferta'));
+          if (modal) modal.hide();
+          // No recargar, el WebSocket debería actualizar
+          // location.reload();
         } else {
           alert(data.message || 'Error al enviar contraoferta');
+          if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Enviar Contraoferta';
+          }
         }
       })
       .catch(error => {
-        console.error('Error:', error);
-        alert('Error al procesar la solicitud');
+        console.error('Error completo:', error);
+        alert('Error al procesar la solicitud: ' + error.message);
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Enviar Contraoferta';
+        }
       });
     });
     
@@ -1169,40 +2037,6 @@
         document.getElementById('precioFinalInput').value = precio;
         document.getElementById('duracionInput').value = duracion;
       }
-    });
-    
-    // Manejar envío de mensaje con AJAX
-    document.getElementById('formEnviarMensaje')?.addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const formData = new FormData(this);
-      const mensajeInput = document.getElementById('mensajeInput');
-      
-      // Deshabilitar botón mientras se envía
-      const submitBtn = this.querySelector('button[type="submit"]');
-      submitBtn.disabled = true;
-      
-      fetch(this.action, {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          mensajeInput.value = ''; // Limpiar input
-          // NO recargar la página - WebSocket se encarga de mostrar el mensaje
-        } else {
-          alert('Error al enviar mensaje: ' + (data.message || 'Error desconocido'));
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('Error al enviar el mensaje');
-      })
-      .finally(() => {
-        submitBtn.disabled = false;
-        mensajeInput.focus();
-      });
     });
     
     // Función para enviar archivos (placeholder - requiere implementación backend)

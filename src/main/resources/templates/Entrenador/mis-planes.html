@@ -284,7 +284,7 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h1 class="text-white fw-bold mb-1">💼 Mis Planes de Entrenamiento</h1>
-          <p class="text-muted-flowfit">Gestiona tus servicios y tarifas</p>
+          <p class="text-white">Gestiona tus servicios y tarifas</p>
         </div>
         <button class="btn-flowfit-primary btn-entrenador-primary btn-enhanced" data-bs-toggle="modal" data-bs-target="#modalCrearPlan">
           <i class="bi bi-plus-circle me-2"></i>Crear Nuevo Plan
@@ -342,18 +342,18 @@
               <div class="mb-3">
                 <h2 class="fw-bold mb-0 text-white">
                   $<span th:text="${#numbers.formatDecimal(plan.precioMensual, 0, 'COMMA', 0, 'POINT')}">50.000</span>
-                  <small class="text-muted-flowfit fs-6">COP / mes</small>
+                  <small class="text-white fs-6">COP / mes</small>
                 </h2>
               </div>
               
               <!-- Descripción -->
-              <p class="text-muted-flowfit small mb-3" th:if="${plan.descripcion}" th:text="${plan.descripcion}">
+              <p class="text-white small mb-3" th:if="${plan.descripcion}" th:text="${plan.descripcion}">
                 Descripción del plan
               </p>
               
               <!-- Características -->
               <div class="mb-3">
-                <p class="text-muted-flowfit small mb-2 fw-bold">✨ Incluye:</p>
+                <p class="text-white small mb-2 fw-bold">✨ Incluye:</p>
                 <ul class="list-unstyled">
                   <li class="small mb-2" th:if="${plan.duracionDias != null}">
                     <i class="bi bi-calendar-check text-success me-2"></i>
@@ -386,11 +386,11 @@
               <div class="d-flex gap-3 pt-3 border-top border-secondary">
                 <div class="text-center flex-fill">
                   <div class="fw-bold text-white" th:text="${plan.clientesActivos != null ? plan.clientesActivos : 0}">0</div>
-                  <small class="text-muted-flowfit">Clientes</small>
+                  <small class="text-white">Clientes</small>
                 </div>
                 <div class="text-center flex-fill" th:if="${plan.esPublico}">
                   <i class="bi bi-eye text-success"></i>
-                  <small class="text-muted-flowfit d-block">Público</small>
+                  <small class="text-white d-block">Público</small>
                 </div>
               </div>
               
@@ -400,9 +400,30 @@
         
         <!-- Mensaje si no hay planes -->
         <div th:if="${planes == null || #lists.isEmpty(planes)}" class="col-12">
-          <div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>
-            No tienes planes creados. Crea tu primer plan para empezar a ofrecer tus servicios.
+          <div class="card-base card-entrenador text-center p-5" style="min-height: 400px; display: flex; align-items: center; justify-content: center;">
+            <div>
+              <i class="bi bi-briefcase" style="font-size: 80px; color: var(--accent-primary); opacity: 0.5; margin-bottom: 2rem;"></i>
+              <h3 class="text-white fw-bold mb-3">No tienes planes creados</h3>
+              <p class="text-white mb-4" style="max-width: 500px; margin: 0 auto;">
+                Los planes te permiten ofrecer tus servicios de entrenamiento a potenciales clientes. 
+                Crea tu primer plan definiendo precio, duración y servicios incluidos.
+              </p>
+              <button class="btn-flowfit-primary btn-entrenador-primary btn-enhanced" data-bs-toggle="modal" data-bs-target="#modalCrearPlan" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                <i class="bi bi-plus-circle me-2"></i>Crear Mi Primer Plan
+              </button>
+              
+              <!-- Tips -->
+              <div class="mt-5 text-start" style="max-width: 600px; margin: 0 auto;">
+                <h5 class="text-white mb-3"><i class="bi bi-lightbulb me-2"></i>Consejos para crear un buen plan:</h5>
+                <ul class="text-white" style="line-height: 1.8;">
+                  <li>Define precios competitivos basados en tu experiencia y servicios</li>
+                  <li>Ofrece diferentes niveles (Básico, Premium, VIP) para más opciones</li>
+                  <li>Incluye servicios adicionales como nutrición o videollamadas para destacar</li>
+                  <li>Activa "Destacado" en tu mejor plan para mayor visibilidad</li>
+                  <li>Mantén tus planes actualizados según la demanda</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -438,11 +459,42 @@
               
               <div class="col-md-6">
                 <label class="form-label">Precio Mensual (COP) *</label>
-                <input type="number" class="form-control" name="precioMensual" placeholder="50000" min="0" required>
+                <input type="number" class="form-control" name="precio" id="precioBase" placeholder="50000" min="0" step="0.01" required>
+                <small class="text-white">Este será tu precio fijo visible</small>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Rutinas por mes</label>
                 <input type="number" class="form-control" name="rutinasMes" placeholder="4" min="0">
+              </div>
+              
+              <!-- Opciones de Personalización -->
+              <div class="col-12">
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" name="permitePersonalizacion" id="permitePersonalizacion" checked>
+                  <label class="form-check-label fw-bold" for="permitePersonalizacion">
+                    <i class="bi bi-sliders text-info me-1"></i> 
+                    Permitir personalización de este plan
+                  </label>
+                  <div class="form-text text-white">Los usuarios podrán negociar precio y servicios dentro de límites inteligentes</div>
+                </div>
+              </div>
+              
+              <!-- Rangos de Precio (solo si permite personalización) -->
+              <div class="col-12" id="rangosPrecioContainer" style="display: none;">
+                <div class="alert alert-info">
+                  <i class="bi bi-info-circle me-2"></i>
+                  <strong>Negociación Inteligente:</strong> Los usuarios podrán proponer precios dentro de estos rangos
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <label class="form-label">Precio Mínimo (70% del base)</label>
+                    <input type="number" class="form-control" name="rangoPrecioMin" id="rangoPrecioMin" readonly>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Precio Máximo (130% del base)</label>
+                    <input type="number" class="form-control" name="rangoPrecioMax" id="rangoPrecioMax" readonly>
+                  </div>
+                </div>
               </div>
               
               <div class="col-md-6">
@@ -505,6 +557,36 @@
   <script th:src="@{/js/sidebar-common.js}"></script>
   
   <script>
+  // Calcular rangos de precio automáticamente
+  const precioBase = document.getElementById('precioBase');
+  const permitePersonalizacion = document.getElementById('permitePersonalizacion');
+  const rangosPrecioContainer = document.getElementById('rangosPrecioContainer');
+  const rangoPrecioMin = document.getElementById('rangoPrecioMin');
+  const rangoPrecioMax = document.getElementById('rangoPrecioMax');
+  
+  function actualizarRangos() {
+    const precio = parseFloat(precioBase.value) || 0;
+    if (precio > 0) {
+      rangoPrecioMin.value = (precio * 0.70).toFixed(2);
+      rangoPrecioMax.value = (precio * 1.30).toFixed(2);
+    }
+  }
+  
+  precioBase.addEventListener('input', actualizarRangos);
+  
+  permitePersonalizacion.addEventListener('change', function() {
+    rangosPrecioContainer.style.display = this.checked ? 'block' : 'none';
+    if (this.checked) {
+      actualizarRangos();
+    }
+  });
+  
+  // Inicializar
+  if (permitePersonalizacion.checked) {
+    rangosPrecioContainer.style.display = 'block';
+    actualizarRangos();
+  }
+  
   function cambiarEstado(element) {
     const planId = element.getAttribute('data-plan-id');
     const activo = element.getAttribute('data-activo') === 'true';

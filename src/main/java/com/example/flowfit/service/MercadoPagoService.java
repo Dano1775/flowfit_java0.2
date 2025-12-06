@@ -65,11 +65,12 @@ public class MercadoPagoService {
                     .pending(appUrl + "/pagos/pending?contratacion_id=" + contratacionId)
                     .build();
 
-            // Configurar métodos de pago - EXCLUIR saldo en cuenta para forzar pago con tarjeta
+            // Configurar métodos de pago - EXCLUIR saldo en cuenta para forzar pago con
+            // tarjeta
             PreferencePaymentTypeRequest excludeAccountMoney = PreferencePaymentTypeRequest.builder()
                     .id("account_money") // Excluir saldo de MercadoPago
                     .build();
-            
+
             List<PreferencePaymentTypeRequest> excludedPaymentTypes = new ArrayList<>();
             excludedPaymentTypes.add(excludeAccountMoney);
 

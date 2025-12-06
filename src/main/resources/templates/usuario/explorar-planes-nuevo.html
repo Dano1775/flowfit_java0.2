@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorar Planes - FlowFit</title>
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- FlowFit CSS -->
+    <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
+    <link th:href="@{/css/flowfit-usuario.css}" rel="stylesheet">
+    
+    <style>
+        .marketplace-header {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .search-box {
+            background: rgba(30, 30, 30, 0.6);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            border-radius: 15px;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+            color: white;
+        }
+        
+        .search-box:focus {
+            background: rgba(30, 30, 30, 0.8);
+            border-color: #10b981;
+            box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.15);
+            color: white;
+        }
+        
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: rgba(30, 30, 30, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: #9CA3AF;
+            cursor: pointer;
+        }
+        
+        .filter-btn:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #10b981;
+            transform: translateY(-2px);
+        }
+        
+        .filter-btn.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #10b981;
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .plan-card {
+            background: rgba(30, 30, 30, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            padding: 0.5rem;
+        }
+        
+        .plan-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(16, 185, 129, 0.4);
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15);
+        }
+        
+        .plan-card.featured {
+            border: 2px solid rgba(16, 185, 129, 0.6);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(30, 30, 30, 0.8) 50%);
+            position: relative;
+        }
+        
+        .plan-card.featured::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #059669, #10b981);
+            background-size: 200% 100%;
+            animation: shimmer 3s linear infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .badge-featured {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-custom {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+        
+        .trainer-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 3px solid #10b981;
+            object-fit: cover;
+        }
+        
+        .feature-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 8px;
+            color: #10b981;
+            flex-shrink: 0;
+        }
+        
+        .price-tag {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+        
+        .btn-primary-action {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            color: white;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+        
+        .btn-primary-action:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+            color: white;
+        }
+        
+        .btn-secondary-action {
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+        
+        .btn-secondary-action:hover {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-color: #3b82f6;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .escrow-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Toggle -->
+    <button class="sidebar-toggle-base sidebar-toggle-usuario d-md-none" id="sidebarToggle">
+        <i class="bi bi-list fs-4"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/sidebar-usuario :: sidebar}"></div>
+
+    <!-- Main Content -->
+    <main class="main-content-base">
+        <div class="container-fluid p-4">
+            
+            <!-- Header del Marketplace -->
+            <div class="marketplace-header">
+                <div class="row align-items-center mb-4">
+                    <div class="col-lg-8">
+                        <h1 class="display-5 fw-bold text-white mb-3">
+                            <i class="bi bi-shop-window me-3"></i>Encuentra tu Entrenador Perfecto
+                        </h1>
+                        <p class="lead text-white-50 mb-0">Explora planes de entrenadores certificados y solicita el que mejor se adapte a tus objetivos. Podrás negociar detalles directamente con el entrenador</p>
+                    </div>
+                    <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                        <div class="d-inline-flex flex-column gap-2 text-start">
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="bi bi-shield-check text-success fs-4"></i>
+                                <div>
+                                    <div class="fw-bold text-white small">Pagos Seguros</div>
+                                    <div class="text-white-50" style="font-size: 0.75rem;">Sistema ESCROW</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="bi bi-award text-success fs-4"></i>
+                                <div>
+                                    <div class="fw-bold text-white small">Entrenadores Certificados</div>
+                                    <div class="text-white-50" style="font-size: 0.75rem;">Verificados por FlowFit</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barra de Búsqueda -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="position-relative">
+                            <i class="bi bi-search position-absolute" style="left: 1.5rem; top: 50%; transform: translateY(-50%); color: #10b981; font-size: 1.25rem;"></i>
+                            <input type="text" class="form-control search-box ps-5" id="searchPlanes" 
+                                   placeholder="Buscar por entrenador, especialidad, rango de precio...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros Mejorados -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap gap-3">
+                        <button class="filter-btn active" data-filter="todos">
+                            <i class="bi bi-grid-3x3-gap me-2"></i>Todos los Planes
+                        </button>
+                        <button class="filter-btn" data-filter="destacados">
+                            <i class="bi bi-star-fill me-2"></i>Destacados
+                        </button>
+                        <button class="filter-btn" data-filter="personalizable">
+                            <i class="bi bi-sliders me-2"></i>Personalizables
+                        </button>
+                        <button class="filter-btn" data-filter="precioAsc">
+                            <i class="bi bi-sort-numeric-down me-2"></i>Precio: Menor a Mayor
+                        </button>
+                        <button class="filter-btn" data-filter="precioDesc">
+                            <i class="bi bi-sort-numeric-up me-2"></i>Precio: Mayor a Menor
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid de Planes Mejorado -->
+            <div class="row g-4" id="planesGrid" style="row-gap: 2rem !important;">
+                <!-- Card de Plan -->
+                <div class="col-xl-4 col-lg-6 col-md-6 plan-item" 
+                     th:each="plan : ${planes}"
+                     th:data-destacado="${plan.destacado}"
+                     th:data-personalizable="${plan.permitePersonalizacion}"
+                     th:data-precio="${plan.precioMensual}">
+                    
+                    <div class="plan-card"
+                         th:classappend="${plan.destacado} ? 'featured' : ''">
+                        
+                        <div class="p-4" style="padding: 2rem !important;">
+                            <!-- Badges Superiores -->
+                            <div class="d-flex gap-2 mb-4">
+                                <span th:if="${plan.destacado}" class="badge-featured">
+                                    <i class="bi bi-star-fill me-1"></i>DESTACADO
+                                </span>
+                                <span th:if="${plan.permitePersonalizacion}" class="badge-custom">
+                                    <i class="bi bi-sliders me-1"></i>PERSONALIZABLE
+                                </span>
+                            </div>
+
+                            <!-- Info del Entrenador -->
+                            <div class="d-flex align-items-center mb-4">
+                                <img th:src="@{/assets/perfil_default.png}" 
+                                     class="trainer-avatar me-3" 
+                                     alt="Entrenador">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold text-white" th:text="${plan.entrenador.nombre}">Carlos Rodríguez</h6>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="d-flex">
+                                            <i class="bi bi-star-fill text-success" style="font-size: 0.875rem;"></i>
+                                            <i class="bi bi-star-fill text-success" style="font-size: 0.875rem;"></i>
+                                            <i class="bi bi-star-fill text-success" style="font-size: 0.875rem;"></i>
+                                            <i class="bi bi-star-fill text-success" style="font-size: 0.875rem;"></i>
+                                            <i class="bi bi-star-half text-success" style="font-size: 0.875rem;"></i>
+                                        </div>
+                                        <span class="text-white small">4.9 (127)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nombre y Descripción -->
+                            <h4 class="fw-bold text-white mb-3" th:text="${plan.nombre}">Plan Premium</h4>
+                            <p class="text-white-50 mb-4" style="min-height: 70px; font-size: 0.95rem; line-height: 1.7;" 
+                               th:text="${plan.descripcion}">
+                                Plan completo con seguimiento personalizado, rutinas adaptadas y nutrición incluida.
+                            </p>
+
+                            <!-- Características con Iconos Mejorados -->
+                            <div class="d-flex flex-column gap-3 mb-4 mt-3">
+                                <div class="d-flex align-items-center gap-3" th:if="${plan.rutinasMes != null}">
+                                    <div class="feature-icon">
+                                        <i class="bi bi-calendar-check"></i>
+                                    </div>
+                                    <span class="text-white" th:text="${plan.rutinasMes} + ' rutinas mensuales'">8 rutinas mensuales</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-3" th:if="${plan.seguimientoSemanal}">
+                                    <div class="feature-icon">
+                                        <i class="bi bi-clipboard-check"></i>
+                                    </div>
+                                    <span class="text-white">Seguimiento semanal personalizado</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-3" th:if="${plan.videollamadasMes > 0}">
+                                    <div class="feature-icon">
+                                        <i class="bi bi-camera-video"></i>
+                                    </div>
+                                    <span class="text-white" th:text="${plan.videollamadasMes} + ' videollamadas al mes'">2 videollamadas al mes</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-3" th:if="${plan.planNutricional}">
+                                    <div class="feature-icon">
+                                        <i class="bi bi-heart-pulse"></i>
+                                    </div>
+                                    <span class="text-white">Plan nutricional completo</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-3" th:if="${plan.chatDirecto}">
+                                    <div class="feature-icon">
+                                        <i class="bi bi-chat-dots"></i>
+                                    </div>
+                                    <span class="text-white">Chat directo ilimitado</span>
+                                </div>
+                            </div>
+
+                            <!-- Separador -->
+                            <hr class="border-secondary my-4">
+
+                            <!-- Precio Destacado -->
+                            <div class="price-tag text-center mb-4 py-3">
+                                <div class="text-white-50 small mb-2">DESDE</div>
+                                <div class="d-flex align-items-center justify-content-center gap-2">
+                                    <h2 class="text-success fw-bold mb-0" th:text="'$' + ${#numbers.formatDecimal(plan.precioMensual, 0, 'COMMA', 0, 'POINT')}">$1,299</h2>
+                                    <span class="text-white">/mes</span>
+                                </div>
+                                <div class="text-white-50 small mt-2" th:if="${plan.permitePersonalizacion && plan.rangoPrecioMin != null}">
+                                    Rango personalizable: 
+                                    <span class="text-white fw-semibold" th:text="'$' + ${#numbers.formatDecimal(plan.rangoPrecioMin, 0, 'COMMA', 0, 'POINT')}">$909</span>
+                                    - 
+                                    <span class="text-white fw-semibold" th:text="'$' + ${#numbers.formatDecimal(plan.rangoPrecioMax, 0, 'COMMA', 0, 'POINT')}">$1,689</span>
+                                </div>
+                            </div>
+
+                            <!-- Botón de Solicitud -->
+                            <div class="d-grid gap-3 mt-3">
+                                <a th:href="@{/chat/iniciar-personalizacion(entrenadorId=${plan.entrenador.id}, planId=${plan.id})}" 
+                                   class="btn-primary-action">
+                                    <i class="bi bi-send-fill me-2"></i>
+                                    Solicitar Plan al Entrenador
+                                </a>
+                                
+                                <div class="text-center text-white-50 small">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    El entrenador revisará tu solicitud y podrán negociar los detalles
+                                </div>
+                            </div>
+
+                            <!-- Badge de Garantía -->
+                            <div class="text-center mt-4">
+                                <div class="escrow-badge">
+                                    <i class="bi bi-shield-check"></i>
+                                    <span>Protección ESCROW Incluida</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sin Resultados -->
+            <div th:if="${#lists.isEmpty(planes)}" class="text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                </div>
+                <h3 class="text-white mb-2">No hay planes disponibles</h3>
+                <p class="text-muted">Intenta ajustar los filtros de búsqueda o contacta con un entrenador</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/sidebar-common.js}"></script>
+    
+    <script>
+        // Búsqueda en tiempo real
+        document.getElementById('searchPlanes').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('.plan-item').forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Filtros mejorados
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filtro = this.dataset.filter;
+                filtrarPlanes(filtro);
+            });
+        });
+
+        function filtrarPlanes(tipo) {
+            const items = Array.from(document.querySelectorAll('.plan-item'));
+            
+            if (tipo === 'destacados') {
+                items.forEach(item => {
+                    item.style.display = item.dataset.destacado === 'true' ? '' : 'none';
+                });
+            } else if (tipo === 'personalizable') {
+                items.forEach(item => {
+                    item.style.display = item.dataset.personalizable === 'true' ? '' : 'none';
+                });
+            } else if (tipo === 'precioAsc') {
+                items.sort((a, b) => parseFloat(a.dataset.precio) - parseFloat(b.dataset.precio));
+                items.forEach(item => document.getElementById('planesGrid').appendChild(item));
+                items.forEach(item => item.style.display = '');
+            } else if (tipo === 'precioDesc') {
+                items.sort((a, b) => parseFloat(b.dataset.precio) - parseFloat(a.dataset.precio));
+                items.forEach(item => document.getElementById('planesGrid').appendChild(item));
+                items.forEach(item => item.style.display = '');
+            } else {
+                items.forEach(item => item.style.display = '');
+            }
+        }
+    </script>
+</body>
+</html>

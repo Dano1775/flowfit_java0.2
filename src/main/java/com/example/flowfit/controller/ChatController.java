@@ -1,6 +1,7 @@
 package com.example.flowfit.controller;
 
 import com.example.flowfit.model.*;
+import com.example.flowfit.repository.ContratacionEntrenadorRepository;
 import com.example.flowfit.service.*;
 import com.example.flowfit.dto.MensajeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpSession;
 import java.util.*;
 
@@ -27,13 +29,19 @@ public class ChatController {
 
     @Autowired
     private ChatService chatService;
-    
+
     @Autowired
     private UsuarioService usuarioService;
-    
+
     @Autowired
     private PlanEntrenadorService planEntrenadorService;
-    
+
+    @Autowired
+    private ContratacionEntrenadorRepository contratacionRepo;
+
+    @Autowired
+    private FileUploadService fileUploadService;
+
     /**
      * Vista principal de chat
      */
@@ -43,23 +51,23 @@ public class ChatController {
         if (usuario == null) {
             return "redirect:/login";
         }
-        
+
         boolean esUsuario = !usuario.getPerfilUsuario().name().equals("Entrenador");
-        
+
         List<Conversacion> conversaciones;
         if (usuario.getPerfilUsuario().name().equals("Entrenador")) {
             conversaciones = chatService.obtenerConversacionesEntrenador(usuario.getId());
         } else {
             conversaciones = chatService.obtenerConversacionesUsuario(usuario.getId());
         }
-        
+
         model.addAttribute("conversaciones", conversaciones);
         model.addAttribute("usuario", usuario);
         model.addAttribute("esUsuario", esUsuario);
-        
+
         return "chat/lista-conversaciones";
     }
-    
+
     /**
      * Vista de conversación específica
      */
@@ -69,24 +77,24 @@ public class ChatController {
         if (usuario == null) {
             return "redirect:/login";
         }
-        
+
         boolean esUsuario = !usuario.getPerfilUsuario().name().equals("Entrenador");
-        
+
         // Obtener conversación primero
         Conversacion conversacion = chatService.obtenerConversacion(conversacionId);
         if (conversacion == null) {
             return "redirect:/chat";
         }
-        
+
         // Obtener mensajes y convertir a DTOs
         List<Mensaje> mensajes = chatService.obtenerMensajes(conversacionId);
         List<MensajeDTO> mensajesDTO = mensajes.stream()
-            .map(MensajeDTO::new)
-            .toList();
-        
+                .map(MensajeDTO::new)
+                .toList();
+
         // Marcar mensajes como leídos
         chatService.marcarComoLeidos(conversacionId, usuario.getId());
-        
+
         // Obtener información de la otra persona
         Usuario otraPersona = null;
         if (conversacion.getUsuarioId().equals(usuario.getId())) {
@@ -94,22 +102,22 @@ public class ChatController {
         } else {
             otraPersona = usuarioService.obtenerUsuarioPorId(conversacion.getUsuarioId());
         }
-        
+
         // Si es entrenador, cargar sus planes activos
         if (!esUsuario) {
             List<PlanEntrenador> planesEntrenador = planEntrenadorService.obtenerPlanesActivos(usuario.getId());
             model.addAttribute("planesEntrenador", planesEntrenador);
         }
-        
+
         model.addAttribute("conversacion", conversacion);
         model.addAttribute("mensajes", mensajesDTO);
         model.addAttribute("otraPersona", otraPersona);
         model.addAttribute("usuario", usuario);
         model.addAttribute("esUsuario", esUsuario);
-        
+
         return "chat/conversacion";
     }
-    
+
     /**
      * Iniciar chat con un entrenador
      */
@@ -118,9 +126,9 @@ public class ChatController {
     public ResponseEntity<Map<String, Object>> iniciarChat(
             @RequestParam Integer entrenadorId,
             HttpSession session) {
-        
+
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             if (usuario == null) {
@@ -128,22 +136,104 @@ public class ChatController {
                 response.put("message", "Sesión no válida");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
-            
+
             Conversacion conversacion = chatService.obtenerOCrearConversacion(usuario.getId(), entrenadorId);
-            
+
             response.put("success", true);
             response.put("conversacionId", conversacion.getId());
             response.put("message", "Chat iniciado");
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
+
+    /**
+     * Iniciar chat con solicitud de personalización de plan
+     * Crea una conversación Y una contratación pendiente de aprobación
+     */
+    @GetMapping("/iniciar-personalizacion")
+    public String iniciarPersonalizacion(
+            @RequestParam Integer entrenadorId,
+            @RequestParam Integer planId,
+            HttpSession session,
+            Model model) {
+
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            // Obtener el plan solicitado
+            PlanEntrenador plan = planEntrenadorService.obtenerPlan(planId);
+            if (plan == null || !plan.getActivo() || !plan.getEsPublico()) {
+                model.addAttribute("error", "Plan no disponible");
+                return "redirect:/usuario/explorar-planes";
+            }
+
+            // Crear o obtener conversación existente
+            Conversacion conversacion = chatService.obtenerOCrearConversacion(usuario.getId(), entrenadorId);
+
+            // Verificar si ya existe una solicitud pendiente para este plan
+            List<ContratacionEntrenador> solicitudesExistentes = contratacionRepo.findByUsuarioIdAndEstado(
+                    usuario.getId(),
+                    ContratacionEntrenador.EstadoContratacion.PENDIENTE_APROBACION);
+
+            boolean yaExisteSolicitud = solicitudesExistentes.stream()
+                    .anyMatch(s -> s.getEntrenadorId().equals(entrenadorId) &&
+                            s.getPlanBaseId() != null &&
+                            s.getPlanBaseId().equals(planId));
+
+            if (!yaExisteSolicitud) {
+                // Crear nueva contratación en estado PENDIENTE_APROBACION
+                ContratacionEntrenador contratacion = new ContratacionEntrenador();
+                contratacion.setUsuarioId(usuario.getId());
+                contratacion.setEntrenadorId(entrenadorId);
+                contratacion.setPlanBaseId(planId);
+                contratacion.setTipoContratacion(ContratacionEntrenador.TipoContratacion.PERSONALIZADO);
+                contratacion.setEstado(ContratacionEntrenador.EstadoContratacion.PENDIENTE_APROBACION);
+
+                // Copiar valores iniciales del plan base
+                contratacion.setPrecioAcordado(plan.getPrecioMensual());
+                contratacion.setDuracionDiasAcordada(plan.getDuracionDias());
+                contratacion.setRutinasMesAcordadas(plan.getRutinasMes());
+                contratacion.setSeguimientoSemanalAcordado(plan.getSeguimientoSemanal());
+                contratacion.setChatDirectoAcordado(plan.getChatDirecto());
+                contratacion.setVideollamadasMesAcordadas(plan.getVideollamadasMes());
+                contratacion.setPlanNutricionalAcordado(plan.getPlanNutricional());
+
+                // Configurar sistema de negociación inteligente
+                contratacion.setRondasNegociacion(0);
+                contratacion.setPorcentajeVariacionPermitido(new java.math.BigDecimal("30.00")); // Primera ronda: ±30%
+                contratacion.setUltimaPropuestaDe(ContratacionEntrenador.PropuestaDe.USUARIO);
+
+                contratacionRepo.save(contratacion);
+
+                // Enviar mensaje automático al entrenador con la solicitud
+                MensajeDTO mensajeDTO = new MensajeDTO();
+                mensajeDTO.setConversacionId(conversacion.getId());
+                mensajeDTO.setContenido(String.format(
+                        "¡Hola! Me interesa tu plan \"%s\" ($%,.0f/mes). Me gustaría discutir los detalles y ver si podemos personalizar algo para mis objetivos.",
+                        plan.getNombre(),
+                        plan.getPrecioMensual()));
+
+                chatService.enviarMensaje(mensajeDTO, usuario.getId());
+            }
+
+            // Redirigir a la conversación
+            return "redirect:/chat/conversacion/" + conversacion.getId();
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al procesar la solicitud: " + e.getMessage());
+            return "redirect:/usuario/explorar-planes";
+        }
+    }
+
     /**
      * Enviar mensaje
      */
@@ -151,11 +241,12 @@ public class ChatController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> enviarMensaje(
             @RequestParam Long conversacionId,
-            @RequestParam String contenido,
+            @RequestParam(required = false) String contenido,
+            @RequestParam(required = false) MultipartFile archivo,
             HttpSession session) {
-        
+
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             if (usuario == null) {
@@ -163,39 +254,72 @@ public class ChatController {
                 response.put("message", "Sesión no válida");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
-            
+
             // Crear DTO con los datos
             MensajeDTO mensajeDTO = new MensajeDTO();
             mensajeDTO.setConversacionId(conversacionId);
-            mensajeDTO.setContenido(contenido);
-            
+            mensajeDTO.setContenido(contenido != null ? contenido : "");
+
+            // Si hay archivo adjunto
+            if (archivo != null && !archivo.isEmpty()) {
+                try {
+                    Map<String, Object> fileInfo = fileUploadService.uploadFile(archivo);
+                    mensajeDTO.setArchivoUrl((String) fileInfo.get("url"));
+                    mensajeDTO.setArchivoNombre((String) fileInfo.get("nombre"));
+                    mensajeDTO.setArchivoTipo((String) fileInfo.get("tipo"));
+                    mensajeDTO.setArchivoTamano((Long) fileInfo.get("tamano"));
+
+                    // Establecer tipo de mensaje según categoría
+                    String categoria = (String) fileInfo.get("tipoCategoria");
+                    if ("IMAGEN".equals(categoria)) {
+                        mensajeDTO.setTipoMensaje(Mensaje.TipoMensaje.IMAGEN);
+                    } else {
+                        mensajeDTO.setTipoMensaje(Mensaje.TipoMensaje.ARCHIVO);
+                    }
+
+                    // Si no hay contenido, usar nombre del archivo
+                    if (mensajeDTO.getContenido().isEmpty()) {
+                        mensajeDTO.setContenido("📎 " + fileInfo.get("nombre"));
+                    }
+                } catch (Exception e) {
+                    response.put("success", false);
+                    response.put("message", "Error al subir archivo: " + e.getMessage());
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+                }
+            }
+
             Mensaje mensaje = chatService.enviarMensaje(mensajeDTO, usuario.getId());
-            
+
             // Enviar notificación en tiempo real vía WebSocket
             Map<String, Object> mensajeWs = new HashMap<>();
             mensajeWs.put("id", mensaje.getId());
             mensajeWs.put("conversacionId", mensaje.getConversacionId());
             mensajeWs.put("remitenteId", mensaje.getRemitenteId());
             mensajeWs.put("contenido", mensaje.getContenido());
+            mensajeWs.put("tipoMensaje", mensaje.getTipoMensaje().toString());
+            mensajeWs.put("archivoUrl", mensaje.getArchivoUrl());
+            mensajeWs.put("archivoNombre", mensaje.getArchivoNombre());
+            mensajeWs.put("archivoTipo", mensaje.getArchivoTipo());
+            mensajeWs.put("archivoTamano", mensaje.getArchivoTamano());
             mensajeWs.put("fechaEnvio", mensaje.getFechaEnvio().toString());
             mensajeWs.put("remitenteNombre", usuario.getNombre());
-            
+
             // Enviar a todos los suscritos a esta conversación
             messagingTemplate.convertAndSend("/topic/conversacion/" + conversacionId, mensajeWs);
-            
+
             response.put("success", true);
             response.put("mensajeId", mensaje.getId());
             response.put("message", "Mensaje enviado");
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
+
     /**
      * Obtener mensajes no leídos
      */
@@ -203,7 +327,7 @@ public class ChatController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> obtenerMensajesNoLeidos(HttpSession session) {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             if (usuario == null) {
@@ -211,15 +335,15 @@ public class ChatController {
                 response.put("message", "Sesión no válida");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
-            
+
             boolean esEntrenador = usuario.getPerfilUsuario().name().equals("Entrenador");
             Long noLeidos = chatService.contarMensajesNoLeidos(usuario.getId(), esEntrenador);
-            
+
             response.put("success", true);
             response.put("noLeidos", noLeidos);
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Error: " + e.getMessage());

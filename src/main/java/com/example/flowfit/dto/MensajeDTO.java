@@ -18,6 +18,10 @@ public class MensajeDTO {
     private Integer remitenteId;
     private String contenido;
     private Mensaje.TipoMensaje tipoMensaje;
+    private String archivoUrl;
+    private String archivoNombre;
+    private String archivoTipo;
+    private Long archivoTamano;
     private LocalDateTime fechaEnvio;
     private Boolean leido;
     private LocalDateTime fechaLectura;
@@ -25,26 +29,31 @@ public class MensajeDTO {
     private LocalDateTime fechaEdicion;
     private Boolean eliminado;
     private Map<String, Object> metadata;
-    
+
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    
+
     public MensajeDTO(Mensaje mensaje) {
         this.id = mensaje.getId();
         this.conversacionId = mensaje.getConversacionId();
         this.remitenteId = mensaje.getRemitenteId();
         this.contenido = mensaje.getContenido();
         this.tipoMensaje = mensaje.getTipoMensaje();
+        this.archivoUrl = mensaje.getArchivoUrl();
+        this.archivoNombre = mensaje.getArchivoNombre();
+        this.archivoTipo = mensaje.getArchivoTipo();
+        this.archivoTamano = mensaje.getArchivoTamano();
         this.fechaEnvio = mensaje.getFechaEnvio();
         this.leido = mensaje.getLeido();
         this.fechaLectura = mensaje.getFechaLectura();
         this.editado = mensaje.getEditado();
         this.fechaEdicion = mensaje.getFechaEdicion();
         this.eliminado = mensaje.getEliminado();
-        
+
         // Parsear metadata JSON a Map
         if (mensaje.getMetadata() != null && !mensaje.getMetadata().isEmpty()) {
             try {
-                this.metadata = objectMapper.readValue(mensaje.getMetadata(), new TypeReference<Map<String, Object>>() {});
+                this.metadata = objectMapper.readValue(mensaje.getMetadata(), new TypeReference<Map<String, Object>>() {
+                });
             } catch (Exception e) {
                 this.metadata = new HashMap<>();
             }

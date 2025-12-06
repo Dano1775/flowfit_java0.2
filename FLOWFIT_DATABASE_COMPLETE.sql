@@ -248,13 +248,15 @@ CREATE TABLE mensaje (
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 3. TABLA DE PLANES DEL ENTRENADOR
+-- 3. TABLA DE PLANES DEL ENTRENADOR (SISTEMA HÍBRIDO)
 CREATE TABLE plan_entrenador (
     id INT AUTO_INCREMENT PRIMARY KEY,
     entrenador_id INT NOT NULL,
     nombre VARCHAR(100) NOT NULL,
     descripcion TEXT,
     precio_mensual DECIMAL(10,2) NOT NULL,
+    rango_precio_min DECIMAL(10,2) DEFAULT NULL COMMENT 'Precio mínimo para personalización',
+    rango_precio_max DECIMAL(10,2) DEFAULT NULL COMMENT 'Precio máximo para personalización',
     duracion_dias INT DEFAULT 30,
     rutinas_mes INT DEFAULT NULL,
     seguimiento_semanal BOOLEAN DEFAULT FALSE,
@@ -262,6 +264,7 @@ CREATE TABLE plan_entrenador (
     videollamadas_mes INT DEFAULT 0,
     plan_nutricional BOOLEAN DEFAULT FALSE,
     es_publico BOOLEAN DEFAULT TRUE,
+    permite_personalizacion BOOLEAN DEFAULT TRUE COMMENT 'Permite negociación inteligente',
     destacado BOOLEAN DEFAULT FALSE,
     activo BOOLEAN DEFAULT TRUE,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -270,21 +273,24 @@ CREATE TABLE plan_entrenador (
     INDEX idx_es_publico (es_publico),
     INDEX idx_destacado (destacado),
     INDEX idx_activo (activo),
+    INDEX idx_permite_personalizacion (permite_personalizacion),
     CONSTRAINT fk_plan_entrenador 
         FOREIGN KEY (entrenador_id) 
         REFERENCES usuario(id) 
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 4. TABLA DE CONTRATACIONES
+-- 4. TABLA DE CONTRATACIONES (SISTEMA HÍBRIDO CON NEGOCIACIÓN INTELIGENTE)
 CREATE TABLE contratacion_entrenador (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
     entrenador_id INT NOT NULL,
     plan_base_id INT DEFAULT NULL,
+    tipo_contratacion ENUM('PLAN_FIJO', 'PERSONALIZADO') DEFAULT 'PLAN_FIJO' COMMENT 'Compra directa o con negociación',
     estado ENUM(
         'PENDIENTE_APROBACION',
         'NEGOCIACION',
+        'PROPUESTA_FINAL',
         'PENDIENTE_PAGO',
         'PAGO_PROCESANDO',
         'ACTIVA',
@@ -306,6 +312,8 @@ CREATE TABLE contratacion_entrenador (
     plan_nutricional_acordado BOOLEAN DEFAULT FALSE,
     servicios_adicionales TEXT DEFAULT NULL,
     version_negociacion INT DEFAULT 1,
+    rondas_negociacion INT DEFAULT 0 COMMENT 'Contador de rondas (máximo 3)',
+    porcentaje_variacion_permitido DECIMAL(5,2) DEFAULT 30.00 COMMENT 'Variación permitida según ronda',
     ultima_propuesta_de ENUM('USUARIO', 'ENTRENADOR') DEFAULT NULL,
     fecha_solicitud DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_aprobacion DATETIME DEFAULT NULL,
@@ -318,6 +326,7 @@ CREATE TABLE contratacion_entrenador (
     INDEX idx_usuario (usuario_id),
     INDEX idx_entrenador (entrenador_id),
     INDEX idx_plan_base (plan_base_id),
+    INDEX idx_tipo_contratacion (tipo_contratacion),
     INDEX idx_estado (estado),
     INDEX idx_fecha_solicitud (fecha_solicitud),
     INDEX idx_fecha_inicio (fecha_inicio),
@@ -336,21 +345,26 @@ CREATE TABLE contratacion_entrenador (
         ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 5. TABLA DE HISTORIAL DE NEGOCIACIÓN
+-- 5. TABLA DE HISTORIAL DE NEGOCIACIÓN (CON SISTEMA INTELIGENTE)
 CREATE TABLE historial_negociacion (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     contratacion_id BIGINT NOT NULL,
     version INT NOT NULL,
+    ronda_numero INT DEFAULT 1 COMMENT 'Número de ronda (1-3)',
     propuesto_por ENUM('USUARIO', 'ENTRENADOR') NOT NULL,
     precio_propuesto DECIMAL(10,2) NOT NULL,
+    precio_base_referencia DECIMAL(10,2) NOT NULL COMMENT 'Precio base del plan',
+    porcentaje_variacion DECIMAL(5,2) DEFAULT NULL COMMENT 'Variación respecto al precio base',
     duracion_propuesta INT NOT NULL,
     servicios_propuestos JSON DEFAULT NULL,
-    estado_propuesta ENUM('PENDIENTE', 'ACEPTADA', 'RECHAZADA', 'CONTRAOFERTA') DEFAULT 'PENDIENTE',
+    estado_propuesta ENUM('PENDIENTE', 'ACEPTADA', 'RECHAZADA', 'CONTRAOFERTA', 'PROPUESTA_FINAL') DEFAULT 'PENDIENTE',
     mensaje TEXT DEFAULT NULL,
+    es_ultima_ronda BOOLEAN DEFAULT FALSE COMMENT 'Marca si es la última oportunidad',
     fecha_propuesta DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_respuesta DATETIME DEFAULT NULL,
     INDEX idx_contratacion (contratacion_id),
     INDEX idx_version (version),
+    INDEX idx_ronda (ronda_numero),
     INDEX idx_estado (estado_propuesta),
     CONSTRAINT fk_historial_contratacion 
         FOREIGN KEY (contratacion_id) 
@@ -566,21 +580,17 @@ INSERT INTO registro_aprobaciones (usuario_id, admin_id, accion, comentarios) VA
 -- INSERTAR BOLETINES DE PRUEBA
 -- =============================================
 INSERT INTO boletin_informativo (asunto, contenido, tipo_destinatario, estado_envio, total_destinatarios, enviados_exitosos, creado_por) VALUES
-('Bienvenida a FlowFit', 'Estimado {{nombre}},\n\n¡Bienvenido a FlowFit!', 'USUARIOS', 'COMPLETADO', 3, 3, 'Admin FlowFit'),
-('Nuevas Rutinas HIIT', 'Hola {{nombre}},\n\nTenemos nuevas rutinas HIIT.', 'TODOS', 'PENDIENTE', 0, 0, 'Admin FlowFit'),
-('Recordatorio Semanal', 'Hola {{nombre}},\n\nRevisa tu progreso.', 'USUARIOS_ACTIVOS', 'PENDIENTE', 0, 0, 'Carlos Rodríguez');
+-- =============================================
+-- PLANES DEL ENTRENADOR CARLOS (SISTEMA HÍBRIDO)
+-- =============================================
+INSERT INTO plan_entrenador (entrenador_id, nombre, descripcion, precio_mensual, rango_precio_min, rango_precio_max, duracion_dias, rutinas_mes, seguimiento_semanal, chat_directo, videollamadas_mes, plan_nutricional, es_publico, permite_personalizacion, destacado) VALUES
+(2, 'Plan Básico', 'Plan perfecto para empezar tu transformación. Ideal para principiantes que buscan establecer hábitos saludables.', 599.00, 419.30, 778.70, 30, 4, FALSE, TRUE, 0, FALSE, TRUE, TRUE, FALSE),
+(2, 'Plan Premium', 'Plan completo con seguimiento personalizado, rutinas adaptadas y nutrición incluida. Perfecto para resultados serios.', 1299.00, 909.30, 1688.70, 30, 8, TRUE, TRUE, 2, TRUE, TRUE, TRUE, TRUE),
+(2, 'Plan Elite', 'Transformación total con atención personalizada VIP. Incluye todo lo necesario para alcanzar tus objetivos.', 2499.00, 1749.30, 3248.70, 30, 12, TRUE, TRUE, 4, TRUE, TRUE, TRUE, TRUE);
 
 -- =============================================
--- DATOS DE PRUEBA: CHAT Y CONTRATACIÓN
+-- CONVERSACIONES DE PRUEBA
 -- =============================================
-
--- Planes del entrenador Carlos
-INSERT INTO plan_entrenador (entrenador_id, nombre, descripcion, precio_mensual, duracion_dias, rutinas_mes, seguimiento_semanal, chat_directo, videollamadas_mes, plan_nutricional, es_publico, destacado) VALUES
-(2, 'Plan Básico', 'Plan perfecto para empezar tu transformación.', 599.00, 30, 4, FALSE, TRUE, 0, FALSE, TRUE, FALSE),
-(2, 'Plan Premium', 'Plan completo con seguimiento personalizado.', 1299.00, 30, NULL, TRUE, TRUE, 2, TRUE, TRUE, TRUE),
-(2, 'Plan Personalizado', 'Plan totalmente customizado a tus objetivos.', 2499.00, 30, NULL, TRUE, TRUE, 999, TRUE, TRUE, TRUE);
-
--- Conversaciones de prueba
 INSERT INTO conversacion (usuario_id, entrenador_id, fecha_ultimo_mensaje, estado) VALUES
 (4, 2, NOW(), 'ACTIVA'), (6, 2, NOW(), 'ACTIVA'), (7, 2, NOW(), 'ACTIVA');
 
@@ -591,9 +601,19 @@ INSERT INTO mensaje (conversacion_id, remitente_id, contenido, tipo_mensaje, lei
 (1, 4, 'Quiero perder peso y ganar masa muscular. ¿El Premium incluye nutrición?', 'TEXTO', TRUE, NOW()),
 (1, 2, 'Perfecto! Sí, el Premium incluye plan nutricional y 2 videollamadas al mes.', 'TEXTO', FALSE, NULL);
 
--- Contratación en negociación
-INSERT INTO contratacion_entrenador (usuario_id, entrenador_id, plan_base_id, estado, precio_acordado, duracion_dias_acordada, rutinas_mes_acordadas, seguimiento_semanal_acordado, chat_directo_acordado, videollamadas_mes_acordadas, plan_nutricional_acordado, version_negociacion, ultima_propuesta_de, nota_usuario) VALUES
-(4, 2, 2, 'PENDIENTE_APROBACION', 1299.00, 30, NULL, TRUE, TRUE, 2, TRUE, 1, 'USUARIO', 'Me interesa el Plan Premium. ¿Podemos empezar la próxima semana?');
+-- Contrataciones de ejemplo (SISTEMA HÍBRIDO)
+-- Contratación 1: Compra directa (sin negociación)
+INSERT INTO contratacion_entrenador (usuario_id, entrenador_id, plan_base_id, tipo_contratacion, estado, precio_acordado, duracion_dias_acordada, rutinas_mes_acordadas, seguimiento_semanal_acordado, chat_directo_acordado, videollamadas_mes_acordadas, plan_nutricional_acordado, version_negociacion, rondas_negociacion, ultima_propuesta_de, nota_usuario) VALUES
+(6, 2, 1, 'PLAN_FIJO', 'PENDIENTE_PAGO', 599.00, 30, 4, FALSE, TRUE, 0, FALSE, 1, 0, 'USUARIO', 'Compra directa del Plan Básico. ¡Listo para empezar!');
+
+-- Contratación 2: Con negociación personalizada
+INSERT INTO contratacion_entrenador (usuario_id, entrenador_id, plan_base_id, tipo_contratacion, estado, precio_acordado, duracion_dias_acordada, rutinas_mes_acordadas, seguimiento_semanal_acordado, chat_directo_acordado, videollamadas_mes_acordadas, plan_nutricional_acordado, version_negociacion, rondas_negociacion, porcentaje_variacion_permitido, ultima_propuesta_de, nota_usuario) VALUES
+(7, 2, 2, 'PERSONALIZADO', 'NEGOCIACION', 1299.00, 30, 10, TRUE, TRUE, 2, TRUE, 1, 1, 30.00, 'USUARIO', 'Quiero el Premium pero con más rutinas mensuales.');
+
+-- Historial de negociación (SISTEMA INTELIGENTE)
+-- Ronda 1: Usuario propone personalización
+INSERT INTO historial_negociacion (contratacion_id, version, ronda_numero, propuesto_por, precio_propuesto, precio_base_referencia, porcentaje_variacion, duracion_propuesta, mensaje, estado_propuesta, es_ultima_ronda, servicios_propuestos) VALUES
+(2, 1, 1, 'USUARIO', 1299.00, 1299.00, 0.00, 30, 'Me interesa el Plan Premium. ¿Podríamos ajustar las rutinas a 10 en lugar de 8? Estoy dispuesto a pagar el mismo precio.', 'PENDIENTE', FALSE, JSON_OBJECT('rutinas_mes', 10, 'seguimiento_semanal', TRUE, 'videollamadas_mes', 2, 'plan_nutricional', TRUE, 'chat_directo', TRUE));
 
 -- Historial de negociación
 INSERT INTO historial_negociacion (contratacion_id, version, propuesto_por, precio_propuesto, duracion_propuesta, mensaje, estado_propuesta, servicios_propuestos) VALUES
