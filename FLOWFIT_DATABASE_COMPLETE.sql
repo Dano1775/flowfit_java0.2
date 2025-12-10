@@ -572,8 +572,62 @@ INSERT INTO rutina_ejercicio (rutina_id, ejercicio_id, orden, series, repeticion
 -- =============================================
 -- ASIGNAR RUTINAS A USUARIOS
 -- =============================================
-INSERT INTO rutina_asignada (rutina_id, usuario_id, estado, asignado_por) VALUES
-(1, 4, 'ACTIVA', 2), (4, 4, 'ACTIVA', NULL), (8, 6, 'ACTIVA', 2), (1, 7, 'COMPLETADA', 2), (6, 8, 'ACTIVA', NULL);
+INSERT INTO rutina_asignada (rutina_id, usuario_id, estado, progreso, veces_completada, fecha_asignacion, fecha_completada, asignado_por) VALUES
+(1, 4, 'ACTIVA', 65, 3, DATE_SUB(NOW(), INTERVAL 20 DAY), NULL, 2),
+(4, 4, 'ACTIVA', 40, 1, DATE_SUB(NOW(), INTERVAL 15 DAY), NULL, NULL),
+(8, 6, 'ACTIVA', 80, 5, DATE_SUB(NOW(), INTERVAL 30 DAY), NULL, 2),
+(1, 7, 'COMPLETADA', 100, 8, DATE_SUB(NOW(), INTERVAL 45 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY), 2),
+(6, 8, 'ACTIVA', 50, 2, DATE_SUB(NOW(), INTERVAL 10 DAY), NULL, NULL),
+(2, 4, 'COMPLETADA', 100, 6, DATE_SUB(NOW(), INTERVAL 25 DAY), DATE_SUB(NOW(), INTERVAL 3 DAY), 2),
+(5, 6, 'ACTIVA', 70, 4, DATE_SUB(NOW(), INTERVAL 18 DAY), NULL, 2);
+
+-- =============================================
+-- INSERTAR PROGRESO DE EJERCICIOS (DATOS DE EJEMPLO)
+-- =============================================
+-- Progreso de Juan Pérez (ID:4) - Última semana
+INSERT INTO progreso_ejercicio (usuario_id, rutina_asignada_id, ejercicio_id, fecha, series_completadas, repeticiones_realizadas, peso_utilizado, comentarios) VALUES
+-- Hace 7 días
+(4, 1, 12, DATE_SUB(CURDATE(), INTERVAL 7 DAY), 3, 60, NULL, 'Primera sesión, buen ritmo'),
+(4, 1, 8, DATE_SUB(CURDATE(), INTERVAL 7 DAY), 3, 45, NULL, 'Intensidad moderada'),
+-- Hace 6 días
+(4, 1, 7, DATE_SUB(CURDATE(), INTERVAL 6 DAY), 3, 30, NULL, 'Sentí buen trabajo en piernas'),
+(4, 1, 13, DATE_SUB(CURDATE(), INTERVAL 6 DAY), 2, 30, 10.0, 'Progreso en fuerza'),
+-- Hace 5 días
+(4, 4, 9, DATE_SUB(CURDATE(), INTERVAL 5 DAY), 2, 90, NULL, 'Mantuve postura'),
+(4, 4, 11, DATE_SUB(CURDATE(), INTERVAL 5 DAY), 3, 45, NULL, 'Activación de glúteos excelente'),
+-- Hace 4 días
+(4, 1, 6, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 3, 36, NULL, 'Mejorando técnica'),
+(4, 1, 1, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 4, 80, NULL, 'Core más fuerte'),
+-- Hace 3 días
+(4, 1, 2, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 4, 32, NULL, 'Cardio intenso, muy cansado'),
+(4, 1, 8, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 4, 80, NULL, 'Aumenté repeticiones'),
+-- Hace 2 días  
+(4, 4, 13, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 3, 45, 15.0, 'Subí peso'),
+(4, 4, 14, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 2, 24, NULL, 'Piernas quemando'),
+-- Ayer
+(4, 1, 12, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 3, 75, NULL, 'Excelente sesión'),
+(4, 1, 9, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 3, 135, NULL, 'Plancha más tiempo'),
+-- Hoy
+(4, 1, 6, CURDATE(), 3, 40, NULL, 'Sesión matutina'),
+(4, 1, 11, CURDATE(), 3, 50, NULL, 'En progreso...'),
+
+-- Progreso de Sofia López (ID:6) - Última semana
+(6, 3, 2, DATE_SUB(CURDATE(), INTERVAL 6 DAY), 4, 40, NULL, 'HIIT muy intenso'),
+(6, 3, 8, DATE_SUB(CURDATE(), INTERVAL 6 DAY), 4, 100, NULL, 'Cardio al máximo'),
+(6, 3, 7, DATE_SUB(CURDATE(), INTERVAL 5 DAY), 4, 48, NULL, 'Piernas fuertes'),
+(6, 5, 1, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 4, 80, NULL, 'Abs definición'),
+(6, 5, 9, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 3, 135, NULL, 'Core resistente'),
+(6, 3, 6, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 3, 36, NULL, 'Pecho trabajando'),
+(6, 5, 11, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 3, 60, NULL, 'Glúteos activados'),
+(6, 3, 12, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 4, 100, NULL, 'Cardio completo'),
+(6, 5, 1, CURDATE(), 4, 85, NULL, 'Mejorando core'),
+
+-- Progreso de Miguel Torres (ID:7) - Última semana
+(7, 4, 9, DATE_SUB(CURDATE(), INTERVAL 5 DAY), 3, 120, NULL, 'Plancha estable'),
+(7, 4, 13, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 2, 30, 20.0, 'Sentadillas con peso'),
+(7, 4, 11, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 3, 45, NULL, 'Puente glúteos'),
+(7, 4, 14, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 2, 20, NULL, 'Zancadas controladas'),
+(7, 4, 6, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 3, 30, NULL, 'Flexiones mejoradas');
 
 -- =============================================
 -- INSERTAR REGISTROS DE APROBACIÓN
