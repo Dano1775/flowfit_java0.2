@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface EjercicioCatalogoRepository extends JpaRepository<EjercicioCatalogo, Long> {
+public interface EjercicioCatalogoRepository extends JpaRepository<EjercicioCatalogo, Integer> {
     
     // Find exercises by name (partial match)
     List<EjercicioCatalogo> findByNombreContainingIgnoreCase(String nombre);

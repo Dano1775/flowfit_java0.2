@@ -831,4 +831,86 @@ public class EmailService {
             return false;
         }
     }
+    
+    /**
+     * ENVÍO MASIVO OPTIMIZADO CON BCC (Copia Oculta)
+     * 
+     * En lugar de enviar correos uno por uno en un bucle for, este método
+     * envía UN SOLO correo con todos los destinatarios en BCC (copia oculta).
+     * 
+     * Ventajas:
+     * - Mucho más rápido (1 envío vs N envíos)
+     * - Reduce carga en el servidor SMTP
+     * - Los destinatarios no ven los correos de otros (privacidad)
+     * - Menos probabilidad de ser bloqueado por spam
+     * 
+     * IMPORTANTE: Gmail tiene límite de ~500 destinatarios en BCC por día.
+     * Para listas más grandes, dividir en lotes.
+     * 
+     * @param asunto Asunto del correo
+     * @param contenidoHtml Contenido HTML del boletín
+     * @param destinatarios Array de correos destinatarios
+     * @return true si el envío fue exitoso
+     */
+    public boolean enviarCorreoMasivoBCC(String asunto, String contenidoHtml, String[] destinatarios) {
+        try {
+            if (destinatarios == null || destinatarios.length == 0) {
+                System.err.println("❌ No hay destinatarios para envío masivo");
+                return false;
+            }
+            
+            System.out.println("📧 Preparando envío masivo con BCC para " + destinatarios.length + " destinatarios");
+            
+            // Si hay más de 500 destinatarios, dividir en lotes (límite de Gmail)
+            int LOTE_MAXIMO = 500;
+            int totalDestinatarios = destinatarios.length;
+            int numLotes = (int) Math.ceil((double) totalDestinatarios / LOTE_MAXIMO);
+            
+            System.out.println("📦 Dividiendo en " + numLotes + " lote(s) de máximo " + LOTE_MAXIMO + " destinatarios");
+            
+            for (int lote = 0; lote < numLotes; lote++) {
+                int inicio = lote * LOTE_MAXIMO;
+                int fin = Math.min(inicio + LOTE_MAXIMO, totalDestinatarios);
+                
+                // Crear sublista para este lote
+                String[] destinatariosLote = new String[fin - inicio];
+                System.arraycopy(destinatarios, inicio, destinatariosLote, 0, fin - inicio);
+                
+                System.out.println("📧 Enviando lote " + (lote + 1) + "/" + numLotes + " (" + destinatariosLote.length + " destinatarios)");
+                
+                // Crear mensaje MIME
+                MimeMessage message = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+                
+                // Configurar remitente y destinatario visible (el propio remitente)
+                helper.setFrom(REMITENTE);
+                helper.setTo(REMITENTE); // El destinatario "visible" es el mismo remitente
+                
+                // Agregar TODOS los destinatarios reales en BCC (Copia Oculta)
+                helper.setBcc(destinatariosLote);
+                
+                // Configurar asunto y contenido
+                helper.setSubject(asunto);
+                helper.setText(contenidoHtml, true); // true = HTML
+                
+                // ENVIAR (un solo envío para todos)
+                mailSender.send(message);
+                
+                System.out.println("✅ Lote " + (lote + 1) + " enviado exitosamente");
+                
+                // Pausa entre lotes para evitar ser bloqueado
+                if (lote < numLotes - 1) {
+                    Thread.sleep(2000); // 2 segundos entre lotes
+                }
+            }
+            
+            System.out.println("✅ Envío masivo completado: " + totalDestinatarios + " destinatarios en " + numLotes + " lote(s)");
+            return true;
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error en envío masivo con BCC: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

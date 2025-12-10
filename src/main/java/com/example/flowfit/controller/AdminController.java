@@ -286,7 +286,7 @@ public class AdminController {
     }
     
     @PostMapping("/ejercicios/eliminar/{id}")
-    public String eliminarEjercicio(@PathVariable("id") Long id,
+    public String eliminarEjercicio(@PathVariable("id") Integer id,
                                   RedirectAttributes redirectAttributes,
                                   HttpSession session) {
         try {
@@ -306,7 +306,7 @@ public class AdminController {
     }
     
     @GetMapping("/ejercicios/editar/{id}")
-    public String editarEjercicioForm(@PathVariable("id") Long id,
+    public String editarEjercicioForm(@PathVariable("id") Integer id,
                                      Model model,
                                      HttpSession session) {
         try {
@@ -333,7 +333,7 @@ public class AdminController {
     }
     
     @PostMapping("/ejercicios/editar/{id}")
-    public String actualizarEjercicio(@PathVariable("id") Long id,
+    public String actualizarEjercicio(@PathVariable("id") Integer id,
                                     @RequestParam("nombre") String nombre,
                                     @RequestParam("descripcion") String descripcion,
                                     @RequestParam(value = "tipo", defaultValue = "CARDIO") String tipo,

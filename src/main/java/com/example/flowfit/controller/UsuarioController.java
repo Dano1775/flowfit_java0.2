@@ -46,6 +46,9 @@ public class UsuarioController {
     @Autowired
     private AsignacionEntrenadorService asignacionService;
 
+    @Autowired
+    private com.example.flowfit.service.ProgresoService progresoService;
+
     /**
      * Dashboard principal del usuario
      * Muestra resumen de actividad, estadísticas personales y accesos rápidos
@@ -210,24 +213,24 @@ public class UsuarioController {
     @GetMapping("/progreso")
     public String progreso(Model model, HttpSession session) {
         try {
+            // Obtener usuario de la sesión
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            if (usuario == null || usuario.getPerfilUsuario().toString().equals("Administrador")) {
-                // Fallback para pruebas - buscar usuario de prueba
-                Usuario usuarioTest = usuarioService.buscarPorCorreo("juan.perez@test.com").orElse(null);
-                if (usuarioTest != null) {
-                    usuario = usuarioTest;
-                    session.setAttribute("usuario", usuario);
-                } else {
-                    return "redirect:/login";
-                }
+            
+            // Validar que haya usuario en sesión y no sea administrador
+            if (usuario == null) {
+                return "redirect:/login";
+            }
+            
+            if (usuario.getPerfilUsuario() != null && 
+                "Administrador".equals(usuario.getPerfilUsuario().name())) {
+                return "redirect:/admin/dashboard";
             }
 
             model.addAttribute("usuario", usuario);
 
-            // Cargar estadísticas de progreso
+            // Cargar estadísticas de rutinas asignadas
             List<RutinaAsignada> rutinasAsignadas = rutinaService.obtenerRutinasAsignadas(usuario.getId());
-            Double progresoGeneral = rutinaService.calcularProgresoGeneralUsuario(usuario.getId());
-
+            
             // Estadísticas de rutinas
             long rutinasCompletadas = rutinasAsignadas.stream()
                     .filter(r -> r.getEstado() == RutinaAsignada.EstadoRutina.COMPLETADA)
@@ -236,30 +239,84 @@ public class UsuarioController {
                     .filter(r -> r.getEstado() == RutinaAsignada.EstadoRutina.ACTIVA)
                     .count();
             long rutinasTotal = rutinasAsignadas.size();
+            
+            // Calcular progreso general (porcentaje de rutinas completadas)
+            double progresoGeneral = rutinasTotal > 0 ? 
+                ((double) rutinasCompletadas / rutinasTotal) * 100 : 0.0;
 
-            // Progreso semanal (últimos 7 días)
-            List<Object[]> progresoSemanal = rutinaService.obtenerProgresoSemanal(usuario.getId());
+            // Obtener estadísticas reales del ProgresoService
+            Map<String, Object> estadisticas = progresoService.getEstadisticasGenerales(usuario);
+            int rachaActual = (Integer) estadisticas.getOrDefault("rachaActual", 0);
+            int diasActivosEsteMes = ((Long) estadisticas.getOrDefault("diasEntrenadosUltimaSemana", 0L)).intValue();
 
-            // Días activos este mes
-            int diasActivosEsteMes = rutinaService.contarDiasActivosEsteMes(usuario.getId());
+            // DATOS PARA GRÁFICA: Últimos 7 días de progreso
+            java.time.LocalDate hoy = java.time.LocalDate.now();
+            java.time.LocalDate hace7Dias = hoy.minusDays(6); // Incluye hoy
+            
+            // Generar array de los últimos 7 días
+            List<String> fechasGrafica = new java.util.ArrayList<>();
+            List<Integer> ejerciciosGrafica = new java.util.ArrayList<>();
+            
+            // Primero intentar obtener datos reales de progreso_ejercicio
+            Map<String, Object> datosProgreso = progresoService.getDatosGraficas(usuario, 7);
+            List<String> fechasProgreso = (List<String>) datosProgreso.get("fechas");
+            List<Long> ejerciciosProgreso = (List<Long>) datosProgreso.get("ejerciciosPorDia");
+            
+            System.out.println("=== DEBUG PROGRESO ===");
+            System.out.println("Usuario: " + usuario.getEmail());
+            System.out.println("Datos progreso_ejercicio: " + (fechasProgreso != null ? fechasProgreso.size() : "null") + " días");
+            
+            if (fechasProgreso != null && !fechasProgreso.isEmpty()) {
+                // Usar datos reales de progreso_ejercicio
+                System.out.println("Usando datos de progreso_ejercicio: " + fechasProgreso);
+                for (int i = 0; i < fechasProgreso.size(); i++) {
+                    fechasGrafica.add(fechasProgreso.get(i));
+                    ejerciciosGrafica.add(ejerciciosProgreso.get(i).intValue());
+                }
+            } else {
+                // Fallback: contar rutinas completadas por día
+                System.out.println("Fallback: usando rutinas completadas");
+                for (int i = 0; i < 7; i++) {
+                    java.time.LocalDate fecha = hace7Dias.plusDays(i);
+                    String fechaStr = fecha.toString();
+                    
+                    // Contar rutinas completadas en esta fecha
+                    long rutinasEnFecha = rutinasAsignadas.stream()
+                        .filter(r -> r.getEstado() == RutinaAsignada.EstadoRutina.COMPLETADA)
+                        .filter(r -> r.getFechaCompletada() != null && r.getFechaCompletada().equals(fecha))
+                        .count();
+                    
+                    if (rutinasEnFecha > 0) {
+                        fechasGrafica.add(fechaStr);
+                        ejerciciosGrafica.add((int) rutinasEnFecha);
+                        System.out.println("  " + fechaStr + ": " + rutinasEnFecha + " rutinas");
+                    }
+                }
+            }
+            
+            System.out.println("Total días con datos: " + fechasGrafica.size());
+            System.out.println("Fechas: " + fechasGrafica);
+            System.out.println("Valores: " + ejerciciosGrafica);
+            System.out.println("======================\n");
 
-            // Racha actual
-            int rachaActual = rutinaService.calcularRachaActual(usuario.getId());
-
+            // Agregar atributos al modelo
             model.addAttribute("rutinasAsignadas", rutinasAsignadas);
-            model.addAttribute("progresoGeneral", progresoGeneral);
+            model.addAttribute("progresoGeneral", Math.round(progresoGeneral * 10.0) / 10.0);
             model.addAttribute("rutinasCompletadas", rutinasCompletadas);
             model.addAttribute("rutinasEnProgreso", rutinasEnProgreso);
             model.addAttribute("rutinasTotal", rutinasTotal);
-            model.addAttribute("progresoSemanal", progresoSemanal);
             model.addAttribute("diasActivosEsteMes", diasActivosEsteMes);
             model.addAttribute("rachaActual", rachaActual);
+            
+            // Pasar datos como arrays simples para JavaScript
+            model.addAttribute("fechasArray", fechasGrafica);
+            model.addAttribute("ejerciciosArray", ejerciciosGrafica);
             model.addAttribute("currentPage", "progreso");
 
             return "usuario/progreso";
         } catch (Exception e) {
             e.printStackTrace();
-            model.addAttribute("error", "Error al cargar progreso");
+            model.addAttribute("error", "Error al cargar progreso: " + e.getMessage());
             return "usuario/dashboard";
         }
     }
@@ -362,8 +419,46 @@ public class UsuarioController {
                 return "redirect:/login";
             }
 
+            // Obtener la rutina asignada
+            Optional<RutinaAsignada> rutinaOpt = rutinaService.obtenerRutinasAsignadas(usuario.getId())
+                .stream()
+                .filter(r -> r.getId().equals(rutinaAsignadaId))
+                .findFirst();
+            
+            if (rutinaOpt.isPresent()) {
+                RutinaAsignada rutinaAsignada = rutinaOpt.get();
+                
+                System.out.println("DEBUG - Completando rutina ID: " + rutinaAsignadaId);
+                System.out.println("DEBUG - Rutina: " + rutinaAsignada.getRutina().getNombre());
+                
+                // Registrar progreso de ejercicios automáticamente
+                if (rutinaAsignada.getRutina() != null && rutinaAsignada.getRutina().getEjercicios() != null) {
+                    int ejerciciosRegistrados = 0;
+                    for (com.example.flowfit.model.RutinaEjercicio ejercicioRutina : rutinaAsignada.getRutina().getEjercicios()) {
+                        try {
+                            progresoService.registrarProgreso(
+                                usuario,
+                                rutinaAsignadaId,
+                                ejercicioRutina.getEjercicioCatalogo().getId(),
+                                ejercicioRutina.getSeries() != null ? ejercicioRutina.getSeries() : 1,
+                                ejercicioRutina.getRepeticiones() != null ? ejercicioRutina.getRepeticiones() : 1,
+                                ejercicioRutina.getPesoKg(),
+                                "Completado automáticamente"
+                            );
+                            ejerciciosRegistrados++;
+                        } catch (Exception ex) {
+                            System.err.println("Error al registrar ejercicio: " + ex.getMessage());
+                            ex.printStackTrace();
+                        }
+                    }
+                    System.out.println("DEBUG - Ejercicios registrados: " + ejerciciosRegistrados);
+                }
+            }
+            
+            // Marcar rutina como completada
             rutinaService.marcarRutinaComoCompletada(rutinaAsignadaId);
-            redirectAttributes.addFlashAttribute("successMessage", "¡Rutina completada! ¡Felicitaciones!");
+            
+            redirectAttributes.addFlashAttribute("successMessage", "¡Rutina completada! ¡Felicitaciones! Tu progreso ha sido registrado.");
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al completar rutina: " + e.getMessage());

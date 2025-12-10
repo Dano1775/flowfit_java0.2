@@ -16,7 +16,6 @@ com\example\flowfit\model\Rutina.class
 com\example\flowfit\config\DataInitializer.class
 com\example\flowfit\model\EjercicioCatalogo.class
 com\example\flowfit\service\BoletinService$1.class
-com\example\flowfit\controller\UsuarioController.class
 com\example\flowfit\model\PagoContratacion$EstadoPago.class
 com\example\flowfit\controller\PasswordResetController.class
 com\example\flowfit\model\Conversacion.class
@@ -30,7 +29,6 @@ com\example\flowfit\service\RutinaService.class
 com\example\flowfit\controller\ChatController.class
 com\example\flowfit\controller\PagosController.class
 com\example\flowfit\service\UsuarioService.class
-com\example\flowfit\service\UsuarioGroupService.class
 com\example\flowfit\model\ContratacionEntrenador$PropuestaDe.class
 com\example\flowfit\controller\LoginController.class
 com\example\flowfit\dto\MensajeDTO.class
@@ -46,7 +44,6 @@ com\example\flowfit\repository\PlanEntrenadorRepository.class
 com\example\flowfit\repository\HistorialNegociacionRepository.class
 com\example\flowfit\service\BoletinService.class
 com\example\flowfit\controller\AdminEmailController.class
-com\example\flowfit\repository\UsuarioGroupRepository.class
 com\example\flowfit\repository\BoletinInformativoRepository.class
 com\example\flowfit\model\BoletinInformativo$TipoDestinatario.class
 com\example\flowfit\service\UsuarioService$1.class
@@ -76,11 +73,9 @@ com\example\flowfit\config\WebMvcConfig.class
 com\example\flowfit\model\RutinaAsignada$EstadoRutina.class
 com\example\flowfit\service\EmailService$3.class
 com\example\flowfit\controller\BoletinController.class
-com\example\flowfit\controller\UsuarioGroupController.class
 com\example\flowfit\dto\EjercicioRutinaDto.class
 com\example\flowfit\controller\NegociacionController.class
 com\example\flowfit\model\ContratacionEntrenador$TipoContratacion.class
-com\example\flowfit\dto\RutinaAsignadaDto.class
 com\example\flowfit\repository\HistorialEdicionesRepository.class
 com\example\flowfit\config\WebConfig.class
 com\example\flowfit\service\EmailService.class
@@ -95,7 +90,6 @@ com\example\flowfit\model\BoletinInformativo.class
 com\example\flowfit\service\EmailMasivoService.class
 com\example\flowfit\service\ExcelExportService.class
 com\example\flowfit\config\SecurityConfig.class
-com\example\flowfit\dto\RutinaDetalleDto.class
 com\example\flowfit\repository\PagoContratacionRepository.class
 com\example\flowfit\service\MercadoPagoService.class
 com\example\flowfit\service\UsuarioService$LoginResult.class

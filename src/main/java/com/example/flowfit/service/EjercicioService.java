@@ -80,11 +80,11 @@ public class EjercicioService {
     }
 
     public EjercicioCatalogo obtenerEjercicioPorId(Integer id) {
-        return ejercicioRepository.findById(id.longValue())
+        return ejercicioRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
     }
     
-    public Optional<EjercicioCatalogo> findById(Long id) {
+    public Optional<EjercicioCatalogo> findById(Integer id) {
         return ejercicioRepository.findById(id);
     }
 
@@ -106,7 +106,7 @@ public class EjercicioService {
         return ejercicioRepository.save(ejercicio);
     }
     
-    public void updateExercise(Long id, String nombre, String descripcion, String tipo, MultipartFile imagen) throws IOException {
+    public void updateExercise(Integer id, String nombre, String descripcion, String tipo, MultipartFile imagen) throws IOException {
         EjercicioCatalogo ejercicio = ejercicioRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
         
@@ -130,10 +130,10 @@ public class EjercicioService {
         if (ejercicio.getImagen() != null) {
             deleteImage(ejercicio.getImagen(), false);
         }
-        ejercicioRepository.deleteById(id.longValue());
+        ejercicioRepository.deleteById(id);
     }
     
-    public void deleteExercise(Long id) {
+    public void deleteExercise(Integer id) {
         EjercicioCatalogo ejercicio = ejercicioRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
         

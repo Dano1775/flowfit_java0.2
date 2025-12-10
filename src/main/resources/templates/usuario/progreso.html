@@ -2,16 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <                </div>
-              </div>
-              <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(251, 191, 36, 0.15); display: flex; align-items: center; justify-content: center;">
-                <i class="bi bi-trophy-fill" style="font-size: 1.75rem; color: #fbbf24;"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Rutinas Completadas -->"viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Progreso - FlowFit</title>
 
     <!-- Bootstrap -->
@@ -146,6 +137,10 @@
             </div>
             <div class="chart-container" style="position: relative; height: 300px;">
               <canvas id="progresoChart"></canvas>
+              <div id="noDataMessage" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #94a3b8;">
+                <i class="bi bi-graph-up" style="font-size: 3rem; opacity: 0.3;"></i>
+                <p class="mt-3 mb-0" style="font-size: 0.9rem;">Completa rutinas para ver tu progreso aquí</p>
+              </div>
             </div>
           </div>
         </div>
@@ -314,52 +309,44 @@
       document.getElementById('main-content').classList.toggle('expanded');
     });
 
-    // Datos reales desde Thymeleaf
-    const progresoGeneralData = /*[[${progresoGeneral}]]*/ 0;
-    const rutinasCompletadasData = /*[[${rutinasCompletadas}]]*/ 0;
-    const rutinasEnProgresoData = /*[[${rutinasEnProgreso}]]*/ 0;
-    const diasActivosData = /*[[${diasActivosEsteMes}]]*/ 0;
-    const rachaActualData = /*[[${rachaActual}]]*/ 0;
-    const progresoSemanalData = /*[[${progresoSemanal}]]*/ [];
+    // Datos desde el backend
+    const fechasBackend = /*[[${fechasArray}]]*/ [];
+    const ejerciciosBackend = /*[[${ejerciciosArray}]]*/ [];
+
+    console.log('=== DATOS RECIBIDOS EN JS ===');
+    console.log('Fechas:', fechasBackend);
+    console.log('Ejercicios:', ejerciciosBackend);
+    console.log('Longitud:', fechasBackend.length);
+    
+    // Formatear fechas para el gráfico
+    const labels = fechasBackend.map(fechaStr => {
+      const fecha = new Date(fechaStr + 'T00:00:00');
+      const opciones = { weekday: 'short', day: 'numeric', month: 'short' };
+      return fecha.toLocaleDateString('es-ES', opciones);
+    });
+    
+    const data = ejerciciosBackend;
+
+    console.log('Labels para gráfico:', labels);
+    console.log('Data para gráfico:', data);
+    console.log('=============================\n');
 
     // Gráfico de Progreso Semanal
     const ctx = document.getElementById('progresoChart').getContext('2d');
     
-    // Generar datos de progreso basados en datos reales o simulados
-    const generateWeeklyData = () => {
-      if (progresoSemanalData && progresoSemanalData.length > 0) {
-        // Usar datos reales si están disponibles
-        return progresoSemanalData.map(item => item[1] || 0);
-      } else {
-        // Generar datos simulados basados en el progreso real del usuario
-        const baseProgress = progresoGeneralData;
-        const variation = 10; // Variación máxima
-        return Array.from({length: 7}, (_, i) => {
-          const randomVariation = (Math.random() - 0.5) * variation;
-          return Math.max(0, Math.min(100, baseProgress + randomVariation));
-        });
-      }
-    };
-
-    // Generar etiquetas para el gráfico
-    const generateWeeklyLabels = () => {
-      if (progresoSemanalData && progresoSemanalData.length > 0) {
-        return progresoSemanalData.map(item => {
-          const fecha = new Date(item[0]);
-          return fecha.toLocaleDateString('es-ES', { weekday: 'short' });
-        });
-      } else {
-        return ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-      }
-    };
+    // Mostrar mensaje si no hay datos
+    if (data.length === 0) {
+      document.getElementById('noDataMessage').style.display = 'block';
+      document.getElementById('progresoChart').style.opacity = '0.3';
+    }
 
     const progresoChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: generateWeeklyLabels(),
+        labels: labels.length > 0 ? labels : ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
         datasets: [{
-          label: 'Progreso %',
-          data: generateWeeklyData(),
+          label: 'Ejercicios completados',
+          data: data,
           borderColor: '#28a745',
           backgroundColor: 'rgba(40, 167, 69, 0.1)',
           borderWidth: 3,
@@ -382,14 +369,14 @@
         scales: {
           y: {
             beginAtZero: true,
-            max: 100,
             grid: {
               color: 'rgba(255, 255, 255, 0.1)'
             },
             ticks: {
               color: 'rgba(255, 255, 255, 0.7)',
+              stepSize: 1,
               callback: function(value) {
-                return value + '%';
+                return Math.floor(value); // Mostrar solo números enteros
               }
             }
           },

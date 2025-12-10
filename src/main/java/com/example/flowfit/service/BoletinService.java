@@ -107,7 +107,9 @@ public class BoletinService {
     }
     
     /**
-     * Envía un boletín de forma asíncrona
+     * Envía un boletín de forma asíncrona usando BCC (CCO)
+     * OPTIMIZACIÓN: En lugar de enviar correos uno por uno en un bucle for,
+     * envía un solo correo con todos los destinatarios en BCC (copia oculta)
      */
     @Async
     @Transactional
@@ -126,67 +128,50 @@ public class BoletinService {
         boletin.setTotalDestinatarios(destinatarios.size());
         boletinRepository.save(boletin);
         
-        // Detectar si el contenido tiene variables para optimizar el envío
-        boolean tieneVariables = boletin.getContenido().contains("{{");
-        boolean esContenidoEstatico = !tieneVariables;
-        
-        // Configurar delay según tipo de contenido
-        int delayMs = esContenidoEstatico ? 100 : 500; // Templates estáticos: 100ms, Personalizados: 500ms
-        
         System.out.println("👥 Total de destinatarios: " + destinatarios.size());
         System.out.println("📝 Tipo: " + boletin.getTipoDestinatario().getDescripcion());
-        System.out.println("⚡ Modo: " + (esContenidoEstatico ? "ESTÁTICO (optimizado)" : "PERSONALIZADO (con variables)"));
-        System.out.println("⏱️ Delay entre envíos: " + delayMs + "ms");
+        System.out.println("⚡ Modo: ENVÍO MASIVO CON BCC (optimizado - sin bucle for)");
+        
+        // Verificar si hay variables personalizadas en el contenido
+        boolean tieneVariables = boletin.getContenido().contains("{{");
         
         int exitosos = 0;
         int fallidos = 0;
         
-        // Para contenido estático, preparar el HTML una sola vez
-        String contenidoFinal = boletin.getContenido();
-        
-        // Enviar correo a cada destinatario
-        for (Usuario usuario : destinatarios) {
+        if (tieneVariables) {
+            // Si tiene variables, enviar de forma personalizada (un email por usuario)
+            System.out.println("⚠️ Contenido con variables detectado. Enviando individualmente...");
+            exitosos = enviarBoletinPersonalizado(boletin, destinatarios);
+            fallidos = destinatarios.size() - exitosos;
+        } else {
+            // Contenido estático: ENVÍO MASIVO CON BCC
+            System.out.println("✅ Contenido estático. Usando envío masivo con BCC...");
+            
+            // Extraer todos los correos
+            String[] emailsArray = destinatarios.stream()
+                .map(Usuario::getCorreo)
+                .filter(email -> email != null && !email.isEmpty())
+                .toArray(String[]::new);
+            
             try {
-                // Si tiene variables, reemplazar por cada usuario
-                if (tieneVariables) {
-                    String perfilStr = (usuario.getPerfilUsuario() != null) ? usuario.getPerfilUsuario().name() : "";
-                    contenidoFinal = boletin.getContenido()
-                        .replace("{{nombre}}", usuario.getNombre() != null ? usuario.getNombre() : "")
-                        .replace("{{correo}}", usuario.getCorreo() != null ? usuario.getCorreo() : "")
-                        .replace("{{perfil}}", perfilStr);
-                }
-                // Si es estático, usar el contenido original sin modificaciones
-                
-                boolean enviado = emailService.enviarCorreoBoletin(
-                    usuario.getCorreo(),
-                    usuario.getNombre(),
+                // ENVÍO MASIVO EN UNA SOLA OPERACIÓN CON BCC
+                boolean enviado = emailService.enviarCorreoMasivoBCC(
                     boletin.getAsunto(),
-                    contenidoFinal
+                    boletin.getContenido(),
+                    emailsArray
                 );
                 
                 if (enviado) {
-                    exitosos++;
-                    if (exitosos % 50 == 0) { // Log cada 50 envíos para no saturar consola
-                        System.out.println("✅ Progreso: " + exitosos + "/" + destinatarios.size() + " enviados");
-                    }
+                    exitosos = emailsArray.length;
+                    System.out.println("✅ Email masivo enviado exitosamente a " + exitosos + " destinatarios");
                 } else {
-                    fallidos++;
-                    System.out.println("❌ Error al enviar a: " + usuario.getNombre());
+                    fallidos = emailsArray.length;
+                    System.out.println("❌ Error en envío masivo");
                 }
                 
-                // Pausa optimizada: más corta para contenido estático
-                Thread.sleep(delayMs);
-                
             } catch (Exception e) {
-                fallidos++;
-                System.out.println("❌ Excepción al enviar a " + usuario.getNombre() + ": " + e.getMessage());
-            }
-            
-            // Actualizar progreso cada 10 envíos
-            if ((exitosos + fallidos) % 10 == 0) {
-                boletin.setEnviadosExitosos(exitosos);
-                boletin.setEnviadosFallidos(fallidos);
-                boletinRepository.save(boletin);
+                fallidos = emailsArray.length;
+                System.err.println("❌ Excepción en envío masivo: " + e.getMessage());
             }
         }
         
@@ -207,7 +192,43 @@ public class BoletinService {
         
         System.out.println("\n✅ ENVÍO MASIVO COMPLETADO");
         System.out.println("📊 Exitosos: " + exitosos + " | Fallidos: " + fallidos);
-        System.out.println("⏱️ Tiempo aproximado: " + ((exitosos + fallidos) * delayMs / 1000) + " segundos");
+    }
+    
+    /**
+     * Envía boletín personalizado (con variables) de forma individual
+     * Solo se usa cuando el contenido tiene variables como {{nombre}}
+     */
+    private int enviarBoletinPersonalizado(BoletinInformativo boletin, List<Usuario> destinatarios) {
+        int exitosos = 0;
+        
+        for (Usuario usuario : destinatarios) {
+            try {
+                String perfilStr = (usuario.getPerfilUsuario() != null) ? usuario.getPerfilUsuario().name() : "";
+                String contenidoPersonalizado = boletin.getContenido()
+                    .replace("{{nombre}}", usuario.getNombre() != null ? usuario.getNombre() : "")
+                    .replace("{{correo}}", usuario.getCorreo() != null ? usuario.getCorreo() : "")
+                    .replace("{{perfil}}", perfilStr);
+                
+                boolean enviado = emailService.enviarCorreoBoletin(
+                    usuario.getCorreo(),
+                    usuario.getNombre(),
+                    boletin.getAsunto(),
+                    contenidoPersonalizado
+                );
+                
+                if (enviado) {
+                    exitosos++;
+                }
+                
+                // Pausa para evitar ser bloqueado por el servidor SMTP
+                Thread.sleep(200);
+                
+            } catch (Exception e) {
+                System.err.println("❌ Error al enviar a " + usuario.getNombre());
+            }
+        }
+        
+        return exitosos;
     }
     
     /**
