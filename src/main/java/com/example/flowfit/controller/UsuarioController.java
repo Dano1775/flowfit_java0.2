@@ -253,50 +253,58 @@ public class UsuarioController {
             java.time.LocalDate hoy = java.time.LocalDate.now();
             java.time.LocalDate hace7Dias = hoy.minusDays(6); // Incluye hoy
             
-            // Generar array de los últimos 7 días
+            // Generar arrays para todos los días (inicializar con 0)
             List<String> fechasGrafica = new java.util.ArrayList<>();
             List<Integer> ejerciciosGrafica = new java.util.ArrayList<>();
             
-            // Primero intentar obtener datos reales de progreso_ejercicio
+            // Crear mapa de fechas con 0 por defecto
+            Map<String, Integer> ejerciciosPorFecha = new java.util.LinkedHashMap<>();
+            for (int i = 0; i < 7; i++) {
+                java.time.LocalDate fecha = hace7Dias.plusDays(i);
+                String fechaStr = fecha.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM"));
+                ejerciciosPorFecha.put(fechaStr, 0);
+            }
+            
+            // Intentar obtener datos reales de progreso_ejercicio
             Map<String, Object> datosProgreso = progresoService.getDatosGraficas(usuario, 7);
             List<String> fechasProgreso = (List<String>) datosProgreso.get("fechas");
             List<Long> ejerciciosProgreso = (List<Long>) datosProgreso.get("ejerciciosPorDia");
             
             System.out.println("=== DEBUG PROGRESO ===");
-            System.out.println("Usuario: " + usuario.getEmail());
-            System.out.println("Datos progreso_ejercicio: " + (fechasProgreso != null ? fechasProgreso.size() : "null") + " días");
+            System.out.println("Usuario: " + usuario.getEmail() + " (ID: " + usuario.getId() + ")");
+            System.out.println("Datos progreso_ejercicio encontrados: " + (fechasProgreso != null ? fechasProgreso.size() : 0) + " días");
             
             if (fechasProgreso != null && !fechasProgreso.isEmpty()) {
-                // Usar datos reales de progreso_ejercicio
-                System.out.println("Usando datos de progreso_ejercicio: " + fechasProgreso);
+                // Poblar con datos reales
                 for (int i = 0; i < fechasProgreso.size(); i++) {
-                    fechasGrafica.add(fechasProgreso.get(i));
-                    ejerciciosGrafica.add(ejerciciosProgreso.get(i).intValue());
-                }
-            } else {
-                // Fallback: contar rutinas completadas por día
-                System.out.println("Fallback: usando rutinas completadas");
-                for (int i = 0; i < 7; i++) {
-                    java.time.LocalDate fecha = hace7Dias.plusDays(i);
-                    String fechaStr = fecha.toString();
+                    String fechaDB = fechasProgreso.get(i);
+                    int ejercicios = ejerciciosProgreso.get(i).intValue();
                     
-                    // Contar rutinas completadas en esta fecha
-                    long rutinasEnFecha = rutinasAsignadas.stream()
-                        .filter(r -> r.getEstado() == RutinaAsignada.EstadoRutina.COMPLETADA)
-                        .filter(r -> r.getFechaCompletada() != null && r.getFechaCompletada().equals(fecha))
-                        .count();
-                    
-                    if (rutinasEnFecha > 0) {
-                        fechasGrafica.add(fechaStr);
-                        ejerciciosGrafica.add((int) rutinasEnFecha);
-                        System.out.println("  " + fechaStr + ": " + rutinasEnFecha + " rutinas");
+                    // Convertir fecha de YYYY-MM-DD a DD/MM para matching
+                    try {
+                        java.time.LocalDate fechaParsed = java.time.LocalDate.parse(fechaDB);
+                        String fechaFormateada = fechaParsed.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM"));
+                        
+                        if (ejerciciosPorFecha.containsKey(fechaFormateada)) {
+                            ejerciciosPorFecha.put(fechaFormateada, ejercicios);
+                            System.out.println("  " + fechaFormateada + ": " + ejercicios + " ejercicios");
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error parseando fecha: " + fechaDB);
                     }
                 }
+            } else {
+                System.out.println("Sin datos de progreso_ejercicio - mostrando gráfica vacía");
             }
             
-            System.out.println("Total días con datos: " + fechasGrafica.size());
-            System.out.println("Fechas: " + fechasGrafica);
-            System.out.println("Valores: " + ejerciciosGrafica);
+            // Convertir mapa a listas
+            for (Map.Entry<String, Integer> entry : ejerciciosPorFecha.entrySet()) {
+                fechasGrafica.add(entry.getKey());
+                ejerciciosGrafica.add(entry.getValue());
+            }
+            
+            System.out.println("Fechas finales: " + fechasGrafica);
+            System.out.println("Valores finales: " + ejerciciosGrafica);
             System.out.println("======================\n");
 
             // Agregar atributos al modelo
