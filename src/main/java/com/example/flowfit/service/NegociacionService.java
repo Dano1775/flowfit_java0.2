@@ -89,10 +89,11 @@ public class NegociacionService {
 
             historialRepo.save(historial);
 
-            // Crear preferencia de pago MercadoPago
-            String linkPago = mercadoPagoService.crearPreferenciaPago(
-                    contratacion.getId(), propuesta.getPrecio(), "Plan personalizado FlowFit",
-                    "Propuesta de plan enviada por entrenador");
+            // COMENTADO - Ya no usamos SDK, ahora Bricks maneja el pago en el frontend
+            // String linkPago = mercadoPagoService.crearPreferenciaPago(
+            // contratacion.getId(), propuesta.getPrecio(), "Plan personalizado FlowFit",
+            // "Propuesta de plan enviada por entrenador");
+            String linkPago = "#pagar"; // Link temporal, el pago se hace con Bricks
 
             // Crear mensaje especial en el chat
             Mensaje mensaje = new Mensaje();
@@ -250,10 +251,29 @@ public class NegociacionService {
             historialRepo.save(ultimaPropuesta);
         }
 
+        // Obtener precio de la última propuesta o de la contratación
+        BigDecimal precioFinal = contratacion.getPrecioAcordado();
+        if (precioFinal == null && ultimaPropuesta != null) {
+            precioFinal = ultimaPropuesta.getPrecioPropuesto();
+        }
+
+        // Asegurar monto mínimo (MercadoPago requiere mínimo 3,000 COP)
+        if (precioFinal == null || precioFinal.compareTo(BigDecimal.valueOf(3000)) < 0) {
+            System.out.println("⚠️ Precio menor al mínimo. Ajustando a 3,000 COP");
+            precioFinal = BigDecimal.valueOf(3000);
+        }
+
+        System.out.println("💰 Precio final calculado: " + precioFinal);
+
         response.put("success", true);
         response.put("message", "Propuesta aceptada. Redirigiendo al pago...");
         response.put("contratacionId", contratacion.getId());
         response.put("requierePago", true);
+        response.put("precioFinal", precioFinal.doubleValue());
+        response.put("duracionDias", contratacion.getDuracionDiasAcordada());
+        response.put("nombrePlan", ultimaPropuesta != null && ultimaPropuesta.getServiciosPropuestos() != null
+                ? "Plan Personalizado"
+                : "Plan de Entrenamiento");
 
         return response;
     }
@@ -276,6 +296,20 @@ public class NegociacionService {
             historialRepo.save(ultimaPropuesta);
         }
 
+        // Obtener precio de la última propuesta o de la contratación
+        BigDecimal precioFinal = contratacion.getPrecioAcordado();
+        if (precioFinal == null && ultimaPropuesta != null) {
+            precioFinal = ultimaPropuesta.getPrecioPropuesto();
+        }
+
+        // Asegurar monto mínimo
+        if (precioFinal == null || precioFinal.compareTo(BigDecimal.valueOf(3000)) < 0) {
+            System.out.println("⚠️ Precio menor al mínimo. Ajustando a 3,000 COP");
+            precioFinal = BigDecimal.valueOf(3000);
+        }
+
+        System.out.println("💰 Precio final calculado (entrenador): " + precioFinal);
+
         // Notificar al usuario vía WebSocket que su contraoferta fue aceptada
         try {
             Conversacion conversacion = conversacionRepo
@@ -286,7 +320,7 @@ public class NegociacionService {
             notificacion.put("tipo", "PROPUESTA_ACEPTADA");
             notificacion.put("contratacionId", contratacion.getId());
             notificacion.put("mensaje", "El entrenador aceptó tu contraoferta. Procede al pago.");
-            notificacion.put("precioFinal", contratacion.getPrecioAcordado());
+            notificacion.put("precioFinal", precioFinal.doubleValue());
 
             messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(), notificacion);
         } catch (Exception e) {
@@ -296,6 +330,7 @@ public class NegociacionService {
         response.put("success", true);
         response.put("message", "Contraoferta aceptada. El usuario puede proceder al pago.");
         response.put("contratacionId", contratacion.getId());
+        response.put("precioFinal", precioFinal.doubleValue());
 
         return response;
     }
@@ -629,12 +664,13 @@ public class NegociacionService {
             throw new RuntimeException("No se encontró historial de negociación");
         }
 
-        // Crear preferencia de pago
-        String linkPago = mercadoPagoService.crearPreferenciaPago(
-                contratacion.getId(),
-                historial.getPrecioPropuesto(),
-                "Plan de Entrenamiento - " + historial.getDuracionPropuesta() + " días",
-                contratacion.getUsuarioId().toString());
+        // COMENTADO - Ya no usamos SDK, ahora Bricks maneja el pago
+        // String linkPago = mercadoPagoService.crearPreferenciaPago(
+        // contratacion.getId(),
+        // historial.getPrecioPropuesto(),
+        // "Plan de Entrenamiento - " + historial.getDuracionPropuesta() + " días",
+        // contratacion.getUsuarioId().toString());
+        String linkPago = "#pagar"; // El pago se hace con Bricks en el frontend
 
         return linkPago;
     }

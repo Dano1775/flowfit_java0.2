@@ -2,6 +2,7 @@ package com.example.flowfit.controller;
 
 import com.example.flowfit.model.*;
 import com.example.flowfit.repository.ContratacionEntrenadorRepository;
+import com.example.flowfit.repository.PagoContratacionRepository;
 import com.example.flowfit.service.*;
 import com.example.flowfit.dto.MensajeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,9 @@ public class ChatController {
 
     @Autowired
     private ContratacionEntrenadorRepository contratacionRepo;
+
+    @Autowired
+    private PagoContratacionRepository pagoContratacionRepository;
 
     @Autowired
     private FileUploadService fileUploadService;

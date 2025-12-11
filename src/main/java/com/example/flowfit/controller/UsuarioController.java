@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
@@ -48,6 +50,9 @@ public class UsuarioController {
 
     @Autowired
     private com.example.flowfit.service.ProgresoService progresoService;
+
+    @Autowired
+    private com.example.flowfit.service.PdfService pdfService;
 
     /**
      * Dashboard principal del usuario
@@ -215,14 +220,14 @@ public class UsuarioController {
         try {
             // Obtener usuario de la sesión
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            
+
             // Validar que haya usuario en sesión y no sea administrador
             if (usuario == null) {
                 return "redirect:/login";
             }
-            
-            if (usuario.getPerfilUsuario() != null && 
-                "Administrador".equals(usuario.getPerfilUsuario().name())) {
+
+            if (usuario.getPerfilUsuario() != null &&
+                    "Administrador".equals(usuario.getPerfilUsuario().name())) {
                 return "redirect:/admin/dashboard";
             }
 
@@ -230,7 +235,7 @@ public class UsuarioController {
 
             // Cargar estadísticas de rutinas asignadas
             List<RutinaAsignada> rutinasAsignadas = rutinaService.obtenerRutinasAsignadas(usuario.getId());
-            
+
             // Estadísticas de rutinas
             long rutinasCompletadas = rutinasAsignadas.stream()
                     .filter(r -> r.getEstado() == RutinaAsignada.EstadoRutina.COMPLETADA)
@@ -239,73 +244,72 @@ public class UsuarioController {
                     .filter(r -> r.getEstado() == RutinaAsignada.EstadoRutina.ACTIVA)
                     .count();
             long rutinasTotal = rutinasAsignadas.size();
-            
+
             // Calcular progreso general (porcentaje de rutinas completadas)
-            double progresoGeneral = rutinasTotal > 0 ? 
-                ((double) rutinasCompletadas / rutinasTotal) * 100 : 0.0;
+            double progresoGeneral = rutinasTotal > 0 ? ((double) rutinasCompletadas / rutinasTotal) * 100 : 0.0;
 
             // Obtener estadísticas reales del ProgresoService
             Map<String, Object> estadisticas = progresoService.getEstadisticasGenerales(usuario);
             int rachaActual = (Integer) estadisticas.getOrDefault("rachaActual", 0);
-            int diasActivosEsteMes = ((Long) estadisticas.getOrDefault("diasEntrenadosUltimaSemana", 0L)).intValue();
+            // Calcular días activos del mes (no de la semana)
+            java.time.LocalDate inicioMes = java.time.LocalDate.now().withDayOfMonth(1);
+            int diasActivosEsteMes = progresoService.contarDiasEntrenadosEntre(usuario, inicioMes,
+                    java.time.LocalDate.now());
 
-            // DATOS PARA GRÁFICA: Últimos 7 días de progreso
+            // DATOS PARA GRÁFICA: Últimos 7 días de rutinas completadas
             java.time.LocalDate hoy = java.time.LocalDate.now();
             java.time.LocalDate hace7Dias = hoy.minusDays(6); // Incluye hoy
-            
-            // Generar arrays para todos los días (inicializar con 0)
-            List<String> fechasGrafica = new java.util.ArrayList<>();
-            List<Integer> ejerciciosGrafica = new java.util.ArrayList<>();
-            
-            // Crear mapa de fechas con 0 por defecto
-            Map<String, Integer> ejerciciosPorFecha = new java.util.LinkedHashMap<>();
+
+            // Crear mapa de fechas con 0 por defecto (últimos 7 días)
+            Map<java.time.LocalDate, Integer> rutinasPorFecha = new java.util.LinkedHashMap<>();
             for (int i = 0; i < 7; i++) {
                 java.time.LocalDate fecha = hace7Dias.plusDays(i);
-                String fechaStr = fecha.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM"));
-                ejerciciosPorFecha.put(fechaStr, 0);
+                rutinasPorFecha.put(fecha, 0);
             }
-            
-            // Intentar obtener datos reales de progreso_ejercicio
-            Map<String, Object> datosProgreso = progresoService.getDatosGraficas(usuario, 7);
-            List<String> fechasProgreso = (List<String>) datosProgreso.get("fechas");
-            List<Long> ejerciciosProgreso = (List<Long>) datosProgreso.get("ejerciciosPorDia");
-            
-            System.out.println("=== DEBUG PROGRESO ===");
-            System.out.println("Usuario: " + usuario.getEmail() + " (ID: " + usuario.getId() + ")");
-            System.out.println("Datos progreso_ejercicio encontrados: " + (fechasProgreso != null ? fechasProgreso.size() : 0) + " días");
-            
-            if (fechasProgreso != null && !fechasProgreso.isEmpty()) {
-                // Poblar con datos reales
-                for (int i = 0; i < fechasProgreso.size(); i++) {
-                    String fechaDB = fechasProgreso.get(i);
-                    int ejercicios = ejerciciosProgreso.get(i).intValue();
-                    
-                    // Convertir fecha de YYYY-MM-DD a DD/MM para matching
-                    try {
-                        java.time.LocalDate fechaParsed = java.time.LocalDate.parse(fechaDB);
-                        String fechaFormateada = fechaParsed.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM"));
-                        
-                        if (ejerciciosPorFecha.containsKey(fechaFormateada)) {
-                            ejerciciosPorFecha.put(fechaFormateada, ejercicios);
-                            System.out.println("  " + fechaFormateada + ": " + ejercicios + " ejercicios");
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Error parseando fecha: " + fechaDB);
+
+            System.out.println("=== DEBUG PROGRESO SEMANAL (RUTINAS COMPLETADAS) ===");
+            System.out.println("Usuario: " + usuario.getCorreo() + " (ID: " + usuario.getId() + ")");
+            System.out.println("Rango: " + hace7Dias + " a " + hoy);
+
+            // Obtener rutinas completadas por fecha desde rutina_asignada
+            List<Object[]> rutinasCompletadasPorFecha = rutinaService.obtenerRutinasCompletadasPorFecha(
+                    usuario.getId(), hace7Dias);
+
+            System.out.println(
+                    "Rutinas completadas encontradas: " + rutinasCompletadasPorFecha.size() + " días con actividad");
+
+            // Poblar con datos reales
+            for (Object[] row : rutinasCompletadasPorFecha) {
+                try {
+                    java.sql.Date sqlDate = (java.sql.Date) row[0];
+                    java.time.LocalDate fecha = sqlDate.toLocalDate();
+                    int cantidad = ((Number) row[1]).intValue();
+
+                    if (rutinasPorFecha.containsKey(fecha)) {
+                        rutinasPorFecha.put(fecha, cantidad);
+                        System.out.println("  ✓ " + fecha + ": " + cantidad + " rutina(s) completada(s)");
                     }
+                } catch (Exception e) {
+                    System.out.println("  ✗ Error procesando fecha: " + e.getMessage());
                 }
-            } else {
-                System.out.println("Sin datos de progreso_ejercicio - mostrando gráfica vacía");
             }
-            
-            // Convertir mapa a listas
-            for (Map.Entry<String, Integer> entry : ejerciciosPorFecha.entrySet()) {
-                fechasGrafica.add(entry.getKey());
-                ejerciciosGrafica.add(entry.getValue());
+
+            // Convertir mapa a listas para el frontend
+            List<String> fechasGrafica = new java.util.ArrayList<>();
+            List<Integer> rutinasGrafica = new java.util.ArrayList<>();
+
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM");
+            for (Map.Entry<java.time.LocalDate, Integer> entry : rutinasPorFecha.entrySet()) {
+                fechasGrafica.add(entry.getKey().format(formatter));
+                rutinasGrafica.add(entry.getValue());
             }
-            
-            System.out.println("Fechas finales: " + fechasGrafica);
-            System.out.println("Valores finales: " + ejerciciosGrafica);
-            System.out.println("======================\n");
+
+            System.out.println("Datos finales para gráfica:");
+            System.out.println("  Fechas: " + fechasGrafica);
+            System.out.println("  Rutinas completadas: " + rutinasGrafica);
+            System.out.println("  Total días con rutinas: "
+                    + rutinasGrafica.stream().filter(v -> v > 0).count());
+            System.out.println("====================================================\n");
 
             // Agregar atributos al modelo
             model.addAttribute("rutinasAsignadas", rutinasAsignadas);
@@ -315,10 +319,10 @@ public class UsuarioController {
             model.addAttribute("rutinasTotal", rutinasTotal);
             model.addAttribute("diasActivosEsteMes", diasActivosEsteMes);
             model.addAttribute("rachaActual", rachaActual);
-            
+
             // Pasar datos como arrays simples para JavaScript
             model.addAttribute("fechasArray", fechasGrafica);
-            model.addAttribute("ejerciciosArray", ejerciciosGrafica);
+            model.addAttribute("ejerciciosArray", rutinasGrafica); // Ahora son rutinas, no ejercicios
             model.addAttribute("currentPage", "progreso");
 
             return "usuario/progreso";
@@ -326,6 +330,47 @@ public class UsuarioController {
             e.printStackTrace();
             model.addAttribute("error", "Error al cargar progreso: " + e.getMessage());
             return "usuario/dashboard";
+        }
+    }
+
+    /**
+     * Descarga el reporte de progreso en formato PDF
+     * Genera un documento con estadísticas, rutinas completadas y activas
+     */
+    @GetMapping("/progreso/descargar-pdf")
+    public ResponseEntity<byte[]> descargarProgresoPdf(HttpSession session) {
+        try {
+            // Validar usuario en sesión
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            if (usuario == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            if (usuario.getPerfilUsuario() != null &&
+                    "Administrador".equals(usuario.getPerfilUsuario().name())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            // Generar PDF
+            byte[] pdfBytes = pdfService.generarReporteProgreso(usuario);
+
+            // Configurar headers para descarga
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+
+            // Nombre del archivo con fecha y nombre del usuario
+            String filename = String.format("FlowFit_Progreso_%s_%s.pdf",
+                    usuario.getNombre().replaceAll("\\s+", "_"),
+                    java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy")));
+
+            headers.setContentDispositionFormData("attachment", filename);
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -370,24 +415,25 @@ public class UsuarioController {
      * NOTA: Esta funcionalidad ahora está en MapaController
      */
     /*
-    @GetMapping("/mapa")
-    public String mapa(Model model, HttpSession session) {
-        try {
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
-            if (usuario == null || usuario.getPerfilUsuario().toString().equals("Administrador")) {
-                return "redirect:/login";
-            }
-
-            usuario = usuarioService.findById(usuario.getId()).orElse(usuario);
-            model.addAttribute("usuario", usuario);
-            return "usuario/mapa";
-        } catch (Exception e) {
-            e.printStackTrace();
-            model.addAttribute("error", "Error al cargar el mapa");
-            return "usuario/dashboard";
-        }
-    }
-    */
+     * @GetMapping("/mapa")
+     * public String mapa(Model model, HttpSession session) {
+     * try {
+     * Usuario usuario = (Usuario) session.getAttribute("usuario");
+     * if (usuario == null ||
+     * usuario.getPerfilUsuario().toString().equals("Administrador")) {
+     * return "redirect:/login";
+     * }
+     * 
+     * usuario = usuarioService.findById(usuario.getId()).orElse(usuario);
+     * model.addAttribute("usuario", usuario);
+     * return "usuario/mapa";
+     * } catch (Exception e) {
+     * e.printStackTrace();
+     * model.addAttribute("error", "Error al cargar el mapa");
+     * return "usuario/dashboard";
+     * }
+     * }
+     */
 
     // ===== ENDPOINTS PARA ACCIONES DE RUTINAS =====
 
@@ -429,30 +475,30 @@ public class UsuarioController {
 
             // Obtener la rutina asignada
             Optional<RutinaAsignada> rutinaOpt = rutinaService.obtenerRutinasAsignadas(usuario.getId())
-                .stream()
-                .filter(r -> r.getId().equals(rutinaAsignadaId))
-                .findFirst();
-            
+                    .stream()
+                    .filter(r -> r.getId().equals(rutinaAsignadaId))
+                    .findFirst();
+
             if (rutinaOpt.isPresent()) {
                 RutinaAsignada rutinaAsignada = rutinaOpt.get();
-                
+
                 System.out.println("DEBUG - Completando rutina ID: " + rutinaAsignadaId);
                 System.out.println("DEBUG - Rutina: " + rutinaAsignada.getRutina().getNombre());
-                
+
                 // Registrar progreso de ejercicios automáticamente
                 if (rutinaAsignada.getRutina() != null && rutinaAsignada.getRutina().getEjercicios() != null) {
                     int ejerciciosRegistrados = 0;
-                    for (com.example.flowfit.model.RutinaEjercicio ejercicioRutina : rutinaAsignada.getRutina().getEjercicios()) {
+                    for (com.example.flowfit.model.RutinaEjercicio ejercicioRutina : rutinaAsignada.getRutina()
+                            .getEjercicios()) {
                         try {
                             progresoService.registrarProgreso(
-                                usuario,
-                                rutinaAsignadaId,
-                                ejercicioRutina.getEjercicioCatalogo().getId(),
-                                ejercicioRutina.getSeries() != null ? ejercicioRutina.getSeries() : 1,
-                                ejercicioRutina.getRepeticiones() != null ? ejercicioRutina.getRepeticiones() : 1,
-                                ejercicioRutina.getPesoKg(),
-                                "Completado automáticamente"
-                            );
+                                    usuario,
+                                    rutinaAsignadaId,
+                                    ejercicioRutina.getEjercicioCatalogo().getId(),
+                                    ejercicioRutina.getSeries() != null ? ejercicioRutina.getSeries() : 1,
+                                    ejercicioRutina.getRepeticiones() != null ? ejercicioRutina.getRepeticiones() : 1,
+                                    ejercicioRutina.getPesoKg(),
+                                    "Completado automáticamente");
                             ejerciciosRegistrados++;
                         } catch (Exception ex) {
                             System.err.println("Error al registrar ejercicio: " + ex.getMessage());
@@ -462,17 +508,137 @@ public class UsuarioController {
                     System.out.println("DEBUG - Ejercicios registrados: " + ejerciciosRegistrados);
                 }
             }
-            
+
             // Marcar rutina como completada
             rutinaService.marcarRutinaComoCompletada(rutinaAsignadaId);
-            
-            redirectAttributes.addFlashAttribute("successMessage", "¡Rutina completada! ¡Felicitaciones! Tu progreso ha sido registrado.");
+
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "¡Rutina completada! ¡Felicitaciones! Tu progreso ha sido registrado.");
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al completar rutina: " + e.getMessage());
         }
 
         return "redirect:/usuario/rutinas";
+    }
+
+    /**
+     * Mostrar página de sesión de entrenamiento
+     */
+    @GetMapping("/sesion/{rutinaAsignadaId}")
+    public String iniciarSesion(@PathVariable Integer rutinaAsignadaId,
+            HttpSession session,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            if (usuario == null) {
+                return "redirect:/login";
+            }
+
+            // Obtener rutina asignada con detalles
+            Optional<RutinaAsignada> rutinaOpt = rutinaService.obtenerRutinasAsignadas(usuario.getId())
+                    .stream()
+                    .filter(r -> r.getId().equals(rutinaAsignadaId))
+                    .findFirst();
+
+            if (rutinaOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Rutina no encontrada");
+                return "redirect:/usuario/rutinas";
+            }
+
+            RutinaAsignada rutinaAsignada = rutinaOpt.get();
+            List<com.example.flowfit.model.RutinaEjercicio> ejercicios = rutinaAsignada.getRutina().getEjercicios();
+
+            model.addAttribute("rutinaAsignada", rutinaAsignada);
+            model.addAttribute("ejercicios", ejercicios);
+
+            return "usuario/sesion-entrenamiento";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar sesión: " + e.getMessage());
+            return "redirect:/usuario/rutinas";
+        }
+    }
+
+    /**
+     * Completar sesión de entrenamiento con progreso detallado
+     */
+    @PostMapping("/sesion/completar")
+    public String completarSesion(@RequestParam Integer rutinaAsignadaId,
+            @RequestParam Map<String, String> allParams,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            if (usuario == null) {
+                return "redirect:/login";
+            }
+
+            int ejerciciosRegistrados = 0;
+            int ejerciciosCompletados = 0;
+
+            // Procesar cada ejercicio del formulario
+            for (Map.Entry<String, String> entry : allParams.entrySet()) {
+                String key = entry.getKey();
+
+                // Buscar ejercicios con formato: ejercicios[0].ejercicioId
+                if (key.startsWith("ejercicios[") && key.endsWith("].ejercicioId")) {
+                    String indexStr = key.substring(11, key.indexOf("]"));
+                    int index = Integer.parseInt(indexStr);
+
+                    // Verificar si este ejercicio fue completado
+                    String completadoKey = "ejercicios[" + index + "].completado";
+                    boolean completado = "true".equals(allParams.get(completadoKey));
+
+                    if (completado) {
+                        Integer ejercicioId = Integer.parseInt(entry.getValue());
+                        Integer series = Integer
+                                .parseInt(allParams.getOrDefault("ejercicios[" + index + "].series", "0"));
+                        Integer repeticiones = Integer
+                                .parseInt(allParams.getOrDefault("ejercicios[" + index + "].repeticiones", "0"));
+                        String pesoStr = allParams.get("ejercicios[" + index + "].peso");
+                        Double peso = (pesoStr != null && !pesoStr.isEmpty()) ? Double.parseDouble(pesoStr) : null;
+                        String comentarios = allParams.get("ejercicios[" + index + "].comentarios");
+
+                        try {
+                            progresoService.registrarProgreso(
+                                    usuario,
+                                    rutinaAsignadaId,
+                                    ejercicioId,
+                                    series,
+                                    repeticiones,
+                                    peso,
+                                    comentarios);
+                            ejerciciosRegistrados++;
+                            ejerciciosCompletados++;
+                        } catch (Exception ex) {
+                            System.err.println("Error al registrar ejercicio " + ejercicioId + ": " + ex.getMessage());
+                        }
+                    }
+                }
+            }
+
+            if (ejerciciosRegistrados > 0) {
+                // Actualizar progreso de la rutina
+                rutinaService.marcarRutinaComoCompletada(rutinaAsignadaId);
+
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "¡Sesión completada! Se registraron " + ejerciciosRegistrados
+                                + " ejercicios. ¡Excelente trabajo!");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "No se registraron ejercicios. Marca los ejercicios completados.");
+                return "redirect:/usuario/sesion/" + rutinaAsignadaId;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al completar sesión: " + e.getMessage());
+        }
+
+        return "redirect:/usuario/progreso";
     }
 
     /**
@@ -646,14 +812,14 @@ public class UsuarioController {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             if (usuario == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Usuario no autenticado"));
+                        .body(Map.of("error", "Usuario no autenticado"));
             }
 
             // Obtener rutina
             Rutina rutina = rutinaService.obtenerRutinaPorId(rutinaId);
             if (rutina == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Rutina no encontrada"));
+                        .body(Map.of("error", "Rutina no encontrada"));
             }
 
             // Obtener ejercicios
@@ -661,14 +827,14 @@ public class UsuarioController {
 
             // Verificar si está asignada
             RutinaAsignada rutinaAsignada = rutinaService.obtenerRutinasDelUsuario(usuario.getId())
-                .stream()
-                .filter(ra -> ra.getRutinaId().equals(rutinaId))
-                .findFirst()
-                .orElse(null);
+                    .stream()
+                    .filter(ra -> ra.getRutinaId().equals(rutinaId))
+                    .findFirst()
+                    .orElse(null);
 
             // Crear respuesta
             Map<String, Object> response = new HashMap<>();
-            
+
             // Rutina completa con todos los detalles
             Map<String, Object> rutinaData = new HashMap<>();
             rutinaData.put("id", rutina.getId());
@@ -679,7 +845,7 @@ public class UsuarioController {
             rutinaData.put("categoria", calcularCategoria(rutina));
             rutinaData.put("caloriasEstimadas", rutina.getCaloriasEstimadas());
             rutinaData.put("objetivo", calcularObjetivo(rutina));
-            
+
             response.put("rutina", rutinaData);
             response.put("ejercicios", ejercicios);
             response.put("rutinaAsignada", rutinaAsignada);
@@ -688,7 +854,7 @@ public class UsuarioController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Error al cargar detalles: " + e.getMessage()));
+                    .body(Map.of("error", "Error al cargar detalles: " + e.getMessage()));
         }
     }
 
@@ -862,7 +1028,7 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
+
     // Métodos auxiliares para calcular categoría y objetivo de rutinas
     private String calcularCategoria(Rutina rutina) {
         String nombre = rutina.getNombre().toLowerCase();
@@ -880,13 +1046,15 @@ public class UsuarioController {
         }
         return "General";
     }
-    
+
     private String calcularObjetivo(Rutina rutina) {
         String nombre = rutina.getNombre().toLowerCase();
-        if (nombre.contains("pérdida") || nombre.contains("perdida") || nombre.contains("quemar") || nombre.contains("adelgazar")) {
+        if (nombre.contains("pérdida") || nombre.contains("perdida") || nombre.contains("quemar")
+                || nombre.contains("adelgazar")) {
             return "Pérdida de peso";
         }
-        if (nombre.contains("masa") || nombre.contains("músculo") || nombre.contains("volumen") || nombre.contains("hipertrofia")) {
+        if (nombre.contains("masa") || nombre.contains("músculo") || nombre.contains("volumen")
+                || nombre.contains("hipertrofia")) {
             return "Ganar músculo";
         }
         if (nombre.contains("tonificación") || nombre.contains("tonificar") || nombre.contains("definición")) {

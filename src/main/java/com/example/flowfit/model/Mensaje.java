@@ -79,6 +79,7 @@ public class Mensaje {
         ACEPTACION_PROPUESTA,
         RECHAZO_PROPUESTA,
         PAGO_GENERADO,
+        PAGO_REALIZADO,
         PAGO_CONFIRMADO,
         CONTRATO_ACTIVADO,
         CONTRATO_FINALIZADO,

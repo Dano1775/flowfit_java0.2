@@ -100,12 +100,13 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		
-		<!-- MercadoPago SDK para integración de pagos -->
+		<!-- MercadoPago SDK - COMENTADO - Ahora usamos Bricks (solo JavaScript)
 		<dependency>
 			<groupId>com.mercadopago</groupId>
 			<artifactId>sdk-java</artifactId>
 			<version>2.1.21</version>
 		</dependency>
+		-->
 		
 		<!-- Gson para manejo de JSON (requerido por MercadoPago) -->
 		<dependency>
@@ -118,6 +119,13 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+		
+		<!-- iText PDF para generación de reportes en PDF -->
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itextpdf</artifactId>
+			<version>5.5.13.3</version>
 		</dependency>
 	</dependencies>
 

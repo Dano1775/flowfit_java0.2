@@ -9,6 +9,9 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
+  <!-- SweetAlert2 -->
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
   <!-- FlowFit CSS System -->
   <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
   <link th:href="@{/css/flowfit-usuario.css}" rel="stylesheet" th:if="${esUsuario}">
@@ -45,6 +48,32 @@
     /* Override Bootstrap para tema oscuro */
     body {
       background: var(--bg-primary) !important;
+    }
+    
+    /* Placeholders en color claro para todos los inputs */
+    input::placeholder,
+    textarea::placeholder,
+    select::placeholder {
+      color: #94a3b8 !important;
+      opacity: 0.7 !important;
+    }
+    
+    input::-webkit-input-placeholder,
+    textarea::-webkit-input-placeholder {
+      color: #94a3b8 !important;
+      opacity: 0.7 !important;
+    }
+    
+    input::-moz-placeholder,
+    textarea::-moz-placeholder {
+      color: #94a3b8 !important;
+      opacity: 0.7 !important;
+    }
+    
+    input:-ms-input-placeholder,
+    textarea:-ms-input-placeholder {
+      color: #94a3b8 !important;
+      opacity: 0.7 !important;
     }
     
     .main-content {
@@ -163,7 +192,7 @@
       font-weight: 500;
       background: var(--bg-tertiary);
       border: 1px solid var(--border-color);
-      color: var(--text-secondary);
+      color: #ffffff;
       border-radius: 18px;
       font-size: 0.85rem;
     }
@@ -745,6 +774,41 @@
                 <i class="bi bi-info-circle me-1"></i>
                 <span th:text="${mensaje.contenido}">Mensaje del sistema</span>
               </span>
+              
+              <!-- 🔔 SISTEMA DE CONFIRMACIÓN DE SERVICIO COMPLETADO -->
+              <div th:if="${mensaje.contenido != null and mensaje.contenido.contains('Pago aprobado exitosamente') and mensaje.metadata != null and mensaje.metadata.containsKey('pagoId')}">
+                <div class="confirmacion-servicio-container mt-3" 
+                     th:attr="data-pago-id=${mensaje.metadata.get('pagoId')}"
+                     style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 2px solid #3b82f6; border-radius: 12px; padding: 1.5rem; max-width: 500px; margin: 0 auto;">
+                  
+                  <!-- Header -->
+                  <div class="text-center mb-3">
+                    <i class="bi bi-shield-check" style="font-size: 2.5rem; color: #3b82f6;"></i>
+                    <h6 class="text-white mt-2 mb-1" style="font-weight: 600;">Sistema de Protección</h6>
+                    <p class="text-white mb-0" style="opacity: 0.7; font-size: 0.85rem;">
+                      El dinero está retenido de forma segura hasta que ambos confirmen
+                    </p>
+                  </div>
+                  
+                  <!-- Botón de Confirmación -->
+                  <button class="btn w-100" 
+                          th:classappend="${esUsuario ? 'btn-primary' : 'btn-success'}"
+                          th:attr="onclick='confirmarServicioCompletado(' + ${mensaje.metadata.get('pagoId')} + ', event)'"
+                          style="padding: 0.9rem; border-radius: 8px; font-weight: 600;">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span th:text="${esUsuario ? 'Confirmar Servicio Recibido' : 'Confirmar Servicio Entregado'}"></span>
+                  </button>
+                  <small class="text-white d-block text-center mt-2" style="opacity: 0.6; font-size: 0.8rem;">
+                    <span th:text="${esUsuario ? 'Confirma cuando hayas recibido el servicio completo' : 'Confirma cuando hayas completado el servicio'}"></span>
+                  </small>
+                  
+                  <div class="alert alert-info mt-3 mb-0" style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); font-size: 0.85rem;">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Los fondos se liberarán solo cuando <strong>ambos</strong> (usuario y entrenador) confirmen.
+                  </div>
+                  
+                </div>
+              </div>
             </div>
             
             <!-- Mensaje de Propuesta -->
@@ -777,12 +841,12 @@
                     <div style="background: var(--bg-primary); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border-color);">
                       <div class="d-flex align-items-center justify-content-between">
                         <div>
-                          <small class="text-white" style="opacity: 0.6; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Precio</small>
+                          <small class="text-white" style="opacity: 1; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Precio</small>
                           <div class="d-flex align-items-baseline mt-1">
-                            <span style="font-size: 2.5rem; font-weight: 700; color: var(--accent-color);">
+                            <span style="font-size: 2.5rem; font-weight: 700; color: #ffffff;">
                               $<span th:text="${mensaje.metadata != null ? #numbers.formatDecimal(mensaje.metadata.get('precioFinal'), 0, 'COMMA', 0, 'POINT') : '0'}">50.000</span>
                             </span>
-                            <span class="text-white ms-2" style="opacity: 0.7; font-size: 1rem;">COP</span>
+                            <span class="text-white ms-2" style="opacity: 1; font-size: 1rem;">COP</span>
                           </div>
                         </div>
                         <div class="text-end">
@@ -1148,12 +1212,19 @@
                   <i class="bi bi-currency-dollar me-2"></i>Precio Final (COP)
                 </label>
                 <input type="number" class="form-control text-white" 
-                       name="precioFinal" id="precioFinalInput" required min="0"
+                       name="precioFinal" id="precioFinalInput" required min="3000"
                        style="background: var(--bg-tertiary); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 10px;"
-                       placeholder="0">
+                       placeholder="3000">
                 <small class="text-white" style="opacity: 0.6; font-size: 0.85rem;">
                   <i class="bi bi-wallet2 me-1"></i>Ajusta según la negociación
                 </small>
+                <!-- Advertencia de monto mínimo -->
+                <div class="alert alert-warning d-flex align-items-center" style="background: rgba(255, 193, 7, 0.15); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 8px; padding: 0.75rem; margin-top: 0.5rem;">
+                  <i class="bi bi-exclamation-triangle-fill me-2" style="color: #ffc107; font-size: 1.1rem;"></i>
+                  <small style="color: #ffc107; font-size: 0.85rem; line-height: 1.4;">
+                    <strong>Monto mínimo:</strong> Si el precio es menor a $3,000 COP, se ajustará automáticamente a $3,000 COP (requerimiento de MercadoPago).
+                  </small>
+                </div>
               </div>
               
               <div class="col-md-6">
@@ -1222,12 +1293,19 @@
                 <i class="bi bi-currency-dollar me-2"></i>Nuevo Precio (COP)
               </label>
               <input type="number" class="form-control text-white" 
-                     name="precioFinal" id="contraofertaPrecio" required min="0"
+                     name="precioFinal" id="contraofertaPrecio" required min="3000"
                      style="background: var(--bg-tertiary); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 10px;"
-                     placeholder="Ingresa tu contraoferta">
+                     placeholder="Mínimo 3,000">
               <small class="text-white" style="opacity: 0.6; font-size: 0.85rem;">
                 <i class="bi bi-info-circle me-1"></i>Tu precio propuesto
               </small>
+              <!-- Advertencia de monto mínimo -->
+              <div class="alert alert-warning d-flex align-items-center" style="background: rgba(255, 193, 7, 0.15); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 8px; padding: 0.75rem; margin-top: 0.5rem;">
+                <i class="bi bi-exclamation-triangle-fill me-2" style="color: #ffc107; font-size: 1.1rem;"></i>
+                <small style="color: #ffc107; font-size: 0.85rem; line-height: 1.4;">
+                  <strong>Monto mínimo:</strong> Si el precio es menor a $3,000 COP, se ajustará automáticamente a $3,000 COP (requerimiento de MercadoPago).
+                </small>
+              </div>
             </div>
             
             <div class="mb-3">
@@ -1258,9 +1336,115 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal de Pago con MercadoPago -->
+  <div class="modal fade" id="modalPago" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden;">
+        
+        <!-- Header del Modal -->
+        <div class="modal-header" style="background: linear-gradient(135deg, var(--accent-color), var(--accent-light)); border: none; padding: 2rem;">
+          <div>
+            <h4 class="modal-title fw-bold text-white mb-2" style="font-size: 1.5rem;">
+              <i class="bi bi-credit-card-2-front me-2"></i>Realizar Pago
+            </h4>
+            <p class="text-white mb-0" style="opacity: 0.9; font-size: 0.95rem;">
+              <i class="bi bi-shield-check me-1"></i>Pago seguro procesado por MercadoPago
+            </p>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <!-- Body del Modal -->
+        <div class="modal-body" style="padding: 2rem;">
+          
+          <!-- Resumen del Pago -->
+          <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+            <h5 class="text-white fw-bold mb-3">
+              <i class="bi bi-receipt me-2" style="color: var(--accent-color);"></i>Resumen del Plan
+            </h5>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-white" style="opacity: 0.8;">Plan contratado:</span>
+              <span class="text-white fw-semibold" id="pagoResumenPlan">-</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-white" style="opacity: 0.8;">Duración:</span>
+              <span class="text-white fw-semibold" id="pagoResumenDuracion">-</span>
+            </div>
+            <hr style="border-color: var(--border-color); margin: 1rem 0;">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-white fw-bold" style="font-size: 1.1rem;">Total a pagar:</span>
+              <span class="text-white fw-bold" style="font-size: 1.5rem;" id="pagoResumenTotal">$0</span>
+            </div>
+          </div>
+
+          <!-- Campos Ocultos -->
+          <input type="hidden" id="pagoContratacionId" name="contratacionId">
+          <input type="hidden" id="pagoMonto" name="monto">
+          <input type="hidden" id="pagoEmail" th:value="${usuario.correo}">
+
+          <!-- MercadoPago Bricks Container -->
+          <div class="mb-4">
+            <h6 class="text-white fw-bold mb-3">
+              <i class="bi bi-credit-card me-2" style="color: var(--accent-color);"></i>Información de Pago
+            </h6>
+            
+            <!-- Contenedor donde se renderiza el Card Payment Brick -->
+            <div id="cardPaymentBrick_container" style="background: white; border-radius: 12px; padding: 20px;"></div>
+            
+            <!-- Indicador de carga mientras se inicializa el brick -->
+            <div id="loadingPayment" class="text-center py-4" style="display: none;">
+              <div class="spinner-border text-info" role="status">
+                <span class="visually-hidden">Cargando formulario...</span>
+              </div>
+              <p class="text-white mt-2">Cargando formulario de pago seguro...</p>
+            </div>
+            
+            <!-- Contenedor para mensajes de éxito/error -->
+            <div id="paymentMessages" class="mt-3" style="display: none;"></div>
+          </div>
+
+          <!-- Mensaje de Sistema ESCROW -->
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem;">
+            <div class="d-flex align-items-start">
+              <i class="bi bi-shield-check" style="color: #10b981; font-size: 1.5rem; margin-right: 1rem; flex-shrink: 0;"></i>
+              <div>
+                <h6 class="text-white fw-bold mb-2">
+                  <span style="color: #10b981;">Sistema de Protección ESCROW</span>
+                </h6>
+                <p class="text-white mb-0" style="font-size: 0.9rem; opacity: 0.9; line-height: 1.6;">
+                  Tu dinero estará <strong>retenido de forma segura</strong> en la plataforma hasta que ambas partes (tú y el entrenador) 
+                  confirmen que el servicio fue entregado correctamente. Esto te protege contra estafas.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botón Cancelar -->
+          <div class="text-center mt-3">
+            <button type="button" class="btn" data-bs-dismiss="modal"
+                    style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: white; padding: 0.75rem 2rem; border-radius: 10px; font-weight: 500;">
+              <i class="bi bi-x-circle me-2"></i>Cerrar
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  
+  <!-- MercadoPago SDK -->
+  <script src="https://sdk.mercadopago.com/js/v2"></script>
+  
+  <!-- FlowFit Payment Integration -->
+  <script th:src="@{/js/payment-service.js}"></script>
+  <script th:src="@{/js/payment-controller.js}"></script>
   
   <!-- Bootstrap Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   
   <!-- SockJS y STOMP para WebSocket -->
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
@@ -1288,7 +1472,77 @@
     document.addEventListener('DOMContentLoaded', function() {
       scrollToBottom();
       conectarWebSocket();
+      verificarEstadosConfirmacion();
     });
+    
+    // Verificar estados de confirmación de todos los pagos
+    function verificarEstadosConfirmacion() {
+      const containers = document.querySelectorAll('.confirmacion-servicio-container[data-pago-id]');
+      containers.forEach(container => {
+        const pagoId = container.getAttribute('data-pago-id');
+        if (pagoId) {
+          fetch(`/confirmacion/estado/${pagoId}`)
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                actualizarUIEstadoConfirmacion(container, data);
+              }
+            })
+            .catch(error => {
+              console.error('Error al verificar estado de confirmación:', error);
+            });
+        }
+      });
+    }
+    
+    // Actualizar UI según el estado de confirmación
+    function actualizarUIEstadoConfirmacion(container, data) {
+      const esEntrenador = [[${!esUsuario}]];
+      const yoConfirme = esEntrenador ? data.entrenadorConfirma : data.usuarioConfirma;
+      const otroConfirmo = esEntrenador ? data.usuarioConfirma : data.entrenadorConfirma;
+      
+      if (data.estadoEscrow === 'LIBERADO' || data.ambosConfirmaron) {
+        // Ambos confirmaron - mostrar mensaje de éxito
+        container.innerHTML = `
+          <div class="alert alert-success mb-0" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: white;">
+            <i class="bi bi-check-circle-fill me-2" style="color: white;"></i>
+            <strong>¡Servicio Completado!</strong> Los fondos han sido liberados al entrenador.
+          </div>
+        `;
+      } else if (yoConfirme) {
+        // Ya confirmé - deshabilitar botón y mostrar mensaje de espera
+        const btn = container.querySelector('button');
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>✅ Ya Confirmaste';
+          btn.classList.remove('btn-primary', 'btn-success');
+          btn.classList.add('btn-secondary');
+        }
+        
+        // Agregar mensaje de espera si no existe
+        if (!container.querySelector('.alert-info')) {
+          const waitMsg = document.createElement('div');
+          waitMsg.className = 'alert alert-info mt-3 mb-0';
+          waitMsg.style.cssText = 'background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); font-size: 0.85rem;';
+          waitMsg.innerHTML = `
+            <i class="bi bi-clock-history me-2"></i>
+            Esperando confirmación de ${esEntrenador ? 'el usuario' : 'el entrenador'}...
+          `;
+          container.appendChild(waitMsg);
+        }
+      } else if (otroConfirmo) {
+        // El otro ya confirmó - mostrar indicador
+        const infoDiv = container.querySelector('.alert-info');
+        if (infoDiv) {
+          infoDiv.innerHTML = `
+            <i class="bi bi-exclamation-circle me-2"></i>
+            ${esEntrenador ? 'El usuario ya confirmó' : 'El entrenador ya confirmó'}. <strong>Falta tu confirmación</strong> para liberar los fondos.
+          `;
+          infoDiv.style.background = 'rgba(251, 191, 36, 0.15)';
+          infoDiv.style.borderColor = 'rgba(251, 191, 36, 0.3)';
+        }
+      }
+    }
     
     // Conectar WebSocket
     function conectarWebSocket() {
@@ -1302,7 +1556,7 @@
         stompClient.subscribe('/topic/conversacion/' + conversacionId, function(mensaje) {
           const data = JSON.parse(mensaje.body);
           
-          // Si es notificación de propuesta aceptada, actualizar UI
+          // 🔔 NOTIFICACIONES EN TIEMPO REAL
           if (data.tipo === 'PROPUESTA_ACEPTADA') {
             actualizarPropuestaAceptada(data.contratacionId, data.mensaje, data.precioFinal);
           } else {
@@ -1667,7 +1921,7 @@
     });
     
     // Ya NO necesitamos auto-refresh porque tenemos WebSocket
-    // setInterval(() => { location.reload(); }, 10000); // ELIMINADO
+    // setInterval(() => { location.reload(); }, 10000); 
     
     // Actualizar precio cuando se selecciona un plan
     document.getElementById('planSelect')?.addEventListener('change', function() {
@@ -1682,10 +1936,20 @@
     // Aceptar propuesta
     function aceptarPropuesta(contratacionIdOrButton) {
       let contratacionId;
+      let metadata = null;
       
       // Soportar tanto el ID directo como un botón
       if (typeof contratacionIdOrButton === 'object') {
         contratacionId = contratacionIdOrButton.getAttribute('data-contratacion-id');
+        // Intentar obtener metadata del elemento padre
+        const propuestaCard = contratacionIdOrButton.closest('[data-metadata]');
+        if (propuestaCard) {
+          try {
+            metadata = JSON.parse(propuestaCard.getAttribute('data-metadata'));
+          } catch (e) {
+            console.log('No se pudo parsear metadata');
+          }
+        }
       } else {
         contratacionId = contratacionIdOrButton;
       }
@@ -1693,7 +1957,7 @@
       console.log('Aceptando propuesta:', contratacionId);
       
       const mensajeConfirmacion = esUsuario 
-        ? '¿Estás seguro de aceptar esta propuesta? Se procederá al pago.'
+        ? '¿Estás seguro de aceptar esta propuesta? Se abrirá el formulario de pago.'
         : '¿Estás seguro de aceptar esta contraoferta del usuario?';
       
       if (confirm(mensajeConfirmacion)) {
@@ -1720,10 +1984,20 @@
         })
         .then(data => {
           console.log('Response data:', data);
+          console.log('📊 Datos de pago:', {
+            precioFinal: data.precioFinal,
+            metadataPrecion: metadata?.precioFinal,
+            nombrePlan: data.nombrePlan,
+            duracionDias: data.duracionDias
+          });
+          
           if (data.success) {
-            // Solo redirigir al pago si es USUARIO
+            // Solo abrir modal de pago si es USUARIO
             if (esUsuario) {
-              window.location.href = '/negociacion/generar-pago?contratacionId=' + contratacionId;
+              // Abrir modal de pago con los datos
+              const precioAPagar = data.precioFinal || metadata?.precioFinal || 3000;
+              console.log('💵 Precio a pagar final:', precioAPagar);
+              abrirModalPago(contratacionId, precioAPagar, data.nombrePlan, data.duracionDias);
             } else {
               // Si es entrenador, mostrar mensaje de éxito y recargar chat
               alert('Contraoferta aceptada. El usuario recibirá notificación para proceder al pago.');
@@ -1766,7 +2040,7 @@
             <i class="bi bi-check-circle-fill me-2"></i>
             <strong>¡Propuesta Aceptada!</strong>
           </div>
-          <button onclick="window.location.href='/negociacion/generar-pago?contratacionId=${contratacionId}'" 
+          <button onclick="abrirModalPago(${contratacionId}, ${precioFinal}, '${nombrePlan || 'Plan Personalizado'}', ${duracionDias || 30})" 
                   style="background: #10b981; border: none; color: white; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s;"
                   onmouseover="this.style.background='#059669'" 
                   onmouseout="this.style.background='#10b981'">
@@ -1790,7 +2064,7 @@
                 <i class="bi bi-check-circle-fill me-2"></i>
                 <strong>¡Propuesta Aceptada!</strong>
               </div>
-              <button onclick="window.location.href='/negociacion/generar-pago?contratacionId=${contratacionId}'" 
+              <button onclick="abrirModalPago(${contratacionId}, ${precioFinal}, '${nombrePlan || 'Plan Personalizado'}', ${duracionDias || 30})" 
                       style="background: #10b981; border: none; color: white; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s;"
                       onmouseover="this.style.background='#059669'" 
                       onmouseout="this.style.background='#10b981'">
@@ -1862,6 +2136,225 @@
           alert('Error al procesar la solicitud: ' + error.message);
         });
       }
+    }
+    
+    // 🔔 Mostrar notificación de pago aprobado en tiempo real
+    function mostrarNotificacionPagoAprobado(data) {
+      console.log('💰 Pago aprobado recibido:', data);
+      
+      // Mostrar notificación toast
+      Swal.fire({
+        icon: 'success',
+        title: '¡Pago Aprobado!',
+        html: `
+          <div style="text-align: left;">
+            <p><strong>💰 Monto:</strong> $${data.monto?.toLocaleString('es-CO')} COP</p>
+            <p><strong>📅 Duración:</strong> ${data.duracionDias} días</p>
+            <p><strong>🔒 El dinero está retenido de forma segura</strong></p>
+            <p style="font-size: 0.9rem; color: #6b7280;">Ambos deben confirmar que el servicio se completó para liberar los fondos.</p>
+          </div>
+        `,
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#10b981'
+      }).then(() => {
+        // Agregar UI de confirmación dinámicamente
+        agregarUIConfirmacion(data.pagoId, data.contratacionId);
+      });
+      
+      // Recargar mensajes para mostrar la confirmación del sistema
+      setTimeout(() => location.reload(), 2000);
+    }
+    
+    // Agregar UI de confirmación dinámicamente al chat
+    function agregarUIConfirmacion(pagoId, contratacionId) {
+      const mensajesContainer = document.getElementById('mensajesContainer');
+      if (!mensajesContainer) return;
+      
+      const esEntrenador = [[${!esUsuario}]];
+      
+      const confirmacionHTML = `
+        <div class="mensaje-sistema">
+          <div class="confirmacion-servicio-container mt-3" id="confirmacion-${pagoId}"
+               style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 2px solid #3b82f6; border-radius: 12px; padding: 1.5rem; max-width: 500px; margin: 0 auto;">
+            
+            <!-- Header -->
+            <div class="text-center mb-3">
+              <i class="bi bi-shield-check" style="font-size: 2.5rem; color: #3b82f6;"></i>
+              <h6 class="text-white mt-2 mb-1" style="font-weight: 600;">Sistema de Protección</h6>
+              <p class="text-white mb-0" style="opacity: 0.7; font-size: 0.85rem;">
+                El dinero está retenido de forma segura
+              </p>
+            </div>
+            
+            <!-- Estado de Confirmaciones -->
+            <div class="confirmacion-estado mb-3 p-3" 
+                 style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px;">
+              <div class="row text-center">
+                <div class="col-6">
+                  <i class="bi bi-clock text-warning" style="font-size: 1.5rem;"></i>
+                  <p class="text-white mb-0 mt-1" style="font-size: 0.85rem;">Usuario</p>
+                </div>
+                <div class="col-6">
+                  <i class="bi bi-clock text-warning" style="font-size: 1.5rem;"></i>
+                  <p class="text-white mb-0 mt-1" style="font-size: 0.85rem;">Entrenador</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Botón de Confirmación -->
+            <button class="btn w-100" id="confirmar-servicio-${pagoId}"
+                    style="background: ${esEntrenador ? '#10b981' : '#3b82f6'}; border: none; padding: 0.9rem; border-radius: 8px; font-weight: 600; color: white;"
+                    onclick="confirmarServicioCompletado(${pagoId})">
+              <i class="bi bi-check-circle me-2"></i>
+              ${esEntrenador ? 'Confirmar Servicio Entregado' : 'Confirmar Servicio Completado'}
+            </button>
+            <small class="text-white d-block text-center mt-2" style="opacity: 0.6; font-size: 0.8rem;">
+              ${esEntrenador ? 'Confirma cuando hayas completado el servicio' : 'Confirma cuando hayas recibido el servicio completo'}
+            </small>
+          </div>
+        </div>
+      `;
+      
+      mensajesContainer.insertAdjacentHTML('beforeend', confirmacionHTML);
+      mensajesContainer.scrollTop = mensajesContainer.scrollHeight;
+    }
+    
+    // 🔔 Mostrar notificación de confirmación de servicio
+    function mostrarNotificacionConfirmacion(data) {
+      console.log('✅ Confirmación recibida:', data);
+      
+      if (data.estadoEscrow === 'LIBERADO') {
+        // Ambos confirmaron - Fondos liberados
+        Swal.fire({
+          icon: 'success',
+          title: '¡Fondos Liberados!',
+          text: data.mensaje,
+          confirmButtonText: 'Excelente',
+          confirmButtonColor: '#10b981'
+        });
+      } else {
+        // Solo uno confirmó
+        Swal.fire({
+          icon: 'info',
+          title: 'Confirmación Registrada',
+          text: data.mensaje,
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#3b82f6'
+        });
+      }
+      
+      // Actualizar UI de confirmación si existe
+      actualizarUIConfirmacion(data);
+    }
+    
+    // Actualizar UI de confirmación en el chat
+    function actualizarUIConfirmacion(data) {
+      const confirmarBtn = document.getElementById(`confirmar-servicio-${data.pagoId}`);
+      if (confirmarBtn) {
+        const estadoDiv = confirmarBtn.closest('.confirmacion-servicio-container');
+        if (estadoDiv) {
+          if (data.estadoEscrow === 'LIBERADO') {
+            estadoDiv.innerHTML = `
+              <div class="alert alert-success" style="color: white;">
+                <i class="bi bi-check-circle-fill me-2" style="color: white;"></i>
+                <strong>¡Servicio Completado!</strong> Los fondos han sido liberados.
+              </div>
+            `;
+          } else {
+            const usuarioIcon = data.usuarioConfirma ? '✅' : '⏳';
+            const entrenadorIcon = data.entrenadorConfirma ? '✅' : '⏳';
+            estadoDiv.querySelector('.confirmacion-estado').innerHTML = `
+              <small>
+                Usuario: ${usuarioIcon} | Entrenador: ${entrenadorIcon}
+              </small>
+            `;
+          }
+        }
+      }
+    }
+    
+    // Confirmar servicio completado
+    function confirmarServicioCompletado(pagoId, event) {
+      if (!confirm('¿Confirmas que el servicio se completó satisfactoriamente?')) {
+        return;
+      }
+      
+      const esEntrenador = [[${!esUsuario}]];
+      const endpoint = esEntrenador 
+        ? `/confirmacion/entrenador/${pagoId}`
+        : `/confirmacion/usuario/${pagoId}`;
+      
+      console.log('🔄 Confirmando servicio:', { pagoId, endpoint, esEntrenador });
+      
+      // Deshabilitar botón mientras se procesa
+      const btn = event?.target || document.querySelector(`button[onclick*="confirmarServicioCompletado(${pagoId})"]`);
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Procesando...';
+      }
+      
+      fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        console.log('📡 Respuesta del servidor:', response.status);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('✅ Datos recibidos:', data);
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: '¡Confirmación Registrada!',
+            html: data.message + 
+                  (data.ambosConfirmaron ? '<br><br><strong>🎉 ¡Fondos liberados al entrenador!</strong>' : ''),
+            confirmButtonText: 'OK'
+          }).then(() => {
+            // Actualizar UI usando la función unificada
+            if (btn) {
+              const container = btn.closest('.confirmacion-servicio-container');
+              if (container) {
+                // Usar la función unificada para actualizar la UI
+                actualizarUIEstadoConfirmacion(container, data);
+              }
+            }
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message,
+            confirmButtonText: 'OK'
+          });
+          // Rehabilitar botón
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>' + 
+                           (esEntrenador ? 'Confirmar Servicio Entregado' : 'Confirmar Servicio Recibido');
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al procesar la confirmación',
+          confirmButtonText: 'OK'
+        });
+        // Rehabilitar botón
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>' + 
+                         (esEntrenador ? 'Confirmar Servicio Entregado' : 'Confirmar Servicio Recibido');
+        }
+      });
     }
     
     // Abrir modal de contraoferta
@@ -2080,6 +2573,105 @@
         alert('Función de subida de archivos próximamente. Por ahora solo texto.');
       }, 1500);
     }
+
+    // =========================================================
+    // SISTEMA DE PAGOS CON MERCADOPAGO BRICKS
+    // =========================================================
+    
+    let paymentController = null;
+    
+    // Abrir modal de pago con MercadoPago Bricks
+    function abrirModalPago(contratacionId, monto, nombrePlan = 'Plan Personalizado', duracionDias = 30) {
+      console.log('🚀 Abriendo modal de pago con Bricks:', { contratacionId, monto, nombrePlan, duracionDias });
+      
+      // Asegurar que monto sea un número válido
+      let montoNumerico = parseFloat(monto) || 0;
+      
+      // MercadoPago requiere un monto mínimo (3,000 COP para Colombia)
+      const MONTO_MINIMO = 3000;
+      if (montoNumerico < MONTO_MINIMO) {
+        console.warn('⚠️ Monto menor al mínimo permitido. Ajustando a:', MONTO_MINIMO);
+        montoNumerico = MONTO_MINIMO;
+      }
+      
+      console.log('💰 Monto a cobrar:', montoNumerico);
+      
+      // Llenar datos del resumen
+      document.getElementById('pagoContratacionId').value = contratacionId;
+      document.getElementById('pagoMonto').value = montoNumerico;
+      document.getElementById('pagoResumenPlan').textContent = nombrePlan || 'Plan Personalizado';
+      document.getElementById('pagoResumenDuracion').textContent = (duracionDias || 30) + ' días';
+      document.getElementById('pagoResumenTotal').textContent = '$' + montoNumerico.toLocaleString('es-CO') + ' COP';
+      
+      // Limpiar contenedor del brick
+      const brickContainer = document.getElementById('cardPaymentBrick_container');
+      if (brickContainer) {
+        brickContainer.innerHTML = '';
+        brickContainer.style.display = 'block';
+      }
+      
+      // Limpiar mensajes previos
+      const messagesContainer = document.getElementById('paymentMessages');
+      if (messagesContainer) {
+        messagesContainer.innerHTML = '';
+        messagesContainer.style.display = 'none';
+      }
+      
+      // Abrir modal
+      const modalElement = document.getElementById('modalPago');
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+      
+      // Inicializar el PaymentController cuando el modal esté completamente abierto
+      modalElement.addEventListener('shown.bs.modal', function initBricks() {
+        // Destruir controlador anterior si existe
+        if (paymentController) {
+          paymentController.destroy();
+          paymentController = null;
+        }
+        
+        // Crear nuevo controlador
+        paymentController = new PaymentController();
+        
+        // Obtener email del usuario
+        const userEmail = document.getElementById('pagoEmail')?.value || '';
+        
+        // Inicializar con configuración
+        paymentController.initialize({
+          amount: montoNumerico,
+          email: userEmail,
+          description: `Plan de entrenamiento: ${nombrePlan}`,
+          negociacionId: contratacionId
+        });
+        
+        // Remover listener para evitar múltiples inicializaciones
+        modalElement.removeEventListener('shown.bs.modal', initBricks);
+      }, { once: true });
+    }
+    
+    // Limpiar al cerrar modal
+    document.getElementById('modalPago')?.addEventListener('hidden.bs.modal', function() {
+      // Destruir el controlador de Bricks
+      if (paymentController) {
+        paymentController.destroy();
+        paymentController = null;
+      }
+      
+      // Limpiar contenedores
+      const brickContainer = document.getElementById('cardPaymentBrick_container');
+      if (brickContainer) {
+        brickContainer.innerHTML = '';
+      }
+      
+      const messagesContainer = document.getElementById('paymentMessages');
+      if (messagesContainer) {
+        messagesContainer.innerHTML = '';
+        messagesContainer.style.display = 'none';
+      }
+      
+      console.log('🗑️ Modal de pago cerrado y limpiado');
+    });
+    
   </script>
 </body>
 </html>

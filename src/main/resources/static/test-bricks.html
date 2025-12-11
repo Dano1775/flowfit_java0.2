@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test MercadoPago Bricks - FlowFit</title>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        #cardPaymentBrick_container {
+            margin-top: 20px;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin: 5px 0;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info-log { color: blue; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test MercadoPago Bricks</h1>
+        
+        <div class="info">
+            <strong>Instrucciones:</strong><br>
+            1. Asegúrate de que el servidor esté corriendo<br>
+            2. Observa los logs en la consola y en pantalla<br>
+            3. Si ves el formulario de pago, ¡funciona! 🎉
+        </div>
+
+        <div id="cardPaymentBrick_container"></div>
+
+        <div class="log">
+            <div class="log-entry"><strong>📋 Logs:</strong></div>
+            <div id="logContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const logContainer = document.getElementById('logContainer');
+        
+        function addLog(message, type = 'info-log') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(message);
+        }
+
+        // Interceptar console.log para mostrar en pantalla
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLog(args.join(' '), 'info-log');
+        };
+
+        const originalError = console.error;
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLog('ERROR: ' + args.join(' '), 'error');
+        };
+
+        // Iniciar test
+        async function testBricks() {
+            try {
+                addLog('🚀 Iniciando test de MercadoPago Bricks...', 'info-log');
+
+                // 1. Obtener configuración del backend
+                addLog('📡 Obteniendo configuración desde /pagos/config...', 'info-log');
+                const response = await fetch('/pagos/config');
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                const config = await response.json();
+                addLog(`✅ Configuración obtenida: ${JSON.stringify(config)}`, 'success');
+
+                // 2. Inicializar MercadoPago
+                addLog('🔧 Inicializando MercadoPago SDK...', 'info-log');
+                const mp = new MercadoPago(config.publicKey, {
+                    locale: config.locale || 'es-CO'
+                });
+                addLog('✅ MercadoPago SDK inicializado', 'success');
+
+                // 3. Crear Bricks Builder
+                const bricksBuilder = mp.bricks();
+                addLog('✅ Bricks Builder creado', 'success');
+
+                // 4. Configurar y renderizar el brick
+                addLog('🎨 Renderizando Card Payment Brick...', 'info-log');
+                
+                const brickSettings = {
+                    initialization: {
+                        amount: 50000  // Monto de prueba: 50,000 COP
+                    },
+                    customization: {
+                        visual: {
+                            style: {
+                                theme: 'default'
+                            }
+                        },
+                        paymentMethods: {
+                            maxInstallments: 1
+                        }
+                    },
+                    callbacks: {
+                        onReady: () => {
+                            addLog('✅ ¡Brick listo! El formulario se renderizó correctamente', 'success');
+                        },
+                        onSubmit: (formData) => {
+                            addLog('📤 Formulario enviado con datos: ' + JSON.stringify(formData), 'info-log');
+                            return new Promise((resolve, reject) => {
+                                addLog('⚠️ Este es solo un test. No se procesará el pago.', 'info-log');
+                                resolve();
+                            });
+                        },
+                        onError: (error) => {
+                            addLog('❌ Error en el brick: ' + JSON.stringify(error), 'error');
+                        }
+                    }
+                };
+
+                addLog('Settings del brick: ' + JSON.stringify(brickSettings), 'info-log');
+
+                const cardPaymentBrickController = await bricksBuilder.create(
+                    'cardPayment',
+                    'cardPaymentBrick_container',
+                    brickSettings
+                );
+
+                addLog('✅ Card Payment Brick renderizado exitosamente!', 'success');
+
+            } catch (error) {
+                addLog('❌ Error en el test: ' + error.message, 'error');
+                addLog('Stack: ' + error.stack, 'error');
+            }
+        }
+
+        // Ejecutar test al cargar la página
+        window.addEventListener('load', testBricks);
+    </script>
+</body>
+</html>

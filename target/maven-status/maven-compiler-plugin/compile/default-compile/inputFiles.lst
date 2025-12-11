@@ -8,10 +8,12 @@ C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\Adm
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\AdminEmailController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\BoletinController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\ChatController.java
+C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\ConfirmacionServicioController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\EntrenadorController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\LoginController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\MapaController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\NegociacionController.java
+C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\PagoController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\PagosController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\PasswordResetController.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\PlanEntrenadorController.java
@@ -22,6 +24,9 @@ C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\controller\Usu
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\dto\EjercicioRutinaDto.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\dto\EjercicioRutinaSimpleDto.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\dto\MensajeDTO.java
+C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\dto\MercadoPagoConfigDTO.java
+C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\dto\PaymentRequestDTO.java
+C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\dto\PaymentResponseDTO.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\dto\PropuestaDTO.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\dto\RutinaAsignadaDto.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\dto\RutinaDetalleDto.java
@@ -79,6 +84,7 @@ C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\notifi
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\notification\PriorityEmailDecorator.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\notification\SimpleEmailNotification.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\PasswordResetService.java
+C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\PdfService.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\PlanEntrenadorService.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\ProgresoService.java
 C:\xampp\htdocs\flowfit_java0.2\src\main\java\com\example\flowfit\service\RutinaService.java

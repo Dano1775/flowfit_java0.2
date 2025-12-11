@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sesión de Entrenamiento - FlowFit</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
+    <link th:href="@{/css/flowfit-usuario.css}" rel="stylesheet">
+    
+    <style>
+        .ejercicio-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .ejercicio-card.completed {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+        
+        .ejercicio-card.active {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+        
+        .check-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .check-button:hover {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .check-button.checked {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981;
+        }
+        
+        .check-button i {
+            font-size: 1.5rem;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .check-button.checked i {
+            opacity: 1;
+        }
+        
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+        }
+        
+        .timer-display {
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .input-group-custom {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0.75rem;
+        }
+        
+        .input-group-custom input {
+            background: transparent;
+            border: none;
+            color: white;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .input-group-custom input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="bg-dark-flowfit">
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/usuario-sidebar :: sidebar}"></div>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-content">
+        <!-- Header -->
+        <div th:replace="~{fragments/usuario-header :: header}"></div>
+
+        <div class="container-fluid px-4 py-4">
+            <!-- Header de Sesión -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card-base card-usuario p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h2 class="text-white fw-bold mb-2" th:text="${rutinaAsignada.rutina.nombre}">Nombre de la Rutina</h2>
+                                <p class="text-muted-flowfit mb-0">
+                                    <i class="bi bi-calendar3 me-2"></i>
+                                    <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}">10/12/2025 14:30</span>
+                                </p>
+                            </div>
+                            <div class="text-end">
+                                <div class="mb-2">
+                                    <span class="badge bg-success px-3 py-2 fs-5">
+                                        <span id="ejerciciosCompletados">0</span> / <span th:text="${#lists.size(ejercicios)}">0</span>
+                                    </span>
+                                </div>
+                                <small class="text-muted-flowfit">Ejercicios completados</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Barra de progreso general -->
+                        <div class="progress" style="height: 12px; background: rgba(255, 255, 255, 0.1); border-radius: 10px;">
+                            <div id="progresoTotal" class="progress-bar bg-success" style="width: 0%;" role="progressbar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Ejercicios -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <form id="formSesion" th:action="@{/usuario/sesion/completar}" method="post">
+                        <input type="hidden" name="rutinaAsignadaId" th:value="${rutinaAsignada.id}">
+                        
+                        <div th:each="ejercicio, iterStat : ${ejercicios}" 
+                             class="ejercicio-card" 
+                             :class="{'active': ejercicioActual == iterStat.index}"
+                             th:data-ejercicio-index="${iterStat.index}">
+                            
+                            <div class="d-flex gap-3">
+                                <!-- Checkbox -->
+                                <div class="check-button" 
+                                     th:id="'check-' + ${iterStat.index}"
+                                     onclick="toggleEjercicio(this, ${iterStat.index})">
+                                    <i class="bi bi-check-lg"></i>
+                                </div>
+                                
+                                <!-- Contenido -->
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <span class="badge bg-primary mb-2">Ejercicio #<span th:text="${iterStat.index + 1}">1</span></span>
+                                            <h5 class="text-white mb-1" th:text="${ejercicio.ejercicioCatalogo.nombre}">Nombre del Ejercicio</h5>
+                                            <p class="text-muted-flowfit small mb-0" th:text="${ejercicio.ejercicioCatalogo.descripcion}">Descripción</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Objetivo vs Realizado -->
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <label class="text-muted-flowfit small mb-2">
+                                                <i class="bi bi-bullseye me-1"></i>Objetivo
+                                            </label>
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.5rem 1rem;" th:if="${ejercicio.series != null}">
+                                                    <span th:text="${ejercicio.series}">3</span> series
+                                                </span>
+                                                <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.5rem 1rem;" th:if="${ejercicio.repeticiones != null}">
+                                                    <span th:text="${ejercicio.repeticiones}">12</span> reps
+                                                </span>
+                                                <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.5rem 1rem;" th:if="${ejercicio.pesoKg != null && ejercicio.pesoKg > 0}">
+                                                    <span th:text="${ejercicio.pesoKg}">0</span> kg
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="text-muted-flowfit small mb-2">
+                                                <i class="bi bi-check-circle me-1"></i>Realizado
+                                            </label>
+                                            <div class="d-flex gap-2">
+                                                <div class="input-group-custom flex-fill">
+                                                    <input type="number" 
+                                                           class="form-control" 
+                                                           th:name="'ejercicios[' + ${iterStat.index} + '].series'"
+                                                           th:value="${ejercicio.series}"
+                                                           min="0" 
+                                                           placeholder="Series">
+                                                </div>
+                                                <div class="input-group-custom flex-fill">
+                                                    <input type="number" 
+                                                           class="form-control" 
+                                                           th:name="'ejercicios[' + ${iterStat.index} + '].repeticiones'"
+                                                           th:value="${ejercicio.repeticiones}"
+                                                           min="0" 
+                                                           placeholder="Reps">
+                                                </div>
+                                                <div class="input-group-custom flex-fill" th:if="${ejercicio.pesoKg != null}">
+                                                    <input type="number" 
+                                                           step="0.5"
+                                                           class="form-control" 
+                                                           th:name="'ejercicios[' + ${iterStat.index} + '].peso'"
+                                                           th:value="${ejercicio.pesoKg}"
+                                                           min="0" 
+                                                           placeholder="Kg">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Comentarios -->
+                                    <div>
+                                        <textarea class="form-control" 
+                                                  th:name="'ejercicios[' + ${iterStat.index} + '].comentarios'"
+                                                  rows="2" 
+                                                  placeholder="Notas sobre este ejercicio (opcional)"
+                                                  style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px;"></textarea>
+                                    </div>
+                                    
+                                    <!-- Hidden fields -->
+                                    <input type="hidden" th:name="'ejercicios[' + ${iterStat.index} + '].ejercicioId'" th:value="${ejercicio.ejercicioCatalogo.id}">
+                                    <input type="hidden" th:name="'ejercicios[' + ${iterStat.index} + '].completado'" th:id="'completado-' + ${iterStat.index}" value="false">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Botón Finalizar Sesión -->
+                        <div class="card-base card-usuario p-4 text-center">
+                            <h5 class="text-white mb-3">¿Terminaste tu entrenamiento?</h5>
+                            <button type="submit" class="btn btn-success btn-lg px-5">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Completar Sesión y Registrar Progreso
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Panel Lateral -->
+                <div class="col-lg-4">
+                    <div class="card-base card-usuario p-4 sticky-top" style="top: 100px;">
+                        <h6 class="text-white mb-3 fw-bold">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Consejos
+                        </h6>
+                        <ul class="text-muted-flowfit small" style="line-height: 1.8;">
+                            <li>Marca cada ejercicio cuando lo completes</li>
+                            <li>Ajusta las series/reps según lo realizado</li>
+                            <li>Agrega notas sobre cómo te sentiste</li>
+                            <li>Descansa entre series según indicado</li>
+                            <li>Mantén una buena técnica</li>
+                        </ul>
+                        
+                        <hr style="border-color: rgba(255, 255, 255, 0.1); margin: 1.5rem 0;">
+                        
+                        <div class="text-center">
+                            <div class="mb-3">
+                                <i class="bi bi-trophy fs-1" style="color: #fbbf24;"></i>
+                            </div>
+                            <p class="text-muted-flowfit small mb-0">
+                                ¡Cada entrenamiento te acerca más a tu objetivo!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let ejerciciosCompletados = 0;
+        const totalEjercicios = /*[[${#lists.size(ejercicios)}]]*/ 0;
+        
+        function toggleEjercicio(button, index) {
+            const card = button.closest('.ejercicio-card');
+            const completadoInput = document.getElementById('completado-' + index);
+            
+            if (button.classList.contains('checked')) {
+                // Desmarcar
+                button.classList.remove('checked');
+                card.classList.remove('completed');
+                completadoInput.value = 'false';
+                ejerciciosCompletados--;
+            } else {
+                // Marcar como completado
+                button.classList.add('checked');
+                card.classList.add('completed');
+                completadoInput.value = 'true';
+                ejerciciosCompletados++;
+            }
+            
+            actualizarProgreso();
+        }
+        
+        function actualizarProgreso() {
+            document.getElementById('ejerciciosCompletados').textContent = ejerciciosCompletados;
+            const porcentaje = (ejerciciosCompletados / totalEjercicios) * 100;
+            document.getElementById('progresoTotal').style.width = porcentaje + '%';
+        }
+        
+        // Validar antes de enviar
+        document.getElementById('formSesion').addEventListener('submit', function(e) {
+            if (ejerciciosCompletados === 0) {
+                e.preventDefault();
+                alert('Por favor, completa al menos un ejercicio antes de finalizar la sesión');
+                return false;
+            }
+            
+            if (ejerciciosCompletados < totalEjercicios) {
+                if (!confirm(`Has completado ${ejerciciosCompletados} de ${totalEjercicios} ejercicios. ¿Deseas finalizar de todos modos?`)) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -172,13 +172,10 @@
               Volver
             </a>
             <div th:if="${rutinaAsignada != null and rutinaAsignada.estado.toString() == 'ACTIVA'}">
-              <form th:action="@{/usuario/rutinas/completar}" method="post" class="d-inline">
-                <input type="hidden" name="rutinaAsignadaId" th:value="${rutinaAsignada.id}">
-                <button type="submit" class="btn-primary-usuario">
-                  <i class="bi bi-check-circle-fill me-2"></i>
-                  Marcar Completada
-                </button>
-              </form>
+              <a th:href="@{/usuario/sesion/{id}(id=${rutinaAsignada.id})}" class="btn-primary-usuario">
+                <i class="bi bi-play-circle-fill me-2"></i>
+                Iniciar Sesión de Entrenamiento
+              </a>
             </div>
           </div>
         </div>

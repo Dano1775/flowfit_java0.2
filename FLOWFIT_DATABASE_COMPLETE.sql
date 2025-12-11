@@ -638,10 +638,6 @@ INSERT INTO registro_aprobaciones (usuario_id, admin_id, accion, comentarios) VA
 (7, 1, 'Aprobado', 'Documentación en orden');
 
 -- =============================================
--- INSERTAR BOLETINES DE PRUEBA
--- =============================================
-INSERT INTO boletin_informativo (asunto, contenido, tipo_destinatario, estado_envio, total_destinatarios, enviados_exitosos, creado_por) VALUES
--- =============================================
 -- PLANES DEL ENTRENADOR CARLOS (SISTEMA HÍBRIDO)
 -- =============================================
 INSERT INTO plan_entrenador (entrenador_id, nombre, descripcion, precio_mensual, rango_precio_min, rango_precio_max, duracion_dias, rutinas_mes, seguimiento_semanal, chat_directo, videollamadas_mes, plan_nutricional, es_publico, permite_personalizacion, destacado) VALUES

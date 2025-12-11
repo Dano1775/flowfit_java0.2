@@ -34,13 +34,25 @@
     <div class="container-fluid px-4 py-4">
       <!-- Page Header -->
       <div class="page-header mb-4">
-        <h1 class="page-title text-white mb-2">
-          <i class="bi bi-graph-up me-2"></i>
-          Mi Progreso
-        </h1>
-        <p class="page-subtitle text-muted-flowfit">
-          Visualiza tu evolución y logros 📊
-        </p>
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+          <div>
+            <h1 class="page-title text-white mb-2">
+              <i class="bi bi-graph-up me-2"></i>
+              Mi Progreso
+            </h1>
+            <p class="page-subtitle text-muted-flowfit mb-0">
+              Visualiza tu evolución y logros 📊
+            </p>
+          </div>
+          <div class="mt-3 mt-md-0">
+            <a th:href="@{/usuario/progreso/descargar-pdf}" 
+               class="btn btn-usuario-outline" 
+               style="border-radius: 12px; padding: 0.625rem 1.25rem; font-weight: 500;">
+              <i class="bi bi-file-earmark-pdf me-2"></i>
+              Descargar PDF
+            </a>
+          </div>
+        </div>
       </div>
 
       <!-- Estadísticas Generales -->
@@ -122,17 +134,7 @@
                 <h5 class="text-white mb-2" style="font-size: 1.125rem; font-weight: 600;">
                   <i class="bi bi-graph-up me-2" style="color: #60a5fa;"></i>Progreso Semanal
                 </h5>
-                <p class="mb-0" style="color: #cbd5e1; font-size: 0.875rem;">Tu evolución en los últimos 7 días</p>
-              </div>
-              <div class="dropdown">
-                <button class="btn" type="button" data-bs-toggle="dropdown" style="background: rgba(255, 255, 255, 0.05); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.5rem 0.75rem; border-radius: 8px;">
-                  <i class="bi bi-three-dots"></i>
-                </button>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#" onclick="cambiarPeriodoGrafico('7')">Últimos 7 días</a></li>
-                  <li><a class="dropdown-item" href="#" onclick="cambiarPeriodoGrafico('30')">Último mes</a></li>
-                  <li><a class="dropdown-item" href="#" onclick="cambiarPeriodoGrafico('90')">Últimos 3 meses</a></li>
-                </ul>
+                <p class="mb-0" style="color: #cbd5e1; font-size: 0.875rem;">Rutinas completadas en los últimos 7 días</p>
               </div>
             </div>
             <div class="chart-container" style="position: relative; height: 300px;">
@@ -302,137 +304,195 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
+  <script th:inline="javascript">
     // Sidebar Toggle
-    document.getElementById('sidebarToggle').addEventListener('click', function() {
-      document.getElementById('sidebar').classList.toggle('collapsed');
-      document.getElementById('main-content').classList.toggle('expanded');
+    document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+      document.getElementById('sidebar')?.classList.toggle('collapsed');
+      document.getElementById('main-content')?.classList.toggle('expanded');
     });
 
-    // Datos desde el backend
+    // Datos desde el backend para gráfico de progreso semanal
     const fechasBackend = /*[[${fechasArray}]]*/ [];
-    const ejerciciosBackend = /*[[${ejerciciosArray}]]*/ [];
+    const rutinasBackend = /*[[${ejerciciosArray}]]*/ []; // Ahora contiene rutinas completadas, no ejercicios
+    
+    // Datos para gráfico de distribución de rutinas
+    const rutinasCompletadasData = /*[[${rutinasCompletadas}]]*/ 0;
+    const rutinasEnProgresoData = /*[[${rutinasEnProgreso}]]*/ 0;
+    const rutinasTotalData = rutinasCompletadasData + rutinasEnProgresoData;
 
     console.log('=== DATOS RECIBIDOS EN JS ===');
     console.log('Fechas:', fechasBackend);
-    console.log('Ejercicios:', ejerciciosBackend);
-    console.log('Longitud:', fechasBackend.length);
+    console.log('Rutinas completadas por día:', rutinasBackend);
+    console.log('Total rutinas completadas:', rutinasCompletadasData);
+    console.log('Rutinas en progreso:', rutinasEnProgresoData);
+    console.log('Longitud fechas:', fechasBackend.length);
     
-    // Formatear fechas para el gráfico
-    const labels = fechasBackend.map(fechaStr => {
-      const fecha = new Date(fechaStr + 'T00:00:00');
-      const opciones = { weekday: 'short', day: 'numeric', month: 'short' };
-      return fecha.toLocaleDateString('es-ES', opciones);
-    });
+    // Formatear datos para el gráfico de progreso semanal
+    let labels = [];
+    let data = [];
     
-    const data = ejerciciosBackend;
+    if (fechasBackend && fechasBackend.length > 0) {
+      // Hay datos, formatear fechas
+      labels = fechasBackend.map(fechaStr => {
+        // Formato DD/MM ya viene del backend
+        return fechaStr;
+      });
+      data = rutinasBackend; // Rutinas completadas por día
+    } else {
+      // No hay datos, mostrar últimos 7 días vacíos
+      const hoy = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const fecha = new Date(hoy);
+        fecha.setDate(hoy.getDate() - i);
+        labels.push(fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }));
+        data.push(0);
+      }
+    }
 
     console.log('Labels para gráfico:', labels);
     console.log('Data para gráfico:', data);
     console.log('=============================\n');
 
     // Gráfico de Progreso Semanal
-    const ctx = document.getElementById('progresoChart').getContext('2d');
-    
-    // Mostrar mensaje si no hay datos
-    if (data.length === 0) {
-      document.getElementById('noDataMessage').style.display = 'block';
-      document.getElementById('progresoChart').style.opacity = '0.3';
-    }
+    const ctx = document.getElementById('progresoChart');
+    if (!ctx) {
+      console.error('No se encontró el canvas progresoChart');
+    } else {
+      // Verificar si todos los datos son 0
+      const tienesDatos = data.some(val => val > 0);
+      
+      if (!tienesDatos) {
+        const noDataMsg = document.getElementById('noDataMessage');
+        if (noDataMsg) {
+          noDataMsg.style.display = 'block';
+          ctx.style.opacity = '0.3';
+        }
+      }
 
-    const progresoChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels.length > 0 ? labels : ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-        datasets: [{
-          label: 'Ejercicios completados',
-          data: data,
-          borderColor: '#28a745',
-          backgroundColor: 'rgba(40, 167, 69, 0.1)',
-          borderWidth: 3,
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#28a745',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          }
+      const progresoChart = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Rutinas completadas',
+            data: data,
+            borderColor: '#4ade80',
+            backgroundColor: 'rgba(74, 222, 128, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#4ade80',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8
+          }]
         },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: 'rgba(255, 255, 255, 0.1)'
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
             },
-            ticks: {
-              color: 'rgba(255, 255, 255, 0.7)',
-              stepSize: 1,
-              callback: function(value) {
-                return Math.floor(value); // Mostrar solo números enteros
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              padding: 12,
+              titleColor: '#fff',
+              bodyColor: '#cbd5e1',
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              borderWidth: 1,
+              callbacks: {
+                label: function(context) {
+                  return 'Rutinas: ' + context.parsed.y;
+                }
               }
             }
           },
-          x: {
-            grid: {
-              color: 'rgba(255, 255, 255, 0.1)'
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.08)'
+              },
+              ticks: {
+                color: 'rgba(255, 255, 255, 0.6)',
+                stepSize: 1,
+                callback: function(value) {
+                  return Math.floor(value);
+                }
+              }
             },
-            ticks: {
-              color: 'rgba(255, 255, 255, 0.7)'
+            x: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.08)'
+              },
+              ticks: {
+                color: 'rgba(255, 255, 255, 0.6)'
+              }
+            }
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          }
+        }
+      });
+    }
+
+    // Gráfico de Distribución de Rutinas
+    const ctx2 = document.getElementById('distribucionChart');
+    if (!ctx2) {
+      console.error('No se encontró el canvas distribucionChart');
+    } else {
+      const distribucionChart = new Chart(ctx2.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Completadas', 'En Progreso', 'Pausadas'],
+          datasets: [{
+            data: [rutinasCompletadasData, rutinasEnProgresoData, 0],
+            backgroundColor: ['#4ade80', '#60a5fa', '#94a3b8'],
+            borderWidth: 0,
+            cutout: '70%',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              padding: 12,
+              titleColor: '#fff',
+              bodyColor: '#cbd5e1',
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              borderWidth: 1,
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                  return label + ': ' + value + ' (' + percentage + '%)';
+                }
+              }
             }
           }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index'
-        },
-        elements: {
-          point: {
-            hoverRadius: 8
-          }
         }
-      }
-    });
-
-    // Gráfico de Distribución
-    const ctx2 = document.getElementById('distribucionChart').getContext('2d');
-    const distribucionChart = new Chart(ctx2, {
-      type: 'doughnut',
-      data: {
-        labels: ['Completadas', 'En Progreso', 'Pausadas'],
-        datasets: [{
-          data: [rutinasCompletadasData, rutinasEnProgresoData, 0],
-          backgroundColor: ['#28a745', '#007bff', '#6c757d'],
-          borderWidth: 0,
-          cutout: '70%'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          }
-        }
-      }
-    });
-
-    // Función para cambiar período del gráfico
-    function cambiarPeriodoGrafico(dias) {
-      // Aquí se puede implementar lógica para cambiar los datos del gráfico
-      console.log('Cambiando a período de ' + dias + ' días');
-      // Por ahora solo mostramos un mensaje
-      const toast = new bootstrap.Toast(document.createElement('div'));
-      // Implementar cambio de datos si es necesario
+      });
+      
+      console.log('Gráfico de distribución creado con datos:', {
+        completadas: rutinasCompletadasData,
+        enProgreso: rutinasEnProgresoData,
+        total: rutinasTotalData
+      });
     }
+
+    // Nota: El gráfico muestra rutinas completadas (no ejercicios individuales)
 
     // Animaciones de entrada
     window.addEventListener('load', function() {

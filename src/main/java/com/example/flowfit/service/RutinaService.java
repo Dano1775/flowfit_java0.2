@@ -23,23 +23,23 @@ public class RutinaService {
 
     @Autowired
     private RutinaRepository rutinaRepository;
-    
+
     @Autowired
     private RutinaAsignadaRepository rutinaAsignadaRepository;
-    
+
     @Autowired
     private RutinaEjercicioRepository rutinaEjercicioRepository;
 
     // ===== GESTIÓN DE RUTINAS =====
-    
+
     public List<Rutina> obtenerRutinasGlobales() {
         return rutinaRepository.findRutinasGlobalesOrdenadas();
     }
-    
+
     public List<Rutina> obtenerRutinasPopulares(int limite) {
         return rutinaRepository.findRutinasPopulares(limite);
     }
-    
+
     public List<Rutina> obtenerRutinasPorEntrenador(Integer entrenadorId) {
         List<Rutina> rutinas = rutinaRepository.findByEntrenadorId(entrenadorId);
         // Cargar ejercicios para cada rutina
@@ -49,7 +49,7 @@ public class RutinaService {
         }
         return rutinas;
     }
-    
+
     public Rutina obtenerRutinaPorId(Integer id) {
         Optional<Rutina> rutinaOpt = rutinaRepository.findById(id);
         if (rutinaOpt.isPresent()) {
@@ -61,17 +61,18 @@ public class RutinaService {
         }
         return null;
     }
-    
-    public void crearRutina(String nombre, String descripcion, Integer entrenadorId, List<com.example.flowfit.dto.EjercicioRutinaSimpleDto> ejercicios) {
+
+    public void crearRutina(String nombre, String descripcion, Integer entrenadorId,
+            List<com.example.flowfit.dto.EjercicioRutinaSimpleDto> ejercicios) {
         // Crear la rutina
         Rutina rutina = new Rutina();
         rutina.setNombre(nombre);
         rutina.setDescripcion(descripcion);
         rutina.setEntrenadorId(entrenadorId);
         rutina.setFechaCreacion(LocalDate.now());
-        
+
         Rutina rutinaSalvada = rutinaRepository.save(rutina);
-        
+
         // Agregar ejercicios a la rutina con orden
         int orden = 1;
         for (com.example.flowfit.dto.EjercicioRutinaSimpleDto ejercicioDto : ejercicios) {
@@ -84,30 +85,30 @@ public class RutinaService {
             rutinaEjercicio.setDuracionSegundos(ejercicioDto.getDuracionSegundos());
             rutinaEjercicio.setDescansoSegundos(ejercicioDto.getDescansoSegundos());
             rutinaEjercicio.setNotas(ejercicioDto.getNotas());
-            
+
             rutinaEjercicioRepository.save(rutinaEjercicio);
         }
     }
-    
+
     public List<Rutina> buscarRutinasPorNombre(String nombre) {
         return rutinaRepository.findByNombreContainingIgnoreCase(nombre);
     }
 
     // ===== ASIGNACIÓN DE RUTINAS =====
-    
+
     public RutinaAsignada asignarRutinaAUsuario(Integer rutinaId, Integer usuarioId) {
         // Verificar que la rutina existe
         rutinaRepository.findById(rutinaId)
-            .orElseThrow(() -> new RuntimeException("Rutina no encontrada"));
-        
+                .orElseThrow(() -> new RuntimeException("Rutina no encontrada"));
+
         // Verificar que el usuario no tenga ya esta rutina asignada y activa
         Optional<RutinaAsignada> existente = rutinaAsignadaRepository
-            .findByUsuarioIdAndRutinaId(usuarioId, rutinaId);
-            
+                .findByUsuarioIdAndRutinaId(usuarioId, rutinaId);
+
         if (existente.isPresent() && existente.get().getEstado() == EstadoRutina.ACTIVA) {
             throw new RuntimeException("El usuario ya tiene esta rutina activa");
         }
-        
+
         // Crear nueva asignación
         RutinaAsignada nuevaAsignacion = new RutinaAsignada();
         nuevaAsignacion.setRutinaId(rutinaId);
@@ -117,86 +118,94 @@ public class RutinaService {
         nuevaAsignacion.setProgreso(0);
         nuevaAsignacion.setUltimaActividad(LocalDate.now());
         nuevaAsignacion.setVecesCompletada(0);
-        
+
         return rutinaAsignadaRepository.save(nuevaAsignacion);
     }
-    
+
     public List<RutinaAsignada> obtenerRutinasDelUsuario(Integer usuarioId) {
         return rutinaAsignadaRepository.findByUsuarioIdOrderByFechaAsignacionDesc(usuarioId);
     }
-    
+
     public List<RutinaAsignada> obtenerRutinasActivasDelUsuario(Integer usuarioId) {
         return rutinaAsignadaRepository.findByUsuarioIdAndEstado(usuarioId, EstadoRutina.ACTIVA);
     }
-    
+
     public List<RutinaAsignada> obtenerRutinasCompletadasDelUsuario(Integer usuarioId) {
         return rutinaAsignadaRepository.findByUsuarioIdAndEstado(usuarioId, EstadoRutina.COMPLETADA);
     }
 
     // ===== PROGRESO Y ESTADÍSTICAS =====
-    
+
     public void actualizarProgresoRutina(Integer rutinaAsignadaId, int progreso) {
         RutinaAsignada rutina = rutinaAsignadaRepository.findById(rutinaAsignadaId)
-            .orElseThrow(() -> new RuntimeException("Rutina asignada no encontrada"));
-        
+                .orElseThrow(() -> new RuntimeException("Rutina asignada no encontrada"));
+
         rutina.actualizarProgreso(progreso);
         rutinaAsignadaRepository.save(rutina);
     }
-    
+
     public void marcarRutinaComoCompletada(Integer rutinaAsignadaId) {
         RutinaAsignada rutina = rutinaAsignadaRepository.findById(rutinaAsignadaId)
-            .orElseThrow(() -> new RuntimeException("Rutina asignada no encontrada"));
-        
+                .orElseThrow(() -> new RuntimeException("Rutina asignada no encontrada"));
+
         rutina.marcarComoCompletada();
         rutinaAsignadaRepository.save(rutina);
     }
-    
+
     public Double calcularProgresoGeneralUsuario(Integer usuarioId) {
         Double progreso = rutinaAsignadaRepository.calcularProgresoGeneral(usuarioId);
         return progreso != null ? progreso : 0.0;
     }
-    
+
     public Object[] obtenerEstadisticasUsuario(Integer usuarioId) {
         return rutinaAsignadaRepository.getEstadisticasUsuario(usuarioId);
     }
-    
+
     public List<RutinaAsignada> obtenerRutinasAsignadas(Integer usuarioId) {
         return rutinaAsignadaRepository.findByUsuarioId(usuarioId);
     }
-    
+
     public List<Object[]> obtenerProgresoSemanal(Integer usuarioId) {
         // Retorna datos de progreso de los últimos 7 días
         // Por ahora simulamos datos, pero se puede implementar una consulta real
         return rutinaAsignadaRepository.obtenerProgresoUltimosDias(usuarioId, 7);
     }
-    
+
     public int contarDiasActivosEsteMes(Integer usuarioId) {
         // Cuenta los días únicos donde el usuario hizo progreso este mes
         return rutinaAsignadaRepository.contarDiasActivosDelMes(usuarioId);
     }
-    
+
     public int calcularRachaActual(Integer usuarioId) {
         // Calcula la racha de días consecutivos con actividad
         return rutinaAsignadaRepository.calcularRachaConsecutiva(usuarioId);
     }
 
+    /**
+     * Obtener rutinas completadas agrupadas por fecha
+     * Para el gráfico de progreso semanal
+     */
+    public List<Object[]> obtenerRutinasCompletadasPorFecha(Integer usuarioId, java.time.LocalDate fechaInicio) {
+        return rutinaAsignadaRepository.contarRutinasCompletadasPorFecha(usuarioId, fechaInicio);
+    }
+
     // ===== EJERCICIOS DE RUTINAS =====
-    
+
     public List<RutinaEjercicio> obtenerEjerciciosDeRutina(Integer rutinaId) {
         return rutinaEjercicioRepository.findByRutinaIdOrderByOrdenAsc(rutinaId);
     }
-    
+
     // Comentado temporalmente debido a problemas con el campo id en la tabla
     /*
-    public List<RutinaEjercicio> obtenerEjerciciosConDetalles(Integer rutinaId) {
-        return rutinaEjercicioRepository.findEjerciciosConDetalles(rutinaId);
-    }
-    */
-    
+     * public List<RutinaEjercicio> obtenerEjerciciosConDetalles(Integer rutinaId) {
+     * return rutinaEjercicioRepository.findEjerciciosConDetalles(rutinaId);
+     * }
+     */
+
     public List<EjercicioRutinaDto> obtenerEjerciciosConDetallesDto(Integer rutinaId) {
         List<Object[]> results = rutinaEjercicioRepository.findEjerciciosConDetallesNativo(rutinaId);
         List<EjercicioRutinaDto> ejercicios = new ArrayList<>();
-        
+
         for (Object[] row : results) {
             EjercicioRutinaDto dto = new EjercicioRutinaDto();
             dto.setRutinaId((Integer) row[0]);
@@ -211,22 +220,22 @@ public class RutinaService {
             dto.setEjercicioNombre((String) row[9]);
             dto.setEjercicioDescripcion((String) row[10]);
             dto.setEjercicioImagen((String) row[11]);
-            
+
             ejercicios.add(dto);
         }
-        
+
         return ejercicios;
     }
 
     // ===== RUTINAS PARA HOY =====
-    
+
     public List<RutinaAsignada> obtenerRutinasParaHoy(Integer usuarioId) {
         return rutinaAsignadaRepository.findRutinasParaHoy(
-            usuarioId, EstadoRutina.ACTIVA, LocalDate.now());
+                usuarioId, EstadoRutina.ACTIVA, LocalDate.now());
     }
 
     // ===== RUTINAS DISPONIBLES PARA USUARIO =====
-    
+
     public List<Rutina> obtenerRutinasDisponiblesParaUsuario(Integer entrenadorId) {
         if (entrenadorId != null) {
             return rutinaRepository.findRutinasDisponiblesParaUsuario(entrenadorId);
@@ -236,33 +245,33 @@ public class RutinaService {
     }
 
     // ===== CREACIÓN Y EDICIÓN DE RUTINAS =====
-    
+
     public Rutina crearRutina(Rutina rutina) {
         rutina.setFechaCreacion(LocalDate.now());
         return rutinaRepository.save(rutina);
     }
-    
+
     public Rutina actualizarRutina(Rutina rutina) {
         if (!rutinaRepository.existsById(rutina.getId())) {
             throw new RuntimeException("Rutina no encontrada");
         }
         return rutinaRepository.save(rutina);
     }
-    
+
     @Transactional
     public void eliminarRutina(Integer rutinaId) {
         // El controller ya maneja el reemplazo de asignaciones
         // Solo eliminamos ejercicios y rutina
-        
+
         // Eliminar ejercicios de la rutina
         rutinaEjercicioRepository.deleteByRutinaId(rutinaId);
-        
+
         // Eliminar la rutina
         rutinaRepository.deleteById(rutinaId);
     }
 
     // ===== RUTINAS RECIENTES =====
-    
+
     public List<RutinaAsignada> obtenerRutinasRecientes(Integer usuarioId) {
         return rutinaAsignadaRepository.findTop5ByUsuarioIdOrderByFechaAsignacionDesc(usuarioId);
     }
