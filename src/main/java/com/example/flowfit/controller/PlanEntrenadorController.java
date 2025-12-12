@@ -217,6 +217,39 @@ public class PlanEntrenadorController {
     }
 
     /**
+     * Reasignar clientes de un plan a otro antes de eliminarlo
+     */
+    @PostMapping("/planes/reasignar/{planIdActual}/{planIdNuevo}")
+    public String reasignarClientesPlan(
+            @PathVariable Integer planIdActual,
+            @PathVariable Integer planIdNuevo,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            if (usuario == null || !usuario.getPerfilUsuario().name().equals("Entrenador")) {
+                return "redirect:/login";
+            }
+
+            // Reasignar clientes
+            int clientesReasignados = planService.reasignarClientesDePlan(planIdActual, planIdNuevo);
+
+            // Ahora eliminar el plan antiguo
+            planService.eliminarPlan(planIdActual);
+
+            redirectAttributes.addFlashAttribute("success",
+                    "Plan eliminado exitosamente. " + clientesReasignados + " cliente(s) reasignado(s) al nuevo plan.");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error",
+                    "Error al reasignar clientes: " + e.getMessage());
+        }
+
+        return "redirect:/entrenador/mis-planes";
+    }
+
+    /**
      * Eliminar plan
      */
     @PostMapping("/planes/eliminar/{planId}")
@@ -229,6 +262,17 @@ public class PlanEntrenadorController {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             if (usuario == null || !usuario.getPerfilUsuario().name().equals("Entrenador")) {
                 return "redirect:/login";
+            }
+
+            // Verificar si tiene clientes activos
+            Map<String, Object> stats = planService.obtenerEstadisticasPlan(planId);
+            Long clientesActivos = (Long) stats.get("clientesActivos");
+
+            if (clientesActivos > 0) {
+                redirectAttributes.addFlashAttribute("error",
+                        "No puedes eliminar este plan porque tiene " + clientesActivos
+                                + " cliente(s) activo(s). Reasígnalos primero.");
+                return "redirect:/entrenador/mis-planes";
             }
 
             planService.eliminarPlan(planId);

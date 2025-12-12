@@ -693,6 +693,29 @@
         padding: 0.8rem 1rem;
       }
     }
+    
+    /* Animaciones para notificaciones */
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -811,8 +834,54 @@
               </div>
             </div>
             
+            <!-- Mensaje de Pago Pendiente (cuando ambos aceptan) -->
+            <div th:if="${mensaje.tipoMensaje.name() == 'TEXTO' && mensaje.metadata != null && mensaje.metadata.contains('PAGO_PENDIENTE')}"
+                 style="margin: 1.5rem 0;">
+              <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 16px; padding: 2rem; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4); text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                <h5 class="text-white mb-3" style="font-size: 1.5rem; font-weight: 600;">¡Propuesta Aceptada!</h5>
+                <p class="text-white mb-4" style="opacity: 0.9; font-size: 1.1rem;" th:text="${mensaje.contenido}">
+                  Propuesta aceptada. Procede con el pago.
+                </p>
+                
+                <!-- Información del pago -->
+                <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-white" style="opacity: 0.8;">Monto a pagar:</span>
+                    <span class="text-white" style="font-size: 2rem; font-weight: 700;" id="montoDisplay">
+                      <small style="font-size: 0.5em; opacity: 0.8;">COP</small>
+                    </span>
+                  </div>
+                </div>
+                
+                <!-- Botón de Pago (solo para usuario) -->
+                <div th:if="${esUsuario}">
+                  <button class="btn btn-light btn-lg w-100" 
+                          style="padding: 1rem; border-radius: 12px; font-weight: 600; font-size: 1.1rem;"
+                          th:attr="data-metadata=${mensaje.metadata}"
+                          onclick="abrirPagoDesdeMetadata(this)">
+                    <i class="bi bi-credit-card me-2"></i>
+                    Proceder al Pago
+                  </button>
+                </div>
+                
+                <!-- Mensaje para entrenador -->
+                <div th:unless="${esUsuario}" class="text-white" style="opacity: 0.9;">
+                  <i class="bi bi-clock-history me-2"></i>
+                  Esperando que el usuario complete el pago
+                </div>
+                
+                <div class="text-end mt-3">
+                  <small class="text-white" style="opacity: 0.6; font-size: 0.8rem;">
+                    <i class="bi bi-clock me-1"></i>
+                    <span th:text="${#temporals.format(mensaje.fechaEnvio, 'dd/MM/yyyy HH:mm')}">01/12/2024 10:30</span>
+                  </small>
+                </div>
+              </div>
+            </div>
+            
             <!-- Mensaje de Propuesta -->
-            <div th:if="${mensaje.tipoMensaje.name() == 'PROPUESTA_PLAN' and (mensaje.eliminado == null or mensaje.eliminado == false)}" 
+            <div th:if="${mensaje.tipoMensaje.name() == 'PROPUESTA_PLAN'}" 
                  th:classappend="${mensaje.remitenteId == usuario.id ? 'enviada' : ''}"
                  style="margin: 1.5rem 0;">
               <div class="propuesta-card" style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border: 2px solid var(--accent-color); border-radius: 16px; padding: 1.8rem; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
@@ -931,32 +1000,12 @@
                         <i class="bi bi-arrow-left-right me-2"></i>Hacer Contraoferta
                       </button>
                       <!-- Mensaje si es mi propia propuesta -->
-                      <div th:if="${mensaje.remitenteId == usuario.id}">
-                        <!-- Si ya está pendiente de pago, mostrar botón de pagar -->
-                        <div th:if="${contratacion != null and contratacion.estado.name() == 'PENDIENTE_PAGO'}"
-                             class="propuesta-estado-usuario"
-                             th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
-                             style="width: 100%; text-align: center; padding: 1rem; background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 10px; color: #10b981;">
-                          <div style="margin-bottom: 0.8rem;">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <strong>¡Propuesta Aceptada!</strong>
-                          </div>
-                          <button th:onclick="'abrirModalPago(' + ${contratacion.id} + ', ' + ${contratacion.precioAcordado} + ', \'' + ${mensaje.metadata != null ? mensaje.metadata.get('nombrePlan') : 'Plan Personalizado'} + '\', ' + ${contratacion.duracionDiasAcordada} + ')'"
-                                  style="background: #10b981; border: none; color: white; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s;"
-                                  onmouseover="this.style.background='#059669'" 
-                                  onmouseout="this.style.background='#10b981'">
-                            <i class="bi bi-credit-card me-2"></i>
-                            <span th:text="'Continuar y Pagar - $' + ${#numbers.formatDecimal(contratacion.precioAcordado, 0, 'COMMA', 0, 'POINT')} + ' COP'">Continuar y Pagar</span>
-                          </button>
-                        </div>
-                        <!-- Si aún no está aceptada, mostrar esperando respuesta -->
-                        <div th:unless="${contratacion != null and contratacion.estado.name() == 'PENDIENTE_PAGO'}"
-                             class="propuesta-estado-usuario"
-                             th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
-                             style="width: 100%; text-align: center; padding: 1rem; background: rgba(251, 191, 36, 0.1); border: 1px solid #fbbf24; border-radius: 10px; color: #fbbf24;">
-                          <i class="bi bi-clock-history me-2"></i>
-                          <strong>Esperando respuesta del entrenador</strong>
-                        </div>
+                      <div th:if="${mensaje.remitenteId == usuario.id}"
+                           class="propuesta-estado-usuario"
+                           th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
+                           style="width: 100%; text-align: center; padding: 1rem; background: rgba(251, 191, 36, 0.1); border: 1px solid #fbbf24; border-radius: 10px; color: #fbbf24;">
+                        <i class="bi bi-clock-history me-2"></i>
+                        <strong>Esperando respuesta del entrenador</strong>
                       </div>
                     </div>
                   </div>
@@ -1017,60 +1066,6 @@
                     <i class="bi bi-file-earmark-pdf" th:if="${mensaje.archivoTipo != null && mensaje.archivoTipo.contains('pdf')}"></i>
                     <i class="bi bi-file-earmark-word" th:if="${mensaje.archivoTipo != null && (mensaje.archivoTipo.contains('word') || mensaje.archivoTipo.contains('msword'))}"></i>
                     <i class="bi bi-file-earmark-excel" th:if="${mensaje.archivoTipo != null && mensaje.archivoTipo.contains('excel')}"></i>
-                    <i class="bi bi-file-earmark-text" th:if="${mensaje.archivoTipo == null || (!mensaje.archivoTipo.contains('pdf') && !mensaje.archivoTipo.contains('word') && !mensaje.archivoTipo.contains('excel'))}"></i>
-                    <div class="archivo-info">
-                      <div class="archivo-nombre" th:text="${mensaje.archivoNombre}">documento.pdf</div>
-                      <div class="archivo-tamano" th:text="${#numbers.formatDecimal(mensaje.archivoTamano / 1024.0, 1, 2)} + ' KB'">0 KB</div>
-                    </div>
-                    <a th:href="${mensaje.archivoUrl}" download class="btn btn-sm btn-primary">
-                      <i class="bi bi-download"></i>
-                    </a>
-                  </div>
-                  <p class="mb-0 mt-2" th:if="${mensaje.contenido != null && !mensaje.contenido.isEmpty() && !mensaje.contenido.startsWith('📎')}" 
-                     th:text="${mensaje.contenido}"></p>
-                </div>
-                <small style="font-size: 0.75rem; margin-top: 0.5rem; display: block;">
-                  <span th:text="${#temporals.format(mensaje.fechaEnvio, 'HH:mm')}">12:34</span>
-                </small>
-              </div>
-            </div>
-            
-            <!-- Mensaje con Imagen -->
-            <div th:if="${mensaje.tipoMensaje.name() == 'IMAGEN'}" 
-                 class="mensaje-item"
-                 th:classappend="${mensaje.remitenteId == usuario.id ? 'enviado' : 'recibido'}">
-              <div class="mensaje-bubble">
-                <div class="mensaje-archivo">
-                  <img th:src="${mensaje.archivoUrl}" 
-                       th:alt="${mensaje.archivoNombre}"
-                       onclick="window.open(this.src, '_blank')">
-                  <p class="mb-1 mt-2" th:if="${mensaje.contenido != null && !mensaje.contenido.isEmpty() && !mensaje.contenido.startsWith('📎')}" 
-                     th:text="${mensaje.contenido}"></p>
-                </div>
-                <small style="font-size: 0.75rem; margin-top: 0.5rem; display: block;">
-                  <span th:text="${#temporals.format(mensaje.fechaEnvio, 'HH:mm')}">12:34</span>
-                </small>
-              </div>
-            </div>
-            
-            <!-- Mensaje con Archivo/Video -->
-            <div th:if="${mensaje.tipoMensaje.name() == 'ARCHIVO'}" 
-                 class="mensaje-item"
-                 th:classappend="${mensaje.remitenteId == usuario.id ? 'enviado' : 'recibido'}">
-              <div class="mensaje-bubble">
-                <div class="mensaje-archivo">
-                  <!-- Si es video -->
-                  <div th:if="${mensaje.archivoTipo != null && mensaje.archivoTipo.startsWith('video/')}">
-                    <video controls th:src="${mensaje.archivoUrl}">
-                      Tu navegador no soporta el elemento de video.
-                    </video>
-                  </div>
-                  <!-- Si es documento -->
-                  <div th:if="${mensaje.archivoTipo == null || !mensaje.archivoTipo.startsWith('video/')}" 
-                       class="archivo-documento">
-                    <i class="bi bi-file-earmark-pdf" th:if="${mensaje.archivoTipo != null && mensaje.archivoTipo.contains('pdf')}"></i>
-                    <i class="bi bi-file-earmark-word" th:if="${mensaje.archivoTipo != null && (mensaje.archivoTipo.contains('word') || mensaje.archivoTipo.contains('msword'))}"></i>
-                    <i class="bi bi-file-earmark-excel" th:if="${mensaje.archivoTipo != null && mensaje.archivoTipo.contains('excel'))}"></i>
                     <i class="bi bi-file-earmark-text" th:if="${mensaje.archivoTipo == null || (!mensaje.archivoTipo.contains('pdf') && !mensaje.archivoTipo.contains('word') && !mensaje.archivoTipo.contains('excel'))}"></i>
                     <div class="archivo-info">
                       <div class="archivo-nombre" th:text="${mensaje.archivoNombre}">documento.pdf</div>
@@ -1480,6 +1475,24 @@
     const esUsuario = [[${esUsuario}]];
     let stompClient = null;
     
+    // Detectar interacción del usuario para evitar recargas inoportunas
+    window.isUserInteracting = false;
+    let interactionTimer = null;
+    
+    function markUserInteraction() {
+      window.isUserInteracting = true;
+      clearTimeout(interactionTimer);
+      interactionTimer = setTimeout(() => {
+        window.isUserInteracting = false;
+        console.log('⏰ Usuario inactivo - permitir recargas automáticas');
+      }, 5000); // 5 segundos sin interacción
+    }
+    
+    document.addEventListener('click', markUserInteraction);
+    document.addEventListener('scroll', markUserInteraction);
+    document.addEventListener('mousemove', markUserInteraction);
+    document.addEventListener('keydown', markUserInteraction);
+    
     // Auto-scroll al último mensaje
     function scrollToBottom() {
       const container = document.getElementById('mensajesContainer');
@@ -1575,11 +1588,44 @@
         // Suscribirse a mensajes de esta conversación
         stompClient.subscribe('/topic/conversacion/' + conversacionId, function(mensaje) {
           const data = JSON.parse(mensaje.body);
+          console.log('📩 Mensaje WebSocket recibido:', data);
           
           // 🔔 NOTIFICACIONES EN TIEMPO REAL
           if (data.tipo === 'PROPUESTA_ACEPTADA') {
+            console.log('✅ Propuesta aceptada recibida por WebSocket');
             actualizarPropuestaAceptada(data.contratacionId, data.mensaje, data.precioFinal);
+            
+            // Si requiere pago, recargar solo si el usuario no está interactuando con la página
+            if (data.requierePago && !document.hidden && !window.isUserInteracting) {
+              setTimeout(() => {
+                console.log('🔄 Recargando página para mostrar botón de pago...');
+                location.reload();
+              }, 2000);
+            }
+          } else if (data.tipo === 'CONTRAOFERTA_ENVIADA' || data.tipo === 'PROPUESTA_ENVIADA') {
+            console.log('📨 Nueva propuesta/contraoferta recibida');
+            // Solo recargar si no hay ningún modal abierto y el usuario no está interactuando
+            const hasOpenModal = document.querySelector('.modal.show');
+            if (!hasOpenModal && !window.isUserInteracting && !document.hidden) {
+              setTimeout(() => {
+                console.log('🔄 Recargando para mostrar nueva propuesta...');
+                location.reload();
+              }, 1500);
+            } else {
+              console.log('⏸️ Recarga pospuesta - usuario está interactuando o modal abierto');
+              // Mostrar notificación flotante
+              const notif = document.createElement('div');
+              notif.className = 'alert alert-info';
+              notif.style.cssText = 'position: fixed; top: 80px; right: 20px; z-index: 9999; max-width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideIn 0.3s ease-out;';
+              notif.innerHTML = '<i class="bi bi-info-circle me-2"></i>Nueva propuesta recibida. <a href="#" onclick="location.reload(); return false;" class="alert-link">Ver ahora</a>';
+              document.body.appendChild(notif);
+              setTimeout(() => {
+                notif.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => notif.remove(), 300);
+              }, 8000);
+            }
           } else {
+            // Mensaje normal de chat
             agregarMensajeAlDOM(data);
           }
         });
@@ -2599,6 +2645,38 @@
     // =========================================================
     
     let paymentController = null;
+    
+    // Helper para abrir pago desde metadata JSON
+    function abrirPagoDesdeMetadata(button) {
+      try {
+        const metadata = JSON.parse(button.getAttribute('data-metadata'));
+        abrirModalPago(
+          metadata.contratacionId || 0,
+          metadata.precioFinal || 0,
+          'Plan Personalizado',
+          metadata.duracionDias || 30
+        );
+      } catch (e) {
+        console.error('Error al parsear metadata:', e);
+        alert('Error al cargar información del pago');
+      }
+    }
+    
+    // Actualizar displays de monto desde metadata
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('[data-metadata]').forEach(btn => {
+        try {
+          const metadata = JSON.parse(btn.getAttribute('data-metadata'));
+          const montoDisplay = btn.closest('.propuesta-card, div[style*="gradient"]')?.querySelector('#montoDisplay');
+          if (montoDisplay && metadata.precioFinal) {
+            const precioFormateado = new Intl.NumberFormat('es-CO').format(metadata.precioFinal);
+            montoDisplay.innerHTML = `$${precioFormateado} <small style="font-size: 0.5em; opacity: 0.8;">COP</small>`;
+          }
+        } catch (e) {
+          console.error('Error al actualizar monto:', e);
+        }
+      });
+    });
     
     // Abrir modal de pago con MercadoPago Bricks
     function abrirModalPago(contratacionId, monto, nombrePlan = 'Plan Personalizado', duracionDias = 30) {

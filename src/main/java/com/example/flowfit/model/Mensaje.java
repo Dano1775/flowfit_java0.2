@@ -20,10 +20,10 @@ public class Mensaje {
     @Column(name = "conversacion_id", nullable = false)
     private Long conversacionId;
 
-    @Column(name = "remitente_id", nullable = false)
+    @Column(name = "remitente_id", nullable = true)
     private Integer remitenteId;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String contenido;
 
     @Enumerated(EnumType.STRING)
@@ -70,6 +70,25 @@ public class Mensaje {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "remitente_id", insertable = false, updatable = false)
     private Usuario remitente;
+
+    @PrePersist
+    protected void onCreate() {
+        if (fechaEnvio == null) {
+            fechaEnvio = LocalDateTime.now();
+        }
+        if (leido == null) {
+            leido = false;
+        }
+        if (editado == null) {
+            editado = false;
+        }
+        if (eliminado == null) {
+            eliminado = false;
+        }
+        if (tipoMensaje == null) {
+            tipoMensaje = TipoMensaje.TEXTO;
+        }
+    }
 
     public enum TipoMensaje {
         TEXTO,

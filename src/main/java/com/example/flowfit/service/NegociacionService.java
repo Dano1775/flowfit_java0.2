@@ -144,53 +144,43 @@ public class NegociacionService {
     @Transactional
     public Map<String, Object> responderPropuesta(Long contratacionId, Integer usuarioId, String accion,
             PropuestaDTO contraoferta) {
-        Map<String, Object> response = new HashMap<>();
+        System.out.println("=== RESPONDER PROPUESTA ===");
+        System.out.println("ContratacionId: " + contratacionId);
+        System.out.println("UsuarioId: " + usuarioId);
+        System.out.println("Acción: " + accion);
 
-        try {
-            System.out.println("=== RESPONDER PROPUESTA ===");
-            System.out.println("ContratacionId: " + contratacionId);
-            System.out.println("UsuarioId: " + usuarioId);
-            System.out.println("Acción: " + accion);
+        ContratacionEntrenador contratacion = contratacionRepo.findById(contratacionId)
+                .orElseThrow(() -> new RuntimeException("Contratación no encontrada"));
 
-            ContratacionEntrenador contratacion = contratacionRepo.findById(contratacionId)
-                    .orElseThrow(() -> new RuntimeException("Contratación no encontrada"));
-
-            // Validar que sea el usuario correcto
-            if (!contratacion.getUsuarioId().equals(usuarioId)) {
-                throw new RuntimeException("No tienes permiso para responder esta propuesta");
-            }
-
-            switch (accion.toUpperCase()) {
-                case "ACEPTAR":
-                    System.out.println("Ejecutando aceptarPropuesta...");
-                    response = aceptarPropuesta(contratacion, usuarioId);
-                    break;
-
-                case "RECHAZAR":
-                    System.out.println("Ejecutando rechazarPropuesta...");
-                    response = rechazarPropuesta(contratacion, usuarioId,
-                            contraoferta != null ? contraoferta.getMensaje() : null);
-                    break;
-
-                case "CONTRAOFERTA":
-                    System.out.println("Ejecutando enviarContraoferta...");
-                    response = enviarContraoferta(contratacion, usuarioId, contraoferta);
-                    break;
-
-                default:
-                    throw new RuntimeException("Acción no válida");
-            }
-
-            System.out.println("Response: " + response);
-            return response;
-
-        } catch (Exception e) {
-            System.err.println("ERROR en responderPropuesta: " + e.getMessage());
-            e.printStackTrace();
-            response.put("success", false);
-            response.put("message", "Error: " + e.getMessage());
-            return response;
+        // Validar que sea el usuario correcto
+        if (!contratacion.getUsuarioId().equals(usuarioId)) {
+            throw new RuntimeException("No tienes permiso para responder esta propuesta");
         }
+
+        Map<String, Object> response;
+        switch (accion.toUpperCase()) {
+            case "ACEPTAR":
+                System.out.println("Ejecutando aceptarPropuesta...");
+                response = aceptarPropuesta(contratacion, usuarioId);
+                break;
+
+            case "RECHAZAR":
+                System.out.println("Ejecutando rechazarPropuesta...");
+                response = rechazarPropuesta(contratacion, usuarioId,
+                        contraoferta != null ? contraoferta.getMensaje() : null);
+                break;
+
+            case "CONTRAOFERTA":
+                System.out.println("Ejecutando enviarContraoferta...");
+                response = enviarContraoferta(contratacion, usuarioId, contraoferta);
+                break;
+
+            default:
+                throw new RuntimeException("Acción no válida");
+        }
+
+        System.out.println("Response: " + response);
+        return response;
     }
 
     /**
@@ -199,36 +189,26 @@ public class NegociacionService {
     @Transactional
     public Map<String, Object> entrenadorRespondeContraoferta(Long contratacionId, Integer entrenadorId, String accion,
             PropuestaDTO nuevaPropuesta) {
-        Map<String, Object> response = new HashMap<>();
+        ContratacionEntrenador contratacion = contratacionRepo.findById(contratacionId)
+                .orElseThrow(() -> new RuntimeException("Contratación no encontrada"));
 
-        try {
-            ContratacionEntrenador contratacion = contratacionRepo.findById(contratacionId)
-                    .orElseThrow(() -> new RuntimeException("Contratación no encontrada"));
+        if (!contratacion.getEntrenadorId().equals(entrenadorId)) {
+            throw new RuntimeException("No tienes permiso para responder esta propuesta");
+        }
 
-            if (!contratacion.getEntrenadorId().equals(entrenadorId)) {
-                throw new RuntimeException("No tienes permiso para responder esta propuesta");
-            }
+        switch (accion.toUpperCase()) {
+            case "ACEPTAR":
+                return entrenadorAceptaContraoferta(contratacion, entrenadorId);
 
-            switch (accion.toUpperCase()) {
-                case "ACEPTAR":
-                    return entrenadorAceptaContraoferta(contratacion, entrenadorId);
+            case "RECHAZAR":
+                return rechazarPropuesta(contratacion, entrenadorId,
+                        nuevaPropuesta != null ? nuevaPropuesta.getMensaje() : null);
 
-                case "RECHAZAR":
-                    return rechazarPropuesta(contratacion, entrenadorId,
-                            nuevaPropuesta != null ? nuevaPropuesta.getMensaje() : null);
+            case "CONTRAOFERTA":
+                return enviarContraofertaEntrenador(contratacion, entrenadorId, nuevaPropuesta);
 
-                case "CONTRAOFERTA":
-                    return enviarContraofertaEntrenador(contratacion, entrenadorId, nuevaPropuesta);
-
-                default:
-                    throw new RuntimeException("Acción no válida");
-            }
-
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Error: " + e.getMessage());
-            e.printStackTrace();
-            return response;
+            default:
+                throw new RuntimeException("Acción no válida");
         }
     }
 
@@ -264,6 +244,90 @@ public class NegociacionService {
         }
 
         System.out.println("💰 Precio final calculado: " + precioFinal);
+
+        // CREAR REGISTRO DE PAGO AUTOMÁTICAMENTE
+        PagoContratacion pagoExistente = pagoRepo.findByContratacionId(contratacion.getId()).orElse(null);
+
+        if (pagoExistente == null) {
+            System.out.println("💳 Creando registro de pago para contratación: " + contratacion.getId());
+
+            PagoContratacion nuevoPago = new PagoContratacion();
+            nuevoPago.setContratacionId(contratacion.getId());
+            nuevoPago.setUsuarioId(contratacion.getUsuarioId());
+            nuevoPago.setMonto(precioFinal);
+            nuevoPago.setMoneda("COP");
+            nuevoPago.setEstadoPago(PagoContratacion.EstadoPago.PENDIENTE);
+            nuevoPago.setEstadoEscrow(PagoContratacion.EstadoEscrow.RETENIDO);
+            nuevoPago.setFechaCreacion(LocalDateTime.now());
+
+            pagoRepo.save(nuevoPago);
+            System.out.println("✅ Pago creado exitosamente con ID: " + nuevoPago.getId());
+
+            response.put("pagoId", nuevoPago.getId());
+        } else {
+            System.out.println("ℹ️ Ya existe un pago para esta contratación");
+            response.put("pagoId", pagoExistente.getId());
+        }
+
+        // Crear mensaje de pago en el chat
+        Optional<Conversacion> conversacionOpt = conversacionRepo
+                .findByUsuarioIdAndEntrenadorId(contratacion.getUsuarioId(), contratacion.getEntrenadorId());
+
+        if (conversacionOpt.isPresent()) {
+            Conversacion conversacion = conversacionOpt.get();
+
+            // Eliminar TODAS las propuestas anteriores del chat
+            List<Mensaje> mensajesAnteriores = mensajeRepo
+                    .findByConversacionIdOrderByFechaEnvioAsc(conversacion.getId());
+            for (Mensaje msg : mensajesAnteriores) {
+                Boolean eliminado = msg.getEliminado();
+                if (msg.getTipoMensaje() == Mensaje.TipoMensaje.PROPUESTA_PLAN && (eliminado == null || !eliminado)) {
+                    msg.setEliminado(true);
+                    mensajeRepo.save(msg);
+                    System.out.println("🗑️ Mensaje de propuesta eliminado después de aceptación");
+                }
+            }
+
+            // Crear mensaje con información del pago
+            Mensaje mensajePago = new Mensaje();
+            mensajePago.setConversacionId(conversacion.getId());
+            mensajePago.setRemitenteId(null); // Sistema
+            mensajePago.setTipoMensaje(Mensaje.TipoMensaje.SISTEMA);
+            mensajePago.setContenido("✅ Propuesta aceptada. Procede con el pago para confirmar la contratación.");
+
+            // Metadata con información del pago
+            Map<String, Object> pagoMetadata = new HashMap<>();
+            pagoMetadata.put("tipo", "PAGO_PENDIENTE");
+            pagoMetadata.put("contratacionId", contratacion.getId());
+            pagoMetadata.put("precioFinal", precioFinal.doubleValue());
+            pagoMetadata.put("duracionDias", contratacion.getDuracionDiasAcordada());
+            Long pagoId = (Long) response.get("pagoId");
+            if (pagoId != null) {
+                pagoMetadata.put("pagoId", pagoId);
+            }
+
+            try {
+                mensajePago.setMetadata(objectMapper.writeValueAsString(pagoMetadata));
+            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                System.err.println("Error al crear metadata: " + e.getMessage());
+                mensajePago.setMetadata("{}"); // Metadata vacío como fallback
+            }
+
+            mensajeRepo.save(mensajePago);
+
+            // Notificar vía WebSocket para recargar
+            Map<String, Object> notificacion = new HashMap<>();
+            notificacion.put("tipo", "PROPUESTA_ACEPTADA");
+            notificacion.put("contratacionId", contratacion.getId());
+            notificacion.put("mensaje", "Propuesta aceptada. Procede al pago.");
+            notificacion.put("precioFinal", precioFinal.doubleValue());
+            notificacion.put("requierePago", true);
+
+            messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(), notificacion);
+        } else {
+            System.err.println("⚠️ No se encontró conversación para usuario " + contratacion.getUsuarioId() +
+                    " y entrenador " + contratacion.getEntrenadorId());
+        }
 
         response.put("success", true);
         response.put("message", "Propuesta aceptada. Redirigiendo al pago...");
@@ -310,27 +374,96 @@ public class NegociacionService {
 
         System.out.println("💰 Precio final calculado (entrenador): " + precioFinal);
 
-        // Notificar al usuario vía WebSocket que su contraoferta fue aceptada
-        try {
-            Conversacion conversacion = conversacionRepo
-                    .findByUsuarioIdAndEntrenadorId(contratacion.getUsuarioId(), contratacion.getEntrenadorId())
-                    .orElseThrow();
+        // CREAR REGISTRO DE PAGO AUTOMÁTICAMENTE
+        PagoContratacion pagoExistente = pagoRepo.findByContratacionId(contratacion.getId()).orElse(null);
 
+        if (pagoExistente == null) {
+            System.out.println("💳 Creando registro de pago para contratación: " + contratacion.getId());
+
+            PagoContratacion nuevoPago = new PagoContratacion();
+            nuevoPago.setContratacionId(contratacion.getId());
+            nuevoPago.setUsuarioId(contratacion.getUsuarioId());
+            nuevoPago.setMonto(precioFinal);
+            nuevoPago.setMoneda("COP");
+            nuevoPago.setEstadoPago(PagoContratacion.EstadoPago.PENDIENTE);
+            nuevoPago.setEstadoEscrow(PagoContratacion.EstadoEscrow.RETENIDO);
+            nuevoPago.setFechaCreacion(LocalDateTime.now());
+
+            pagoRepo.save(nuevoPago);
+            System.out.println("✅ Pago creado exitosamente con ID: " + nuevoPago.getId());
+
+            response.put("pagoId", nuevoPago.getId());
+        } else {
+            System.out.println("ℹ️ Ya existe un pago para esta contratación");
+            response.put("pagoId", pagoExistente.getId());
+        }
+
+        // Crear mensaje de pago en el chat
+        Optional<Conversacion> conversacionOpt = conversacionRepo
+                .findByUsuarioIdAndEntrenadorId(contratacion.getUsuarioId(), contratacion.getEntrenadorId());
+
+        if (conversacionOpt.isPresent()) {
+            Conversacion conversacion = conversacionOpt.get();
+
+            // Eliminar TODAS las propuestas anteriores del chat
+            List<Mensaje> mensajesAnteriores = mensajeRepo
+                    .findByConversacionIdOrderByFechaEnvioAsc(conversacion.getId());
+            for (Mensaje msg : mensajesAnteriores) {
+                Boolean eliminado = msg.getEliminado();
+                if (msg.getTipoMensaje() == Mensaje.TipoMensaje.PROPUESTA_PLAN && (eliminado == null || !eliminado)) {
+                    msg.setEliminado(true);
+                    mensajeRepo.save(msg);
+                    System.out.println("🗑️ Mensaje de propuesta eliminado después de aceptación (entrenador)");
+                }
+            }
+
+            // Crear mensaje con información del pago
+            Mensaje mensajePago = new Mensaje();
+            mensajePago.setConversacionId(conversacion.getId());
+            mensajePago.setRemitenteId(null); // Sistema
+            mensajePago.setTipoMensaje(Mensaje.TipoMensaje.SISTEMA);
+            mensajePago.setContenido(
+                    "✅ El entrenador aceptó tu contraoferta. Procede con el pago para confirmar la contratación.");
+
+            // Metadata con información del pago
+            Map<String, Object> pagoMetadata = new HashMap<>();
+            pagoMetadata.put("tipo", "PAGO_PENDIENTE");
+            pagoMetadata.put("contratacionId", contratacion.getId());
+            pagoMetadata.put("precioFinal", precioFinal.doubleValue());
+            pagoMetadata.put("duracionDias", contratacion.getDuracionDiasAcordada());
+            Long pagoId = (Long) response.get("pagoId");
+            if (pagoId != null) {
+                pagoMetadata.put("pagoId", pagoId);
+            }
+
+            try {
+                mensajePago.setMetadata(objectMapper.writeValueAsString(pagoMetadata));
+            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                System.err.println("Error al crear metadata: " + e.getMessage());
+                mensajePago.setMetadata("{}"); // Metadata vacío como fallback
+            }
+
+            mensajeRepo.save(mensajePago);
+
+            // Notificar vía WebSocket para recargar
             Map<String, Object> notificacion = new HashMap<>();
             notificacion.put("tipo", "PROPUESTA_ACEPTADA");
             notificacion.put("contratacionId", contratacion.getId());
             notificacion.put("mensaje", "El entrenador aceptó tu contraoferta. Procede al pago.");
             notificacion.put("precioFinal", precioFinal.doubleValue());
+            notificacion.put("requierePago", true);
 
             messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(), notificacion);
-        } catch (Exception e) {
-            System.err.println("Error al enviar notificación WebSocket: " + e.getMessage());
+        } else {
+            System.err.println("⚠️ No se encontró conversación para usuario " + contratacion.getUsuarioId() +
+                    " y entrenador " + contratacion.getEntrenadorId());
         }
 
         response.put("success", true);
         response.put("message", "Contraoferta aceptada. El usuario puede proceder al pago.");
         response.put("contratacionId", contratacion.getId());
         response.put("precioFinal", precioFinal.doubleValue());
+        response.put("requierePago", true);
 
         return response;
     }
@@ -394,6 +527,31 @@ public class NegociacionService {
             propuestaAnterior.setEstadoPropuesta(HistorialNegociacion.EstadoPropuesta.CONTRAOFERTA);
             propuestaAnterior.setFechaRespuesta(LocalDateTime.now());
             historialRepo.save(propuestaAnterior);
+
+            // Eliminar el mensaje anterior de la propuesta en el chat
+            Conversacion conv = conversacionRepo
+                    .findByUsuarioIdAndEntrenadorId(contratacion.getUsuarioId(), contratacion.getEntrenadorId())
+                    .orElseThrow();
+            List<Mensaje> mensajesAnteriores = mensajeRepo.findByConversacionIdOrderByFechaEnvioAsc(conv.getId());
+
+            for (Mensaje msg : mensajesAnteriores) {
+                Boolean eliminado = msg.getEliminado();
+                if (msg.getTipoMensaje() == Mensaje.TipoMensaje.PROPUESTA_PLAN && (eliminado == null || !eliminado)) {
+                    try {
+                        Map<String, Object> metadata = objectMapper.readValue(msg.getMetadata(), Map.class);
+                        Integer versionMsg = (Integer) metadata.get("version");
+                        if (versionMsg != null && versionMsg == (nuevaVersion - 1)) {
+                            msg.setEliminado(true);
+                            mensajeRepo.save(msg);
+                            System.out.println(
+                                    "🗑️ Mensaje de propuesta anterior (v" + versionMsg + ") marcado como eliminado");
+                            break;
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error al procesar metadata del mensaje: " + e.getMessage());
+                    }
+                }
+            }
         }
 
         // Crear nuevo historial
@@ -434,10 +592,12 @@ public class NegociacionService {
             mensajeWs.put("remitenteId", mensaje.getRemitenteId());
             mensajeWs.put("contenido", mensaje.getContenido());
             mensajeWs.put("tipoMensaje", "PROPUESTA_PLAN");
+            mensajeWs.put("tipo", "CONTRAOFERTA_ENVIADA"); // Para que el frontend recargue
             mensajeWs.put("fechaEnvio", mensaje.getFechaEnvio().toString());
             mensajeWs.put("metadata", objectMapper.readValue(mensaje.getMetadata(), Map.class));
 
             messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(), mensajeWs);
+            System.out.println("✅ Notificación WebSocket enviada: CONTRAOFERTA_ENVIADA (Usuario)");
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
             System.err.println("Error al parsear metadata para WebSocket: " + e.getMessage());
         }
@@ -481,6 +641,31 @@ public class NegociacionService {
             propuestaAnterior.setEstadoPropuesta(HistorialNegociacion.EstadoPropuesta.CONTRAOFERTA);
             propuestaAnterior.setFechaRespuesta(LocalDateTime.now());
             historialRepo.save(propuestaAnterior);
+
+            // Eliminar el mensaje anterior de la propuesta en el chat
+            Conversacion conv = conversacionRepo
+                    .findByUsuarioIdAndEntrenadorId(contratacion.getUsuarioId(), contratacion.getEntrenadorId())
+                    .orElseThrow();
+            List<Mensaje> mensajesAnteriores = mensajeRepo.findByConversacionIdOrderByFechaEnvioAsc(conv.getId());
+
+            for (Mensaje msg : mensajesAnteriores) {
+                Boolean eliminado = msg.getEliminado();
+                if (msg.getTipoMensaje() == Mensaje.TipoMensaje.PROPUESTA_PLAN && (eliminado == null || !eliminado)) {
+                    try {
+                        Map<String, Object> metadata = objectMapper.readValue(msg.getMetadata(), Map.class);
+                        Integer versionMsg = (Integer) metadata.get("version");
+                        if (versionMsg != null && versionMsg == (nuevaVersion - 1)) {
+                            msg.setEliminado(true);
+                            mensajeRepo.save(msg);
+                            System.out.println(
+                                    "🗑️ Mensaje de propuesta anterior (v" + versionMsg + ") marcado como eliminado");
+                            break;
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error al procesar metadata del mensaje: " + e.getMessage());
+                    }
+                }
+            }
         }
 
         // Crear nuevo historial

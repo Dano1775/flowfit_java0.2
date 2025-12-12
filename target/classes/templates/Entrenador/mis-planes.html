@@ -14,90 +14,189 @@
   <link th:href="@{/css/flowfit-entrenador.css}" rel="stylesheet">
   
   <style>
-    /* Variables de colores FlowFit - ENTRENADOR (AZUL) */
-    :root {
-      --bg-primary: #0f172a;
-      --bg-secondary: #1e293b;
-      --bg-tertiary: #334155;
-      --accent-primary: #1e40af;
-      --accent-light: #3b82f6;
-      --accent-dark: #1e3a8a;
-      --text-primary: #ffffff;
-      --text-secondary: #94a3b8;
-      --border-color: #475569;
-      --success-color: #10b981;
-      --warning-color: #fbbf24;
-    }
-    
-    /* Cards de planes mejoradas */
-    .card-base {
-      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%) !important;
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
+    /* Plan Cards - Estilo FlowFit consistente */
+    .plan-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 20px;
+      padding: 2rem;
       transition: all 0.3s ease;
+      position: relative;
       overflow: hidden;
+      backdrop-filter: blur(10px);
     }
     
-    .card-base:hover {
-      transform: translateY(-8px);
-      border-color: var(--accent-primary);
-      box-shadow: 0 12px 40px rgba(30, 64, 175, 0.3);
-    }
-    
-    .card-base::before {
+    .plan-card::before {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-light) 100%);
+      height: 3px;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
       opacity: 0;
       transition: opacity 0.3s ease;
     }
     
-    .card-base:hover::before {
+    .plan-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(59, 130, 246, 0.5);
+      box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2);
+    }
+    
+    .plan-card:hover::before {
       opacity: 1;
     }
     
-    /* Badges mejorados */
+    /* Plan Header */
+    .plan-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+    
+    .plan-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Plan Badges */
     .badge {
-      padding: 0.5rem 1rem;
-      border-radius: 12px;
-      font-weight: 500;
-      font-size: 0.8rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
     }
     
-    .badge.bg-success {
-      background: linear-gradient(135deg, var(--success-color) 0%, #34d399 100%) !important;
+    .badge-active {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
     }
     
-    .badge.bg-warning {
-      background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%) !important;
+    .badge-inactive {
+      background: rgba(148, 163, 184, 0.2);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.3);
     }
     
-    /* Precio destacado */
-    .card-body h2 {
-      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-light) 100%);
+    .badge-destacado {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #1e293b;
+      border: none;
+    }
+    
+    /* Plan Precio */
+    .plan-precio {
+      margin: 1.5rem 0;
+    }
+    
+    .precio-valor {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #3b82f6, #60a5fa);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      background-clip: text;
+      line-height: 1;
     }
     
-    /* Lista de características */
-    .list-unstyled li i {
+    .precio-moneda {
+      font-size: 1rem;
+      color: #ffffff;
+      font-weight: 400;
+      margin-left: 0.5rem;
+      opacity: 0.9;
+    }
+    
+    /* Plan Descripción */
+    .plan-descripcion {
+      color: #ffffff;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      opacity: 0.95;
+    }
+    
+    /* Plan Características */
+    .plan-features {
+      margin-bottom: 1.5rem;
+    }
+    
+    .features-title {
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      padding: 0.6rem 0;
+      color: #ffffff;
+      font-size: 0.9rem;
+    }
+    
+    .feature-item i {
       width: 24px;
+      margin-right: 0.8rem;
+      color: #10b981;
+      font-size: 1rem;
+    }
+    
+    /* Plan Stats */
+    .plan-stats {
+      display: flex;
+      gap: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-item {
+      flex: 1;
       text-align: center;
     }
     
-    /* Stats */
-    .border-top {
-      border-color: var(--border-color) !important;
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #3b82f6;
+      display: block;
     }
     
-    /* Botón crear plan */
-    .btn-flowfit-primary {
-      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-light) 100%);
+    .stat-label {
+      font-size: 0.75rem;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.8;
+    }
+    
+    /* Dropdown Menu Mejorado */
+    .plan-menu-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      padding: 0.5rem 0.8rem;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+    }
+    
+    .plan-menu-btn:hover {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.5);
+      color: #ffffff;
+    }
+    
+    /* Botón Crear Plan - Estilo FlowFit */
+    .btn-create-plan {
+      background: linear-gradient(135deg, #3b82f6, #60a5fa);
       border: none;
       padding: 0.8rem 1.8rem;
       border-radius: 12px;
@@ -113,22 +212,34 @@
     
     /* Dropdown */
     .dropdown-menu {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
+      background: rgba(15, 23, 42, 0.98) !important;
+      border: 1px solid rgba(59, 130, 246, 0.4) !important;
       border-radius: 12px;
       padding: 0.5rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
     }
     
     .dropdown-item {
-      color: var(--text-secondary);
+      color: #ffffff !important;
       border-radius: 8px;
       padding: 0.6rem 1rem;
       transition: all 0.2s ease;
+      font-weight: 500;
     }
     
     .dropdown-item:hover {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
+      background: rgba(59, 130, 246, 0.2) !important;
+      color: #ffffff !important;
+    }
+    
+    .dropdown-item.text-danger {
+      color: #ef4444 !important;
+    }
+    
+    .dropdown-item.text-danger:hover {
+      background: rgba(239, 68, 68, 0.2) !important;
+      color: #ef4444 !important;
     }
     
     .dropdown-item i {
@@ -151,6 +262,27 @@
     
     .modal-body {
       padding: 2rem;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    
+    /* Scrollbar personalizado para modal */
+    .modal-body::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .modal-body::-webkit-scrollbar-track {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 10px;
+    }
+    
+    .modal-body::-webkit-scrollbar-thumb {
+      background: rgba(59, 130, 246, 0.5);
+      border-radius: 10px;
+    }
+    
+    .modal-body::-webkit-scrollbar-thumb:hover {
+      background: rgba(59, 130, 246, 0.7);
     }
     
     .modal-footer {
@@ -221,24 +353,55 @@
       border-radius: 12px;
       border: none;
       padding: 1rem 1.5rem;
+      color: #ffffff !important;
     }
     
     .alert-success {
-      background: rgba(16, 185, 129, 0.1);
-      border-left: 4px solid var(--success-color);
-      color: var(--text-primary);
+      background: rgba(34, 197, 94, 0.2) !important;
+      border: 1px solid rgba(34, 197, 94, 0.4) !important;
+      color: #ffffff !important;
+    }
+    
+    .alert-success strong,
+    .alert-success p,
+    .alert-success span {
+      color: #ffffff !important;
     }
     
     .alert-danger {
-      background: rgba(245, 87, 108, 0.1);
-      border-left: 4px solid #f5576c;
-      color: var(--text-primary);
+      background: rgba(239, 68, 68, 0.2) !important;
+      border: 1px solid rgba(239, 68, 68, 0.4) !important;
+      color: #ffffff !important;
+    }
+    
+    .alert-danger strong,
+    .alert-danger p,
+    .alert-danger span {
+      color: #ffffff !important;
     }
     
     .alert-info {
-      background: rgba(30, 64, 175, 0.1);
-      border-left: 4px solid var(--accent-primary);
-      color: var(--text-primary);
+      background: rgba(59, 130, 246, 0.2) !important;
+      border: 1px solid rgba(59, 130, 246, 0.4) !important;
+      color: #ffffff !important;
+    }
+    
+    .alert-info strong,
+    .alert-info p,
+    .alert-info span {
+      color: #ffffff !important;
+    }
+    
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.2) !important;
+      border: 1px solid rgba(245, 158, 11, 0.4) !important;
+      color: #ffffff !important;
+    }
+    
+    .alert-warning strong,
+    .alert-warning p,
+    .alert-warning span {
+      color: #ffffff !important;
     }
     
     /* Header */
@@ -250,10 +413,240 @@
       background-clip: text;
     }
     
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 5rem 2rem;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 24px;
+      border: 2px dashed rgba(59, 130, 246, 0.3);
+    }
+    
+    .empty-state-icon {
+      font-size: 5rem;
+      color: rgba(59, 130, 246, 0.3);
+      margin-bottom: 2rem;
+    }
+    
+    .empty-state-title {
+      color: white;
+      font-weight: 700;
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    .empty-state-text {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    /* Modal Enhancements */
+    .modal-content {
+      background: rgba(15, 23, 42, 0.95) !important;
+      border: 1px solid rgba(59, 130, 246, 0.3) !important;
+      border-radius: 20px !important;
+      backdrop-filter: blur(20px);
+    }
+    
+    .modal-title {
+      color: white !important;
+      font-weight: 700;
+    }
+    
+    .btn-close {
+      filter: invert(1);
+      opacity: 0.7;
+    }
+    
+    .btn-close:hover {
+      opacity: 1;
+    }
+    
+    /* Form Enhancements */
+    .form-label {
+      color: white !important;
+      font-weight: 600;
+    }
+    
+    .form-control, .form-select {
+      background: rgba(30, 41, 59, 0.8) !important;
+      border: 1px solid rgba(59, 130, 246, 0.3) !important;
+      color: white !important;
+      border-radius: 12px;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      background: rgba(30, 41, 59, 0.9) !important;
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+      color: white !important;
+    }
+    
+    .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .form-check-input {
+      background-color: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+    
+    .form-check-input:checked {
+      background-color: #3b82f6;
+      border-color: #3b82f6;
+    }
+    
+    .form-check-label {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .form-select option {
+      background: #1e293b;
+      color: white;
+    }
+    
+    /* Tips Section */
+    .tips-section {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .tips-section h5 {
+      color: #3b82f6;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    
+    .tips-section ul {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.8;
+    }
+    
+    /* Button Enhancements */
+    .btn-entrenador-primary, .btn-primary-flow {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+      border: none !important;
+      color: white !important;
+      padding: 0.75rem 2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-entrenador-primary:hover, .btn-primary-flow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+      color: white !important;
+    }
+    
+    .btn-secondary {
+      background: rgba(100, 116, 139, 0.4) !important;
+      border: 1px solid rgba(100, 116, 139, 0.6) !important;
+      color: white !important;
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(100, 116, 139, 0.6) !important;
+      border-color: rgba(100, 116, 139, 0.8) !important;
+      color: white !important;
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+      border: none !important;
+      color: white !important;
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-danger:hover {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+      color: white !important;
+      transform: translateY(-2px);
+    }
+    
+    .btn-warning {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+      border: none !important;
+      color: #1e293b !important;
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+    
+    .btn-warning:hover {
+      background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+      color: #0f172a !important;
+      transform: translateY(-2px);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      border: none;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-danger:hover {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    }
+    
+    .text-danger {
+      color: #f87171 !important;
+    }
+    
+    .border-danger {
+      border-color: rgba(239, 68, 68, 0.3) !important;
+    }
+    
+    .dropdown-item.text-danger:hover {
+      background: rgba(239, 68, 68, 0.1) !important;
+      color: #f87171 !important;
+    }
+    
     /* Responsive */
     @media (max-width: 768px) {
       .card-base:hover {
         transform: translateY(-4px);
+      }
+      
+      .plan-card {
+        margin-bottom: 1rem;
+      }
+      
+      .plan-precio {
+        padding: 1.5rem 0;
+      }
+      
+      .precio-valor {
+        font-size: 2.5rem;
       }
     }
   </style>
@@ -292,109 +685,128 @@
       </div>
       
       <!-- Mensajes Flash -->
-      <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle me-2"></i>
-        <span th:text="${success}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert" 
+           style="background: rgba(34, 197, 94, 0.2) !important; border: 1px solid rgba(34, 197, 94, 0.5) !important; color: #ffffff !important; font-weight: 500;">
+        <i class="bi bi-check-circle me-2" style="color: #22c55e;"></i>
+        <span th:text="${success}" style="color: #ffffff !important;"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
       </div>
       
-      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        <span th:text="${error}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert"
+           style="background: rgba(239, 68, 68, 0.2) !important; border: 1px solid rgba(239, 68, 68, 0.5) !important; color: #ffffff !important; font-weight: 500;">
+        <i class="bi bi-exclamation-triangle me-2" style="color: #ef4444;"></i>
+        <span th:text="${error}" style="color: #ffffff !important;"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
       </div>
       
       <!-- Lista de Planes -->
       <div class="row g-4">
         <div th:each="plan : ${planes}" class="col-lg-4 col-md-6">
-          <div class="card-base card-entrenador h-100">
-            <div class="card-body p-4">
-              
-              <!-- Header del Plan -->
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <h4 class="fw-bold mb-2 text-white" th:text="${plan.nombre}">Plan Básico</h4>
-                  <span class="badge bg-success" th:if="${plan.activo}">Activo</span>
-                  <span class="badge bg-secondary" th:unless="${plan.activo}">Inactivo</span>
-                  <span class="badge bg-warning text-dark ms-1" th:if="${plan.destacado}">
-                    <i class="bi bi-star-fill"></i> Destacado
+          <div class="plan-card h-100">
+            
+            <!-- Header del Plan -->
+            <div class="plan-header">
+              <div>
+                <h4 class="plan-title" th:text="${plan.nombre}">Plan Básico</h4>
+                <div class="d-flex gap-2 flex-wrap">
+                  <span class="badge badge-destacado" th:if="${plan.destacado}">
+                    <i class="bi bi-star-fill me-1"></i>Destacado
                   </span>
                 </div>
-                <div class="dropdown">
-                  <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
-                    <i class="bi bi-three-dots-vertical"></i>
-                  </button>
-                  <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="#" th:attr="data-plan-id=${plan.id}" onclick="editarPlan(this)">
-                      <i class="bi bi-pencil me-2"></i>Editar
-                    </a></li>
-                    <li><a class="dropdown-item" href="#" th:attr="data-plan-id=${plan.id}, data-activo=${plan.activo}" onclick="cambiarEstado(this)">
-                      <i class="bi bi-eye-slash me-2" th:if="${plan.activo}"></i>
-                      <i class="bi bi-eye me-2" th:unless="${plan.activo}"></i>
-                      <span th:if="${plan.activo}">Desactivar</span>
-                      <span th:unless="${plan.activo}">Activar</span>
-                    </a></li>
-                  </ul>
-                </div>
               </div>
-              
-              <!-- Precio -->
-              <div class="mb-3">
-                <h2 class="fw-bold mb-0 text-white">
-                  $<span th:text="${#numbers.formatDecimal(plan.precioMensual, 0, 'COMMA', 0, 'POINT')}">50.000</span>
-                  <small class="text-white fs-6">COP / mes</small>
-                </h2>
-              </div>
-              
-              <!-- Descripción -->
-              <p class="text-white small mb-3" th:if="${plan.descripcion}" th:text="${plan.descripcion}">
-                Descripción del plan
-              </p>
-              
-              <!-- Características -->
-              <div class="mb-3">
-                <p class="text-white small mb-2 fw-bold">✨ Incluye:</p>
-                <ul class="list-unstyled">
-                  <li class="small mb-2" th:if="${plan.duracionDias != null}">
-                    <i class="bi bi-calendar-check text-success me-2"></i>
-                    <span th:text="${plan.duracionDias} + ' días de duración'"></span>
-                  </li>
-                  <li class="small mb-2" th:if="${plan.rutinasMes != null}">
-                    <i class="bi bi-lightning-charge text-success me-2"></i>
-                    <span th:text="${plan.rutinasMes} + ' rutinas al mes'"></span>
-                  </li>
-                  <li class="small mb-2" th:if="${plan.seguimientoSemanal}">
-                    <i class="bi bi-graph-up text-success me-2"></i>
-                    Seguimiento semanal personalizado
-                  </li>
-                  <li class="small mb-2" th:if="${plan.videollamadasMes > 0}">
-                    <i class="bi bi-camera-video text-success me-2"></i>
-                    <span th:text="${plan.videollamadasMes} + ' videollamada(s) mensual(es)'"></span>
-                  </li>
-                  <li class="small mb-2" th:if="${plan.chatDirecto}">
-                    <i class="bi bi-chat-dots text-success me-2"></i>
-                    Chat directo ilimitado
-                  </li>
-                  <li class="small mb-2" th:if="${plan.planNutricional}">
-                    <i class="bi bi-heart-pulse text-success me-2"></i>
-                    Plan nutricional incluido
-                  </li>
+              <div class="dropdown">
+                <button class="plan-menu-btn" data-bs-toggle="dropdown">
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="#" 
+                    th:attr="data-plan-id=${plan.id},
+                            data-nombre=${plan.nombre},
+                            data-descripcion=${plan.descripcion},
+                            data-precio=${plan.precioMensual},
+                            data-duracion=${plan.duracionDias},
+                            data-rutinas=${plan.rutinasMes},
+                            data-seguimiento=${plan.seguimientoSemanal},
+                            data-chat=${plan.chatDirecto},
+                            data-videollamadas=${plan.videollamadasMes},
+                            data-nutricion=${plan.planNutricional},
+                            data-publico=${plan.esPublico},
+                            data-destacado=${plan.destacado}" 
+                    onclick="editarPlan(this); return false;">
+                    <i class="bi bi-pencil me-2"></i>Editar Plan
+                  </a></li>
+                  <li><hr class="dropdown-divider" style="border-color: rgba(59, 130, 246, 0.3);"></li>
+                  <li><a class="dropdown-item text-danger" href="#" 
+                    th:attr="data-plan-id=${plan.id}, 
+                             data-nombre=${plan.nombre},
+                             data-clientes-activos=${plan.clientesActivos != null ? plan.clientesActivos : 0},
+                             data-precio=${plan.precioMensual},
+                             data-activo=${plan.activo}" 
+                    onclick="confirmarEliminar(this); return false;">
+                    <i class="bi bi-trash me-2"></i>Eliminar Plan
+                  </a></li>
                 </ul>
               </div>
-              
-              <!-- Stats -->
-              <div class="d-flex gap-3 pt-3 border-top border-secondary">
-                <div class="text-center flex-fill">
-                  <div class="fw-bold text-white" th:text="${plan.clientesActivos != null ? plan.clientesActivos : 0}">0</div>
-                  <small class="text-white">Clientes</small>
-                </div>
-                <div class="text-center flex-fill" th:if="${plan.esPublico}">
-                  <i class="bi bi-eye text-success"></i>
-                  <small class="text-white d-block">Público</small>
-                </div>
-              </div>
-              
             </div>
+            
+            <!-- Precio -->
+            <div class="plan-precio">
+              <div class="d-flex align-items-baseline">
+                <span class="precio-valor">
+                  $<span th:text="${#numbers.formatDecimal(plan.precioMensual, 0, 'COMMA', 0, 'POINT')}">50.000</span>
+                </span>
+                <span class="precio-moneda">COP / mes</span>
+              </div>
+            </div>
+            
+            <!-- Descripción -->
+            <p class="plan-descripcion" th:if="${plan.descripcion}" th:text="${plan.descripcion}">
+              Descripción completa del plan de entrenamiento
+            </p>
+            
+            <!-- Características -->
+            <div class="plan-features">
+              <div class="features-title">
+                <i class="bi bi-check2-circle me-2"></i>Incluye
+              </div>
+              <div class="feature-item" th:if="${plan.duracionDias != null}">
+                <i class="bi bi-calendar-check"></i>
+                <span th:text="${plan.duracionDias} + ' días de duración'"></span>
+              </div>
+              <div class="feature-item" th:if="${plan.rutinasMes != null}">
+                <i class="bi bi-lightning-charge"></i>
+                <span th:text="${plan.rutinasMes} + ' rutinas al mes'"></span>
+              </div>
+              <div class="feature-item" th:if="${plan.seguimientoSemanal}">
+                <i class="bi bi-graph-up"></i>
+                <span>Seguimiento semanal personalizado</span>
+              </div>
+              <div class="feature-item" th:if="${plan.videollamadasMes > 0}">
+                <i class="bi bi-camera-video"></i>
+                <span th:text="${plan.videollamadasMes} + ' videollamada(s) mensual(es)'"></span>
+              </div>
+              <div class="feature-item" th:if="${plan.chatDirecto}">
+                <i class="bi bi-chat-dots"></i>
+                <span>Chat directo ilimitado</span>
+              </div>
+              <div class="feature-item" th:if="${plan.planNutricional}">
+                <i class="bi bi-heart-pulse"></i>
+                <span>Plan nutricional incluido</span>
+              </div>
+            </div>
+            
+            <!-- Stats -->
+            <div class="plan-stats">
+              <div class="stat-item">
+                <span class="stat-value" th:text="${plan.clientesActivos != null ? plan.clientesActivos : 0}">0</span>
+                <span class="stat-label">Clientes</span>
+              </div>
+              <div class="stat-item" th:if="${plan.esPublico}">
+                <span class="stat-value"><i class="bi bi-eye"></i></span>
+                <span class="stat-label">Público</span>
+              </div>
+            </div>
+            
           </div>
         </div>
         
@@ -550,6 +962,202 @@
     </div>
   </div>
   
+  <!-- Modal Editar Plan -->
+  <div class="modal fade" id="modalEditarPlan" tabindex="-1" aria-labelledby="modalEditarPlanLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <form id="formEditarPlan" method="POST">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold" id="modalEditarPlanLabel">
+              <i class="bi bi-pencil-square me-2"></i>Editar Plan
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            
+            <input type="hidden" id="editPlanId" name="planId">
+            
+            <div class="row g-3">
+              
+              <!-- Información Básica -->
+              <div class="col-12">
+                <h6 class="text-white fw-bold mb-3">📋 Información del Plan</h6>
+              </div>
+              
+              <div class="col-md-6">
+                <label for="editNombre" class="form-label">
+                  <i class="bi bi-tag"></i> Nombre del Plan
+                </label>
+                <input type="text" class="form-control" id="editNombre" name="nombre" required placeholder="Ej: Plan Premium">
+              </div>
+              
+              <div class="col-md-6">
+                <label for="editPrecio" class="form-label">
+                  <i class="bi bi-currency-dollar"></i> Precio Mensual (COP)
+                </label>
+                <input type="number" class="form-control" id="editPrecio" name="precio" required min="0" step="1000" placeholder="50000">
+              </div>
+              
+              <div class="col-12">
+                <label for="editDescripcion" class="form-label">
+                  <i class="bi bi-text-paragraph"></i> Descripción
+                </label>
+                <textarea class="form-control" id="editDescripcion" name="descripcion" rows="3" placeholder="Describe tu plan..."></textarea>
+              </div>
+              
+              <!-- Características del Plan -->
+              <div class="col-12 mt-4">
+                <h6 class="text-white fw-bold mb-3">⚙️ Características</h6>
+              </div>
+              
+              <div class="col-md-6">
+                <label for="editDuracion" class="form-label">
+                  <i class="bi bi-calendar-range"></i> Duración (días)
+                </label>
+                <input type="number" class="form-control" id="editDuracion" name="duracionDias" required min="1" placeholder="30">
+              </div>
+              
+              <div class="col-md-6">
+                <label for="editRutinas" class="form-label">
+                  <i class="bi bi-lightning-charge"></i> Rutinas por mes
+                </label>
+                <input type="number" class="form-control" id="editRutinas" name="rutinasMes" min="0" placeholder="4">
+              </div>
+              
+              <div class="col-md-6">
+                <label for="editVideollamadas" class="form-label">
+                  <i class="bi bi-camera-video"></i> Videollamadas mensuales
+                </label>
+                <input type="number" class="form-control" id="editVideollamadas" name="videollamadasMes" min="0" placeholder="2">
+              </div>
+              
+              <!-- Opciones Incluidas -->
+              <div class="col-12 mt-3">
+                <label class="form-label d-block mb-3">
+                  <i class="bi bi-check2-square"></i> Opciones Incluidas
+                </label>
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" id="editSeguimiento" name="seguimientoSemanal">
+                  <label class="form-check-label" for="editSeguimiento">
+                    <i class="bi bi-graph-up me-1"></i> Seguimiento semanal personalizado
+                  </label>
+                </div>
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" id="editChat" name="chatDirecto">
+                  <label class="form-check-label" for="editChat">
+                    <i class="bi bi-chat-dots me-1"></i> Chat directo ilimitado
+                  </label>
+                </div>
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" id="editNutricion" name="planNutricional">
+                  <label class="form-check-label" for="editNutricion">
+                    <i class="bi bi-heart-pulse me-1"></i> Plan nutricional incluido
+                  </label>
+                </div>
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" id="editPublico" name="esPublico">
+                  <label class="form-check-label" for="editPublico">
+                    <i class="bi bi-eye me-1"></i> Plan público (visible para usuarios)
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="editDestacado" name="destacado">
+                  <label class="form-check-label" for="editDestacado">
+                    <i class="bi bi-star-fill text-warning me-1"></i> Destacar plan (aparece primero)
+                  </label>
+                </div>
+              </div>
+              
+            </div>
+            
+          </div>
+          <div class="modal-footer border-secondary">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn-flowfit-primary btn-entrenador-primary">
+              <i class="bi bi-check-circle me-2"></i>Guardar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Confirmar Eliminación -->
+  <div class="modal fade" id="modalEliminarPlan" tabindex="-1" aria-labelledby="modalEliminarPlanLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header border-danger">
+          <h5 class="modal-title fw-bold text-danger" id="modalEliminarPlanLabel">
+            <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Eliminación
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-3" style="color: #ffffff; font-size: 1.1rem;">¿Estás seguro de que deseas eliminar el plan?</p>
+          <div class="alert alert-danger d-flex align-items-center" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4);">
+            <i class="bi bi-exclamation-circle me-2" style="color: #ef4444; font-size: 1.5rem;"></i>
+            <div>
+              <strong id="eliminarPlanNombre" style="color: #ffffff; font-size: 1.1rem;"></strong>
+              <p class="mb-0 mt-1 small" style="color: rgba(255, 255, 255, 0.9);">Esta acción no se puede deshacer.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" onclick="eliminarPlan()">
+            <i class="bi bi-trash me-2"></i>Sí, Eliminar Plan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Reasignar Plan -->
+  <div class="modal fade" id="modalReasignarPlan" tabindex="-1" aria-labelledby="modalReasignarPlanLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-warning">
+          <h5 class="modal-title fw-bold text-warning" id="modalReasignarPlanLabel">
+            <i class="bi bi-people-fill me-2"></i>Reasignar Clientes
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="reasignarPlanId">
+          
+          <div class="alert alert-warning d-flex align-items-start mb-4" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4);">
+            <i class="bi bi-exclamation-triangle-fill me-3 fs-4" style="color: #f59e0b;"></i>
+            <div>
+              <strong style="color: #ffffff;">El plan "<span id="reasignarPlanNombre" style="color: #fbbf24;"></span>" tiene clientes activos</strong>
+              <p class="mb-0 mt-2" style="color: #ffffff;">Hay <strong style="color: #fbbf24;"><span id="reasignarClientesCount"></span> cliente(s)</strong> usando este plan actualmente.</p>
+              <p class="mb-0 mt-1 small" style="color: rgba(255, 255, 255, 0.9);">Debes reasignarlos a otro plan antes de eliminarlo.</p>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="planReasignacion" class="form-label" style="color: #ffffff; font-weight: 600;">
+              <i class="bi bi-arrow-right-circle me-2"></i>Selecciona el nuevo plan
+            </label>
+            <select class="form-select" id="planReasignacion" required>
+              <option value="">Cargando planes...</option>
+            </select>
+            <small class="mt-2 d-block" style="color: rgba(255, 255, 255, 0.85);">
+              Los clientes serán transferidos automáticamente al plan seleccionado
+            </small>
+          </div>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-2"></i>Cancelar
+          </button>
+          <button type="button" class="btn btn-warning text-dark fw-bold" onclick="confirmarReasignacion()">
+            <i class="bi bi-check-circle me-2"></i>Reasignar y Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <!-- Bootstrap Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   
@@ -587,30 +1195,130 @@
     actualizarRangos();
   }
   
-  function cambiarEstado(element) {
+  // Variable global para el plan a eliminar
+  let planIdEliminar = null;
+  
+  // Función para editar plan
+  function editarPlan(element) {
     const planId = element.getAttribute('data-plan-id');
-    const activo = element.getAttribute('data-activo') === 'true';
+    const nombre = element.getAttribute('data-nombre');
+    const descripcion = element.getAttribute('data-descripcion');
+    const precio = element.getAttribute('data-precio');
+    const duracion = element.getAttribute('data-duracion');
+    const rutinas = element.getAttribute('data-rutinas');
+    const seguimiento = element.getAttribute('data-seguimiento') === 'true';
+    const chat = element.getAttribute('data-chat') === 'true';
+    const videollamadas = element.getAttribute('data-videollamadas');
+    const nutricion = element.getAttribute('data-nutricion') === 'true';
+    const publico = element.getAttribute('data-publico') === 'true';
+    const destacado = element.getAttribute('data-destacado') === 'true';
     
-    if (confirm(`¿Estás seguro de ${activo ? 'desactivar' : 'activar'} este plan?`)) {
+    // Llenar el formulario con los datos actuales
+    document.getElementById('editPlanId').value = planId;
+    document.getElementById('editNombre').value = nombre;
+    document.getElementById('editDescripcion').value = descripcion || '';
+    document.getElementById('editPrecio').value = precio;
+    document.getElementById('editDuracion').value = duracion;
+    document.getElementById('editRutinas').value = rutinas || '';
+    document.getElementById('editVideollamadas').value = videollamadas || '0';
+    document.getElementById('editSeguimiento').checked = seguimiento;
+    document.getElementById('editChat').checked = chat;
+    document.getElementById('editNutricion').checked = nutricion;
+    document.getElementById('editPublico').checked = publico;
+    document.getElementById('editDestacado').checked = destacado;
+    
+    // Actualizar la acción del formulario
+    document.getElementById('formEditarPlan').action = `/entrenador/planes/actualizar/${planId}`;
+    
+    // Mostrar el modal
+    const modal = new bootstrap.Modal(document.getElementById('modalEditarPlan'));
+    modal.show();
+  }
+  
+  // Función para confirmar eliminación
+  function confirmarEliminar(element) {
+    planIdEliminar = element.getAttribute('data-plan-id');
+    const planNombre = element.getAttribute('data-nombre');
+    const clientesActivos = parseInt(element.getAttribute('data-clientes-activos') || '0');
+    
+    if (clientesActivos > 0) {
+      // Si hay clientes activos, mostrar modal de reasignación
+      document.getElementById('reasignarPlanNombre').textContent = planNombre;
+      document.getElementById('reasignarClientesCount').textContent = clientesActivos;
+      document.getElementById('reasignarPlanId').value = planIdEliminar;
+      
+      // Cargar planes disponibles
+      cargarPlanesDisponibles(planIdEliminar);
+      
+      const modalReasignar = new bootstrap.Modal(document.getElementById('modalReasignarPlan'));
+      modalReasignar.show();
+    } else {
+      // Si no hay clientes, mostrar confirmación normal
+      document.getElementById('eliminarPlanNombre').textContent = planNombre;
+      
+      const modal = new bootstrap.Modal(document.getElementById('modalEliminarPlan'));
+      modal.show();
+    }
+  }
+  
+  // Cargar planes disponibles para reasignación
+  function cargarPlanesDisponibles(planIdExcluir) {
+    const select = document.getElementById('planReasignacion');
+    select.innerHTML = '<option value="">Cargando...</option>';
+    
+    // Obtener todos los planes del dropdown actual
+    const planesCards = document.querySelectorAll('[data-plan-id]');
+    select.innerHTML = '<option value="">Selecciona un plan...</option>';
+    
+    const planesAgregados = new Set();
+    planesCards.forEach(card => {
+      const planId = card.getAttribute('data-plan-id');
+      const planNombre = card.getAttribute('data-nombre');
+      const planPrecio = card.getAttribute('data-precio');
+      const planActivo = card.getAttribute('data-activo') === 'true';
+      
+      if (planId != planIdExcluir && planActivo && !planesAgregados.has(planId)) {
+        planesAgregados.add(planId);
+        const option = document.createElement('option');
+        option.value = planId;
+        option.textContent = `${planNombre} - $${parseInt(planPrecio).toLocaleString()} COP`;
+        select.appendChild(option);
+      }
+    });
+    
+    if (select.options.length === 1) {
+      select.innerHTML = '<option value="">No hay otros planes activos disponibles</option>';
+    }
+  }
+  
+  // Función para reasignar y eliminar
+  function confirmarReasignacion() {
+    const planIdNuevo = document.getElementById('planReasignacion').value;
+    
+    if (!planIdNuevo) {
+      alert('Por favor selecciona un plan para reasignar a los clientes');
+      return;
+    }
+    
+    // Crear formulario para reasignar
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/entrenador/planes/reasignar/${planIdEliminar}/${planIdNuevo}`;
+    
+    document.body.appendChild(form);
+    form.submit();
+  }
+  
+  // Función para eliminar plan sin clientes
+  function eliminarPlan() {
+    if (planIdEliminar) {
       const form = document.createElement('form');
       form.method = 'POST';
-      form.action = `/entrenador/planes/cambiar-estado/${planId}`;
-      
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'activo';
-      input.value = !activo;
-      form.appendChild(input);
+      form.action = `/entrenador/planes/eliminar/${planIdEliminar}`;
       
       document.body.appendChild(form);
       form.submit();
     }
-  }
-  
-  function editarPlan(element) {
-    const planId = element.getAttribute('data-plan-id');
-    // TODO: Implementar modal de edición
-    alert('Función de edición en desarrollo. Por ahora, crea un nuevo plan o desactiva el actual.');
   }
   </script>
 </body>

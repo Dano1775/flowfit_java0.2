@@ -812,7 +812,7 @@
             </div>
             
             <!-- Mensaje de Propuesta -->
-            <div th:if="${mensaje.tipoMensaje.name() == 'PROPUESTA_PLAN'}" 
+            <div th:if="${mensaje.tipoMensaje.name() == 'PROPUESTA_PLAN' and (mensaje.eliminado == null or mensaje.eliminado == false)}" 
                  th:classappend="${mensaje.remitenteId == usuario.id ? 'enviada' : ''}"
                  style="margin: 1.5rem 0;">
               <div class="propuesta-card" style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border: 2px solid var(--accent-color); border-radius: 16px; padding: 1.8rem; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
@@ -931,12 +931,32 @@
                         <i class="bi bi-arrow-left-right me-2"></i>Hacer Contraoferta
                       </button>
                       <!-- Mensaje si es mi propia propuesta -->
-                      <div th:if="${mensaje.remitenteId == usuario.id}"
-                           class="propuesta-estado-usuario"
-                           th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
-                           style="width: 100%; text-align: center; padding: 1rem; background: rgba(251, 191, 36, 0.1); border: 1px solid #fbbf24; border-radius: 10px; color: #fbbf24;">
-                        <i class="bi bi-clock-history me-2"></i>
-                        <strong>Esperando respuesta del entrenador</strong>
+                      <div th:if="${mensaje.remitenteId == usuario.id}">
+                        <!-- Si ya está pendiente de pago, mostrar botón de pagar -->
+                        <div th:if="${contratacion != null and contratacion.estado.name() == 'PENDIENTE_PAGO'}"
+                             class="propuesta-estado-usuario"
+                             th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
+                             style="width: 100%; text-align: center; padding: 1rem; background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 10px; color: #10b981;">
+                          <div style="margin-bottom: 0.8rem;">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>¡Propuesta Aceptada!</strong>
+                          </div>
+                          <button th:onclick="'abrirModalPago(' + ${contratacion.id} + ', ' + ${contratacion.precioAcordado} + ', \'' + ${mensaje.metadata != null ? mensaje.metadata.get('nombrePlan') : 'Plan Personalizado'} + '\', ' + ${contratacion.duracionDiasAcordada} + ')'"
+                                  style="background: #10b981; border: none; color: white; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s;"
+                                  onmouseover="this.style.background='#059669'" 
+                                  onmouseout="this.style.background='#10b981'">
+                            <i class="bi bi-credit-card me-2"></i>
+                            <span th:text="'Continuar y Pagar - $' + ${#numbers.formatDecimal(contratacion.precioAcordado, 0, 'COMMA', 0, 'POINT')} + ' COP'">Continuar y Pagar</span>
+                          </button>
+                        </div>
+                        <!-- Si aún no está aceptada, mostrar esperando respuesta -->
+                        <div th:unless="${contratacion != null and contratacion.estado.name() == 'PENDIENTE_PAGO'}"
+                             class="propuesta-estado-usuario"
+                             th:attr="data-contratacion-id=${mensaje.metadata != null ? mensaje.metadata.get('contratacionId') : ''}"
+                             style="width: 100%; text-align: center; padding: 1rem; background: rgba(251, 191, 36, 0.1); border: 1px solid #fbbf24; border-radius: 10px; color: #fbbf24;">
+                          <i class="bi bi-clock-history me-2"></i>
+                          <strong>Esperando respuesta del entrenador</strong>
+                        </div>
                       </div>
                     </div>
                   </div>

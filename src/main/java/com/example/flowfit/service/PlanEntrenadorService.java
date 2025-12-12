@@ -129,4 +129,39 @@ public class PlanEntrenadorService {
     public List<PlanEntrenador> obtenerTodosPlanesPublicos() {
         return planRepo.findPlanesPublicosActivos();
     }
+
+    /**
+     * Reasignar todos los clientes de un plan a otro
+     */
+    @Transactional
+    public int reasignarClientesDePlan(Integer planIdActual, Integer planIdNuevo) {
+        // Verificar que ambos planes existan
+        PlanEntrenador planActual = planRepo.findById(planIdActual)
+                .orElseThrow(() -> new RuntimeException("Plan actual no encontrado"));
+
+        PlanEntrenador planNuevo = planRepo.findById(planIdNuevo)
+                .orElseThrow(() -> new RuntimeException("Plan nuevo no encontrado"));
+
+        // Verificar que el plan nuevo esté activo
+        if (!planNuevo.getActivo()) {
+            throw new RuntimeException("El plan de destino debe estar activo");
+        }
+
+        // Obtener todas las contrataciones activas del plan actual
+        List<ContratacionEntrenador> contrataciones = contratacionRepo.findByPlanIdAndEstadoNot(
+                planIdActual,
+                ContratacionEntrenador.EstadoContratacion.CANCELADA);
+
+        // Reasignar cada contratación al nuevo plan
+        int contadorReasignados = 0;
+        for (ContratacionEntrenador contratacion : contrataciones) {
+            // Solo cambiar el ID del plan, no la relación completa
+            contratacion.setPlanBaseId(planIdNuevo);
+            contratacion.setPlanBase(null); // Limpiar la relación para evitar conflictos
+            contratacionRepo.save(contratacion);
+            contadorReasignados++;
+        }
+
+        return contadorReasignados;
+    }
 }

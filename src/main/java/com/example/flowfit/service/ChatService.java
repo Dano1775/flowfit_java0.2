@@ -74,7 +74,11 @@ public class ChatService {
      * Obtener todos los mensajes de una conversación
      */
     public List<Mensaje> obtenerMensajes(Long conversacionId) {
-        return mensajeRepo.findByConversacionIdOrderByFechaEnvioAsc(conversacionId);
+        List<Mensaje> todosMensajes = mensajeRepo.findByConversacionIdOrderByFechaEnvioAsc(conversacionId);
+        // Filtrar mensajes eliminados
+        return todosMensajes.stream()
+                .filter(msg -> msg.getEliminado() == null || !msg.getEliminado())
+                .toList();
     }
 
     /**

@@ -6,6 +6,7 @@ import com.example.flowfit.repository.PagoContratacionRepository;
 import com.example.flowfit.service.*;
 import com.example.flowfit.dto.MensajeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Optional;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -113,11 +114,22 @@ public class ChatController {
             model.addAttribute("planesEntrenador", planesEntrenador);
         }
 
+        // Buscar contratación activa para esta conversación
+        Optional<ContratacionEntrenador> contratacionOpt = contratacionRepo.findByUsuarioIdAndEntrenadorId(
+                conversacion.getUsuarioId(),
+                conversacion.getEntrenadorId());
+
+        ContratacionEntrenador contratacion = null;
+        if (contratacionOpt.isPresent()) {
+            contratacion = contratacionOpt.get();
+        }
+
         model.addAttribute("conversacion", conversacion);
         model.addAttribute("mensajes", mensajesDTO);
         model.addAttribute("otraPersona", otraPersona);
         model.addAttribute("usuario", usuario);
         model.addAttribute("esUsuario", esUsuario);
+        model.addAttribute("contratacion", contratacion);
 
         return "chat/conversacion";
     }
