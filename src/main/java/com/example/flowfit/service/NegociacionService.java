@@ -811,11 +811,14 @@ public class NegociacionService {
 
         if (historial != null) {
             // Buscar el mensaje de propuesta asociado
-            List<Mensaje> mensajes = mensajeRepo.findByConversacionIdOrderByFechaEnvioAsc(
-                    conversacionRepo.findByUsuarioIdAndEntrenadorId(
+            List<Conversacion> conversaciones = conversacionRepo
+                    .findByUsuarioIdAndEntrenadorIdOrderByFechaUltimoMensajeDesc(
                             contratacionRepo.findById(contratacionId).orElseThrow().getUsuarioId(),
-                            contratacionRepo.findById(contratacionId).orElseThrow().getEntrenadorId()).orElseThrow()
-                            .getId());
+                            contratacionRepo.findById(contratacionId).orElseThrow().getEntrenadorId());
+            Conversacion conversacion = conversaciones.isEmpty() ? null : conversaciones.get(0);
+            if (conversacion == null)
+                throw new RuntimeException("Conversación no encontrada");
+            List<Mensaje> mensajes = mensajeRepo.findByConversacionIdOrderByFechaEnvioAsc(conversacion.getId());
 
             for (Mensaje mensaje : mensajes) {
                 if (mensaje.getTipoMensaje() == Mensaje.TipoMensaje.PROPUESTA_PLAN && mensaje.getMetadata() != null) {

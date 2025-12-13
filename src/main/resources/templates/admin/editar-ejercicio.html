@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowFit - Editar Ejercicio</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" th:href="@{/css/flowfit-base.css}">
+  <link rel="stylesheet" th:href="@{/css/flowfit-admin.css}">
+  
+  <style>
+    .preview-image {
+      max-width: 300px;
+      max-height: 300px;
+      border-radius: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body class="bg-base">
+
+  <!-- Desktop Toggle (for collapse) -->
+  <button class="sidebar-collapse-btn d-none d-md-flex" id="sidebarCollapseBtn" title="Contraer/Expandir Sidebar">
+    <i class="bi bi-chevron-left"></i>
+  </button>
+
+  <!-- Mobile Toggle -->
+  <button class="sidebar-toggle-base sidebar-toggle-admin d-md-none" id="sidebarToggle">
+    <i class="bi bi-list fs-4"></i>
+  </button>
+
+  <!-- Sidebar Overlay for Mobile -->
+  <div class="sidebar-overlay-base" id="sidebarOverlay"></div>
+
+  <!-- FlowFit Sidebar -->
+  <nav class="sidebar-base sidebar-admin d-flex flex-column" id="sidebar">
+    <!-- Brand -->
+    <a th:href="@{/admin/dashboard}" class="navbar-brand d-flex align-items-center text-decoration-none">
+      <img src="/assets/logo_flowfit_admin.png" alt="FlowFit Admin" height="40" class="me-3 logo-flowfit">
+      <span class="brand-text">FlowFit</span>
+    </a>
+
+    <!-- Navigation -->
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a th:href="@{/admin/dashboard}" class="nav-link-base nav-link-admin" title="Dashboard">
+          <i class="bi bi-speedometer2 me-3"></i>
+          <span class="nav-text">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/usuarios-pendientes}" class="nav-link-base nav-link-admin" title="Usuarios Pendientes">
+          <i class="bi bi-people me-3"></i>
+          <span class="nav-text">Usuarios Pendientes</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/usuarios}" class="nav-link-base nav-link-admin" title="Gestión Usuarios">
+          <i class="bi bi-person-badge me-3"></i>
+          <span class="nav-text">Gestión Usuarios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/ejercicios}" class="nav-link-base nav-link-admin active" title="Ejercicios">
+          <i class="bi bi-activity me-3"></i>
+          <span class="nav-text">Ejercicios</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/historial}" class="nav-link-base nav-link-admin" title="Historial">
+          <i class="bi bi-clock-history me-3"></i>
+          <span class="nav-text">Historial</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/correos}" class="nav-link-base nav-link-admin" title="Correos">
+          <i class="bi bi-envelope me-3"></i>
+          <span class="nav-text">Correos</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/admin/boletines}" class="nav-link-base nav-link-admin" title="Boletines">
+          <i class="bi bi-megaphone me-3"></i>
+          <span class="nav-text">Boletines</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Profile Dropdown -->
+    <div class="dropdown dropup">
+      <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle profile-dropdown" 
+         id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+        <div class="avatar-container me-3">
+          <div class="avatar-placeholder">
+            <i class="bi bi-person-fill fs-4"></i>
+          </div>
+        </div>
+        <div class="user-info">
+          <span class="user-name" th:text="${admin.nombre}">Admin</span>
+          <span class="user-role">Administrador</span>
+        </div>
+      </a>
+      <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+        <li><a class="dropdown-item" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container-fluid py-4">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="h2 fw-bold text-light mb-1">
+            <i class="bi bi-pencil-square me-2"></i>Editar Ejercicio
+          </h1>
+          <p class="text-secondary mb-0">Modifica la información del ejercicio</p>
+        </div>
+        <a th:href="@{/admin/ejercicios}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-2"></i>Volver
+        </a>
+      </div>
+
+      <!-- Form Card -->
+      <div class="card bg-dark border-secondary">
+        <div class="card-body p-4">
+          <form th:action="@{/admin/ejercicios/editar/{id}(id=${ejercicio.id})}" method="post" enctype="multipart/form-data">
+            <div class="row g-4">
+              <!-- Imagen Actual -->
+              <div class="col-12" th:if="${ejercicio.imagen}">
+                <label class="form-label text-light fw-semibold">
+                  <i class="bi bi-image me-2"></i>Imagen Actual
+                </label>
+                <div class="mb-3">
+                  <img th:src="@{'/ejercicio_image_uploads/' + ${ejercicio.imagen}}" 
+                       alt="Imagen del ejercicio" 
+                       class="preview-image">
+                </div>
+              </div>
+
+              <!-- Nombre -->
+              <div class="col-md-6">
+                <label for="nombre" class="form-label text-light fw-semibold">
+                  <i class="bi bi-tag me-2"></i>Nombre del Ejercicio
+                </label>
+                <input type="text" class="form-control bg-secondary text-light border-0" 
+                       id="nombre" name="nombre" th:value="${ejercicio.nombre}" required
+                       placeholder="Ej: Sentadillas con peso">
+              </div>
+
+              <!-- Grupo Muscular -->
+              <div class="col-md-6">
+                <label for="grupoMuscular" class="form-label text-light fw-semibold">
+                  <i class="bi bi-bullseye me-2"></i>Grupo Muscular
+                </label>
+                <select class="form-select bg-secondary text-light border-0" 
+                        id="grupoMuscular" name="grupoMuscular" required>
+                  <option value="Pecho" th:selected="${ejercicio.grupoMuscular == 'Pecho'}">Pecho</option>
+                  <option value="Espalda" th:selected="${ejercicio.grupoMuscular == 'Espalda'}">Espalda</option>
+                  <option value="Piernas" th:selected="${ejercicio.grupoMuscular == 'Piernas'}">Piernas</option>
+                  <option value="Brazos" th:selected="${ejercicio.grupoMuscular == 'Brazos'}">Brazos</option>
+                  <option value="Hombros" th:selected="${ejercicio.grupoMuscular == 'Hombros'}">Hombros</option>
+                  <option value="Abdomen" th:selected="${ejercicio.grupoMuscular == 'Abdomen'}">Abdomen</option>
+                  <option value="Cardio" th:selected="${ejercicio.grupoMuscular == 'Cardio'}">Cardio</option>
+                  <option value="Full Body" th:selected="${ejercicio.grupoMuscular == 'Full Body'}">Full Body</option>
+                </select>
+              </div>
+
+              <!-- Nivel de Dificultad -->
+              <div class="col-md-6">
+                <label for="nivelDificultad" class="form-label text-light fw-semibold">
+                  <i class="bi bi-bar-chart me-2"></i>Nivel de Dificultad
+                </label>
+                <select class="form-select bg-secondary text-light border-0" 
+                        id="nivelDificultad" name="nivelDificultad" required>
+                  <option value="Principiante" th:selected="${ejercicio.nivelDificultad == 'Principiante'}">Principiante</option>
+                  <option value="Intermedio" th:selected="${ejercicio.nivelDificultad == 'Intermedio'}">Intermedio</option>
+                  <option value="Avanzado" th:selected="${ejercicio.nivelDificultad == 'Avanzado'}">Avanzado</option>
+                </select>
+              </div>
+
+              <!-- Calorías por Minuto -->
+              <div class="col-md-6">
+                <label for="caloriasPorMinuto" class="form-label text-light fw-semibold">
+                  <i class="bi bi-fire me-2"></i>Calorías por Minuto
+                </label>
+                <input type="number" class="form-control bg-secondary text-light border-0" 
+                       id="caloriasPorMinuto" name="caloriasPorMinuto" 
+                       th:value="${ejercicio.caloriasPorMinuto}"
+                       min="1" required
+                       placeholder="Ej: 8">
+              </div>
+
+              <!-- Descripción -->
+              <div class="col-12">
+                <label for="descripcion" class="form-label text-light fw-semibold">
+                  <i class="bi bi-text-paragraph me-2"></i>Descripción
+                </label>
+                <textarea class="form-control bg-secondary text-light border-0" 
+                          id="descripcion" name="descripcion" rows="4" required
+                          th:text="${ejercicio.descripcion}"
+                          placeholder="Describe cómo realizar el ejercicio correctamente..."></textarea>
+              </div>
+
+              <!-- Nueva Imagen (opcional) -->
+              <div class="col-12">
+                <label for="imagen" class="form-label text-light fw-semibold">
+                  <i class="bi bi-image me-2"></i>Cambiar Imagen (opcional)
+                </label>
+                <input type="file" class="form-control bg-secondary text-light border-0" 
+                       id="imagen" name="imagen" accept="image/*">
+                <small class="text-muted d-block mt-2">
+                  <i class="bi bi-info-circle me-1"></i>Si no seleccionas una imagen, se mantendrá la actual. Formatos: JPG, PNG, GIF (max 5MB)
+                </small>
+              </div>
+
+              <!-- Estado -->
+              <div class="col-12">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                         th:checked="${ejercicio.activo}">
+                  <label class="form-check-label text-light" for="activo">
+                    <i class="bi bi-check-circle me-2"></i>Ejercicio activo
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex gap-3 mt-4 pt-4 border-top border-secondary">
+              <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-check-circle me-2"></i>Guardar Cambios
+              </button>
+              <a th:href="@{/admin/ejercicios}" class="btn btn-outline-secondary">
+                Cancelar
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Sidebar Script -->
+  <script th:src="@{/js/sidebar-common.js}"></script>
+</body>
+</html>

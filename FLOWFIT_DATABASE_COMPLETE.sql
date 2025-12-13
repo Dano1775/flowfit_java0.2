@@ -223,9 +223,9 @@ CREATE TABLE conversacion (
 CREATE TABLE mensaje (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     conversacion_id BIGINT NOT NULL,
-    remitente_id INT NOT NULL,
+    remitente_id INT DEFAULT NULL,
     contenido TEXT NOT NULL,
-    tipo_mensaje ENUM('TEXTO', 'IMAGEN', 'ARCHIVO', 'PROPUESTA_PLAN', 'PAGO_GENERADO', 'SISTEMA') DEFAULT 'TEXTO',
+    tipo_mensaje ENUM('TEXTO', 'IMAGEN', 'ARCHIVO', 'PROPUESTA_PLAN', 'PAGO_GENERADO', 'SISTEMA', 'CONFIRMACION_SERVICIO', 'DISPUTA_INICIADA') DEFAULT 'TEXTO',
     
     -- Campos para envío de archivos
     archivo_url VARCHAR(500) DEFAULT NULL COMMENT 'URL del archivo subido',
@@ -253,6 +253,7 @@ CREATE TABLE mensaje (
         FOREIGN KEY (remitente_id) 
         REFERENCES usuario(id) 
         ON DELETE CASCADE
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 3. TABLA DE PLANES DEL ENTRENADOR (SISTEMA HÍBRIDO)

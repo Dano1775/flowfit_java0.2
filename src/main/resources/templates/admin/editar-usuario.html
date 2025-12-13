@@ -1,0 +1,343 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Editar Usuario - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" th:href="@{/css/flowfit-base.css}" />
+    <link rel="stylesheet" th:href="@{/css/flowfit-admin.css}" />
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+        
+        .page-header-editar-usuario {
+            background: linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #991b1b 100%);
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(185, 28, 28, 0.4);
+        }
+        
+        .page-header-editar-usuario h1 {
+            color: white;
+            font-weight: 800;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .page-header-editar-usuario .subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1rem;
+        }
+        
+        .form-card-editar {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .info-card {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1.5px solid rgba(59, 130, 246, 0.3);
+            border-radius: 15px;
+            padding: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-card-text {
+            color: #60a5fa;
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+        
+        .form-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .form-control, .form-select {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+            color: white;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: #ef4444;
+            box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25);
+            color: white;
+        }
+        
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .form-select option {
+            background: #1e293b;
+            color: white;
+        }
+        
+        .form-text {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #b91c1c, #dc2626);
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #991b1b, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+        }
+        
+        .btn-outline-secondary {
+            border: 1.5px solid rgba(148, 163, 184, 0.4);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-secondary:hover {
+            background: rgba(148, 163, 184, 0.1);
+            border-color: rgba(148, 163, 184, 0.6);
+            color: white;
+        }
+        
+        .additional-info-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 15px;
+            padding: 1.75rem;
+        }
+        
+        .additional-info-card h5 {
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            font-size: 1.1rem;
+        }
+        
+        .additional-info-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .additional-info-card li {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.875rem;
+            display: flex;
+            align-items: start;
+            font-size: 0.9rem;
+        }
+        
+        .additional-info-card li i {
+            margin-right: 0.75rem;
+            margin-top: 0.2rem;
+        }
+        
+        .warning-card {
+            border: 1.5px solid rgba(251, 191, 36, 0.4);
+            background: rgba(251, 191, 36, 0.05);
+        }
+        
+        .warning-card h5 {
+            color: #fbbf24;
+        }
+        
+        .row {
+            margin-left: -0.5rem;
+            margin-right: -0.5rem;
+        }
+        
+        .row > * {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/sidebar-admin :: sidebar}"></div>
+
+    <div class="main-content-base">
+        <div class="container-fluid px-0">
+            <div class="page-header-editar-usuario">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h1><i class="bi bi-pencil-square me-3"></i> Editar Usuario</h1>
+                        <p class="subtitle mb-0">Modifica la información del usuario en el sistema</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <div class="form-card-editar">
+                    <!-- Información del Usuario -->
+                    <div class="info-card">
+                        <p class="info-card-text">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>ID:</strong> <span th:text="${usuario.id}">0</span> | 
+                            <strong>Documento:</strong> <span th:text="${usuario.numeroDocumento}">-</span> |
+                            <strong>Fecha Registro:</strong> <span th:text="${#temporals.format(usuario.fechaRegistro, 'dd/MM/yyyy HH:mm')}">-</span>
+                        </p>
+                    </div>
+
+                    <form th:action="@{/admin/usuarios/editar/{id}(id=${usuario.id})}" method="post">
+                        <!-- Campo oculto para numeroDocumento -->
+                        <input type="hidden" name="numeroDocumento" th:value="${usuario.numeroDocumento}" />
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-person me-2"></i>Nombre Completo
+                                </label>
+                                <input type="text" name="nombre" class="form-control" th:value="${usuario.nombre}" required placeholder="Nombre completo del usuario" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-envelope me-2"></i>Correo Electrónico
+                                </label>
+                                <input type="email" name="correo" class="form-control" th:value="${usuario.correo}" required placeholder="correo@ejemplo.com" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label">
+                                    <i class="bi bi-phone me-2"></i>Teléfono
+                                </label>
+                                <input type="text" name="telefono" class="form-control" th:value="${usuario.telefono}" required placeholder="Número de teléfono" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">
+                                    <i class="bi bi-shield-check me-2"></i>Perfil de Usuario
+                                </label>
+                                <select name="perfilUsuario" class="form-select" required>
+                                    <option value="Usuario" th:selected="${usuario.perfilUsuario.name() == 'Usuario'}">Usuario</option>
+                                    <option value="Entrenador" th:selected="${usuario.perfilUsuario.name() == 'Entrenador'}">Entrenador</option>
+                                    <option value="Nutricionista" th:selected="${usuario.perfilUsuario.name() == 'Nutricionista'}">Nutricionista</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">
+                                    <i class="bi bi-toggle-on me-2"></i>Estado
+                                </label>
+                                <select name="estado" class="form-select" required>
+                                    <option value="A" th:selected="${usuario.estado == 'A'}">Activo</option>
+                                    <option value="I" th:selected="${usuario.estado == 'I'}">Inactivo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label class="form-label">
+                                    <i class="bi bi-key me-2"></i>Nueva Contraseña (opcional)
+                                </label>
+                                <input type="password" name="nuevaClave" class="form-control" placeholder="Dejar en blanco para mantener la actual" />
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Solo completa este campo si deseas cambiar la contraseña
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="bi bi-chat-left-text me-2"></i>Motivo de la Edición (opcional)
+                            </label>
+                            <textarea name="motivo" class="form-control" rows="4" placeholder="Describe brevemente el motivo de esta edición para el historial..."></textarea>
+                        </div>
+
+                        <div class="d-flex gap-3 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>Guardar Cambios
+                            </button>
+                            <a th:href="@{/admin/usuarios}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Información Adicional -->
+                <div class="row mt-4">
+                    <div class="col-md-6 mb-4">
+                        <div class="additional-info-card">
+                            <h5><i class="bi bi-info-circle me-2"></i>Información Adicional</h5>
+                            <ul class="mb-0">
+                                <li>
+                                    <i class="bi bi-calendar-check text-success"></i>
+                                    <div>
+                                        <strong>Fecha Registro:</strong><br>
+                                        <span th:text="${#temporals.format(usuario.fechaRegistro, 'dd/MM/yyyy HH:mm')}">-</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <i class="bi bi-calendar-event" style="color: #60a5fa;"></i>
+                                    <div>
+                                        <strong>Última Actualización:</strong><br>
+                                        <span th:text="${usuario.fechaActualizacion != null ? #temporals.format(usuario.fechaActualizacion, 'dd/MM/yyyy HH:mm') : 'Sin actualizaciones'}">-</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="additional-info-card warning-card">
+                            <h5><i class="bi bi-exclamation-triangle me-2"></i>Consideraciones Importantes</h5>
+                            <ul class="mb-0">
+                                <li>
+                                    <i class="bi bi-dot"></i>
+                                    <span>Los cambios en el perfil afectan los permisos del usuario inmediatamente</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-dot"></i>
+                                    <span>Cambiar el estado a "Inactivo" impedirá el acceso del usuario al sistema</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-dot"></i>
+                                    <span>Los administradores no pueden ser editados por razones de seguridad</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-dot"></i>
+                                    <span>Todas las modificaciones quedan registradas en el historial del sistema</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

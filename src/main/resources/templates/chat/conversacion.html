@@ -775,7 +775,25 @@
                 <span th:text="${mensaje.contenido}">Mensaje del sistema</span>
               </span>
               
-              <!-- 🔔 SISTEMA DE CONFIRMACIÓN DE SERVICIO COMPLETADO -->
+              <!-- � BOTÓN DE PAGO CUANDO PROPUESTA ES ACEPTADA -->
+              <div th:if="${mensaje.metadata != null and mensaje.metadata.containsKey('tipo') and mensaje.metadata.get('tipo') == 'PAGO_PENDIENTE' and esUsuario}"
+                   class="mt-3" style="max-width: 500px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; padding: 1.5rem; text-align: center;">
+                  <i class="bi bi-check-circle-fill" style="font-size: 2.5rem; color: white;"></i>
+                  <h6 class="text-white mt-2 mb-3" style="font-weight: 600;">¡Propuesta Aceptada!</h6>
+                  <p class="text-white mb-3" style="opacity: 0.9; font-size: 0.9rem;">
+                    Precio acordado: <strong style="font-size: 1.2rem;">$<span th:text="${#numbers.formatDecimal(mensaje.metadata.get('precioFinal'), 0, 'COMMA', 0, 'POINT')}">0</span> COP</strong>
+                  </p>
+                  <button 
+                    th:attr="onclick='abrirModalPago(' + ${mensaje.metadata.get('contratacionId')} + ',' + ${mensaje.metadata.get('precioFinal')} + ',\'Plan Personalizado\',' + ${mensaje.metadata.get('duracionDias')} + ')'"
+                    class="btn btn-light w-100"
+                    style="padding: 0.9rem; border-radius: 8px; font-weight: 600; background: white; color: #059669;">
+                    <i class="bi bi-credit-card me-2"></i>Proceder al Pago
+                  </button>
+                </div>
+              </div>
+              
+              <!-- �🔔 SISTEMA DE CONFIRMACIÓN DE SERVICIO COMPLETADO -->
               <div th:if="${mensaje.contenido != null and mensaje.contenido.contains('Pago aprobado exitosamente') and mensaje.metadata != null and mensaje.metadata.containsKey('pagoId')}">
                 <div class="confirmacion-servicio-container mt-3" 
                      th:attr="data-pago-id=${mensaje.metadata.get('pagoId')}"
@@ -1578,7 +1596,11 @@
           
           // 🔔 NOTIFICACIONES EN TIEMPO REAL
           if (data.tipo === 'PROPUESTA_ACEPTADA') {
-            actualizarPropuestaAceptada(data.contratacionId, data.mensaje, data.precioFinal);
+            // Recargar la página para mostrar el botón de pago correctamente
+            console.log('Propuesta aceptada, recargando página...');
+            setTimeout(() => {
+              location.reload();
+            }, 500);
           } else {
             agregarMensajeAlDOM(data);
           }

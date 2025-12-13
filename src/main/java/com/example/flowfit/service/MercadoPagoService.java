@@ -39,18 +39,18 @@ public class MercadoPagoService {
     private final Gson gson = new Gson();
 
     /**
-     * Obtiene la public key para inicializar Bricks en el frontend
+     * Obtiene la clave pública para inicializar Bricks en el frontend
      * 
-     * @return Public key de MercadoPago
+     * @return Clave pública de MercadoPago
      */
     public String getPublicKey() {
         return publicKey;
     }
 
     /**
-     * Obtiene el access token (solo si se necesita para alguna validación)
+     * Obtiene el token de acceso (solo si se necesita para alguna validación)
      * 
-     * @return Access token de MercadoPago
+     * @return Token de acceso de MercadoPago
      */
     public String getAccessToken() {
         return accessToken;

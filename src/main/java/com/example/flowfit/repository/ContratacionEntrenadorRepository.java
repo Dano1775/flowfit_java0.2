@@ -37,8 +37,18 @@ public interface ContratacionEntrenadorRepository extends JpaRepository<Contrata
                         @Param("planId") Integer planId,
                         @Param("estado") ContratacionEntrenador.EstadoContratacion estado);
 
+        // Retorna lista ordenada por fecha más reciente para manejar duplicados
         @Query("SELECT c FROM ContratacionEntrenador c WHERE c.usuarioId = :usuarioId AND c.entrenadorId = :entrenadorId ORDER BY c.fechaSolicitud DESC")
-        java.util.Optional<ContratacionEntrenador> findByUsuarioIdAndEntrenadorId(
+        List<ContratacionEntrenador> findAllByUsuarioIdAndEntrenadorId(
                         @Param("usuarioId") Integer usuarioId,
                         @Param("entrenadorId") Integer entrenadorId);
+
+        // Método auxiliar que retorna solo la contratación más reciente
+        default java.util.Optional<ContratacionEntrenador> findByUsuarioIdAndEntrenadorId(Integer usuarioId,
+                        Integer entrenadorId) {
+                List<ContratacionEntrenador> contrataciones = findAllByUsuarioIdAndEntrenadorId(usuarioId,
+                                entrenadorId);
+                return contrataciones.isEmpty() ? java.util.Optional.empty()
+                                : java.util.Optional.of(contrataciones.get(0));
+        }
 }
