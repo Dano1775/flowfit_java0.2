@@ -1,6 +1,7 @@
 package com.example.flowfit.service;
 
 import com.example.flowfit.dto.PropuestaDTO;
+import com.example.flowfit.dto.MensajeDTO;
 import com.example.flowfit.model.*;
 import com.example.flowfit.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,31 @@ public class NegociacionService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private List<Long> invalidarPropuestasActivas(Long conversacionId) {
+        List<Long> invalidatedIds = new ArrayList<>();
+        try {
+            List<Mensaje> propuestas = mensajeRepo.findPropuestasPorConversacion(conversacionId);
+            for (Mensaje msg : propuestas) {
+                if (!Boolean.TRUE.equals(msg.getEliminado())) {
+                    msg.setEliminado(true);
+                    mensajeRepo.save(msg);
+                    invalidatedIds.add(msg.getId());
+                }
+            }
+
+            // También invalidar CTAs obsoletas de pago pendiente al llegar una nueva
+            // propuesta.
+            // (Evita que queden “Propuesta aceptada / proceder al pago” visibles cuando ya
+            // hay una nueva negociación.)
+            String p1 = "\"tipo\":\"PAGO_PENDIENTE\"";
+            String p2 = "\"tipo\": \"PAGO_PENDIENTE\"";
+            mensajeRepo.softDeleteSistemaByMetadataPattern(conversacionId, p1, p2);
+        } catch (Exception e) {
+            System.err.println("Error invalidando propuestas anteriores: " + e.getMessage());
+        }
+        return invalidatedIds;
+    }
+
     /**
      * Entrenador envía propuesta inicial al usuario
      */
@@ -48,6 +74,9 @@ public class NegociacionService {
         try {
             Conversacion conversacion = conversacionRepo.findById(conversacionId)
                     .orElseThrow(() -> new RuntimeException("Conversación no encontrada"));
+
+            // Invalidar propuestas anteriores de esta conversación (si existen)
+            List<Long> invalidatedIds = invalidarPropuestasActivas(conversacionId);
 
             // Crear contratación en estado NEGOCIACION
             ContratacionEntrenador contratacion = new ContratacionEntrenador();
@@ -116,6 +145,7 @@ public class NegociacionService {
                 mensajeWs.put("tipoMensaje", "PROPUESTA_PLAN");
                 mensajeWs.put("fechaEnvio", mensaje.getFechaEnvio().toString());
                 mensajeWs.put("metadata", objectMapper.readValue(mensaje.getMetadata(), Map.class));
+                mensajeWs.put("invalidatedMensajeIds", invalidatedIds);
 
                 messagingTemplate.convertAndSend("/topic/conversacion/" + conversacionId, mensajeWs);
             } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
@@ -130,9 +160,10 @@ public class NegociacionService {
 
         } catch (Exception e) {
             response.put("success", false);
-            response.put("message", "Error: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+            response.put("message", "Error al enviar la propuesta inicial: " + e.getMessage());
+            e.printStackTrace(); // Imprimir el stack trace para depuración
+            // No relanzar la excepción para permitir que la respuesta JSON se envíe al
+            // cliente.
         }
 
         return response;
@@ -315,15 +346,9 @@ public class NegociacionService {
 
             mensajeRepo.save(mensajePago);
 
-            // Notificar vía WebSocket para recargar
-            Map<String, Object> notificacion = new HashMap<>();
-            notificacion.put("tipo", "PROPUESTA_ACEPTADA");
-            notificacion.put("contratacionId", contratacion.getId());
-            notificacion.put("mensaje", "Propuesta aceptada. Procede al pago.");
-            notificacion.put("precioFinal", precioFinal.doubleValue());
-            notificacion.put("requierePago", true);
-
-            messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(), notificacion);
+            // Notificar vía WebSocket con el DTO del mensaje del sistema
+            messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(),
+                    new com.example.flowfit.dto.MensajeDTO(mensajePago));
         } else {
             System.err.println("⚠️ No se encontró conversación para usuario " + contratacion.getUsuarioId() +
                     " y entrenador " + contratacion.getEntrenadorId());
@@ -405,25 +430,12 @@ public class NegociacionService {
         if (conversacionOpt.isPresent()) {
             Conversacion conversacion = conversacionOpt.get();
 
-            // Eliminar TODAS las propuestas anteriores del chat
-            List<Mensaje> mensajesAnteriores = mensajeRepo
-                    .findByConversacionIdOrderByFechaEnvioAsc(conversacion.getId());
-            for (Mensaje msg : mensajesAnteriores) {
-                Boolean eliminado = msg.getEliminado();
-                if (msg.getTipoMensaje() == Mensaje.TipoMensaje.PROPUESTA_PLAN && (eliminado == null || !eliminado)) {
-                    msg.setEliminado(true);
-                    mensajeRepo.save(msg);
-                    System.out.println("🗑️ Mensaje de propuesta eliminado después de aceptación (entrenador)");
-                }
-            }
-
             // Crear mensaje con información del pago
             Mensaje mensajePago = new Mensaje();
             mensajePago.setConversacionId(conversacion.getId());
             mensajePago.setRemitenteId(null); // Sistema
             mensajePago.setTipoMensaje(Mensaje.TipoMensaje.SISTEMA);
-            mensajePago.setContenido(
-                    "✅ El entrenador aceptó tu contraoferta. Procede con el pago para confirmar la contratación.");
+            mensajePago.setContenido("✅ Propuesta aceptada por el entrenador. El usuario puede proceder con el pago.");
 
             // Metadata con información del pago
             Map<String, Object> pagoMetadata = new HashMap<>();
@@ -445,18 +457,9 @@ public class NegociacionService {
 
             mensajeRepo.save(mensajePago);
 
-            // Notificar vía WebSocket para recargar
-            Map<String, Object> notificacion = new HashMap<>();
-            notificacion.put("tipo", "PROPUESTA_ACEPTADA");
-            notificacion.put("contratacionId", contratacion.getId());
-            notificacion.put("mensaje", "El entrenador aceptó tu contraoferta. Procede al pago.");
-            notificacion.put("precioFinal", precioFinal.doubleValue());
-            notificacion.put("requierePago", true);
-
-            messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(), notificacion);
-        } else {
-            System.err.println("⚠️ No se encontró conversación para usuario " + contratacion.getUsuarioId() +
-                    " y entrenador " + contratacion.getEntrenadorId());
+            // Notificar vía WebSocket con el DTO del mensaje del sistema
+            messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(),
+                    new com.example.flowfit.dto.MensajeDTO(mensajePago));
         }
 
         response.put("success", true);
@@ -575,6 +578,9 @@ public class NegociacionService {
                 .findByUsuarioIdAndEntrenadorId(contratacion.getUsuarioId(), contratacion.getEntrenadorId())
                 .orElseThrow();
 
+        // Invalidar propuestas anteriores (dejar solo la más reciente activa)
+        List<Long> invalidatedIds = invalidarPropuestasActivas(conversacion.getId());
+
         Mensaje mensaje = new Mensaje();
         mensaje.setConversacionId(conversacion.getId());
         mensaje.setRemitenteId(usuarioId);
@@ -592,12 +598,11 @@ public class NegociacionService {
             mensajeWs.put("remitenteId", mensaje.getRemitenteId());
             mensajeWs.put("contenido", mensaje.getContenido());
             mensajeWs.put("tipoMensaje", "PROPUESTA_PLAN");
-            mensajeWs.put("tipo", "CONTRAOFERTA_ENVIADA"); // Para que el frontend recargue
             mensajeWs.put("fechaEnvio", mensaje.getFechaEnvio().toString());
             mensajeWs.put("metadata", objectMapper.readValue(mensaje.getMetadata(), Map.class));
+            mensajeWs.put("invalidatedMensajeIds", invalidatedIds);
 
             messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(), mensajeWs);
-            System.out.println("✅ Notificación WebSocket enviada: CONTRAOFERTA_ENVIADA (Usuario)");
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
             System.err.println("Error al parsear metadata para WebSocket: " + e.getMessage());
         }
@@ -689,6 +694,9 @@ public class NegociacionService {
                 .findByUsuarioIdAndEntrenadorId(contratacion.getUsuarioId(), contratacion.getEntrenadorId())
                 .orElseThrow();
 
+        // Invalidar propuestas anteriores (dejar solo la más reciente activa)
+        List<Long> invalidatedIds = invalidarPropuestasActivas(conversacion.getId());
+
         Mensaje mensaje = new Mensaje();
         mensaje.setConversacionId(conversacion.getId());
         mensaje.setRemitenteId(entrenadorId);
@@ -708,6 +716,7 @@ public class NegociacionService {
             mensajeWs.put("tipoMensaje", "PROPUESTA_PLAN");
             mensajeWs.put("fechaEnvio", mensaje.getFechaEnvio().toString());
             mensajeWs.put("metadata", objectMapper.readValue(mensaje.getMetadata(), Map.class));
+            mensajeWs.put("invalidatedMensajeIds", invalidatedIds);
 
             messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(), mensajeWs);
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {

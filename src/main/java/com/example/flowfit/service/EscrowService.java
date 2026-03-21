@@ -1,8 +1,10 @@
 package com.example.flowfit.service;
 
+import com.example.flowfit.dto.MensajeDTO;
 import com.example.flowfit.model.*;
 import com.example.flowfit.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -27,6 +29,9 @@ public class EscrowService {
 
     @Autowired
     private ConversacionRepository conversacionRepo;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     /**
      * Usuario confirma que recibió el servicio correctamente
@@ -79,6 +84,9 @@ public class EscrowService {
                     (comentario != null ? "\n\n💬 Comentario: " + comentario : ""));
             mensaje.setMetadata("{\"pagoId\": " + pagoId + ", \"tipo\": \"confirmacion_usuario\"}");
             mensajeRepo.save(mensaje);
+
+            // WebSocket: notificar en tiempo real
+            messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(), new MensajeDTO(mensaje));
 
             response.put("success", true);
 
@@ -138,6 +146,9 @@ public class EscrowService {
                     (comentario != null ? "\n\n💬 Comentario: " + comentario : ""));
             mensaje.setMetadata("{\"pagoId\": " + pagoId + ", \"tipo\": \"confirmacion_entrenador\"}");
             mensajeRepo.save(mensaje);
+
+            // WebSocket: notificar en tiempo real
+            messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(), new MensajeDTO(mensaje));
 
             response.put("success", true);
 
@@ -204,6 +215,9 @@ public class EscrowService {
                     "El equipo de FlowFit revisará el caso y tomará una decisión en las próximas 48 horas.");
             mensaje.setMetadata("{\"pagoId\": " + pagoId + ", \"tipo\": \"disputa_iniciada\"}");
             mensajeRepo.save(mensaje);
+
+            // WebSocket: notificar en tiempo real
+            messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(), new MensajeDTO(mensaje));
 
             response.put("success", true);
             response.put("message", "Disputa iniciada. El equipo de soporte la revisará pronto.");
@@ -279,6 +293,9 @@ public class EscrowService {
             mensaje.setMetadata("{\"pagoId\": " + pagoId + ", \"tipo\": \"disputa_resuelta\"}");
             mensajeRepo.save(mensaje);
 
+            // WebSocket: notificar en tiempo real
+            messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(), new MensajeDTO(mensaje));
+
             response.put("success", true);
 
         } catch (Exception e) {
@@ -342,6 +359,10 @@ public class EscrowService {
                         "✅ Los fondos han sido liberados automáticamente al entrenador después de 7 días sin disputas.");
                 mensaje.setMetadata("{\"pagoId\": " + pago.getId() + ", \"tipo\": \"liberacion_automatica\"}");
                 mensajeRepo.save(mensaje);
+
+                // WebSocket: notificar en tiempo real
+                messagingTemplate.convertAndSend("/topic/conversacion/" + conversacion.getId(),
+                        new MensajeDTO(mensaje));
             }
         }
     }

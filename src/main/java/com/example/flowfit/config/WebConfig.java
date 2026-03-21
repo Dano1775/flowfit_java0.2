@@ -36,8 +36,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/chat_uploads/**")
                 .addResourceLocations(chatUploadPath);
 
-        System.out.println("✅ Configuración de archivos:");
-        System.out.println("   📁 Ejercicios: " + exerciseUploadPath);
-        System.out.println("   💬 Chat: " + chatUploadPath);
+        System.out.println(" Configuración de archivos:");
+        System.out.println("    Ejercicios: " + exerciseUploadPath);
+        System.out.println("    Chat: " + chatUploadPath);
     }
 }

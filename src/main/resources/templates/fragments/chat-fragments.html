@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+  <!-- ================================================================== -->
+  <!-- FRAGMENTO PARA RENDERIZAR EL CONTENIDO DE UN MENSAJE INDIVIDUAL    -->
+  <!-- ================================================================== -->
+  <div th:fragment="mensaje-contenido(mensaje, usuario)">
+
+    <!-- 1. MENSAJE DE SISTEMA (sin remitente) -->
+    <div th:if="${mensaje.remitenteId == null}">
+      
+      <!-- Tarjeta de Propuesta de Plan -->
+      <div th:if="${mensaje.tipoMensaje.name() == 'PROPUESTA_PLAN' and mensaje.metadata != null}" 
+           class="propuesta-card" th:classappend="${mensaje.remitenteId == usuario.id} ? 'enviada' : 'recibida'">
+        <h5 class="text-white fw-bold">Propuesta de Plan</h5>
+        
+        <div th:if="${mensaje.metadata.precio != null}" class="propuesta-precio" th:text="${'$' + #numbers.formatDecimal(mensaje.metadata.precio, 1, 'POINT', 0, 'COMMA') + ' COP'}"></div>
+        <p th:if="${mensaje.metadata.duracionDias != null}" class="text-white mb-3" th:text="${'Duración: ' + mensaje.metadata.duracionDias + ' días'}"></p>
+        <p th:if="${mensaje.metadata.mensaje != null and !mensaje.metadata.mensaje.isEmpty()}" class="text-white-50 fst-italic border-start border-2 border-primary ps-3" th:text="${mensaje.metadata.mensaje}"></p>
+
+        <hr class="border-secondary">
+
+        <div class="mt-3">
+          <p class="text-white mb-2"><strong>Incluye:</strong></p>
+          <ul class="list-unstyled">
+            <li th:if="${mensaje.metadata.rutinasMes != null}" class="d-flex align-items-center mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><span th:text="${mensaje.metadata.rutinasMes + ' rutinas/mes'}"></span></li>
+            <li th:if="${mensaje.metadata.videollamadasMes != null}" class="d-flex align-items-center mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><span th:text="${mensaje.metadata.videollamadasMes + ' videollamadas/mes'}"></span></li>
+            <li th:if="${mensaje.metadata.seguimientoSemanal == true}" class="d-flex align-items-center mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><span>Seguimiento semanal</span></li>
+            <li th:if="${mensaje.metadata.planNutricional == true}" class="d-flex align-items-center mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><span>Plan nutricional</span></li>
+            <li th:if="${mensaje.metadata.chatDirecto == true}" class="d-flex align-items-center mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><span>Chat directo</span></li>
+          </ul>
+
+          <div th:if="${mensaje.metadata.serviciosAdicionales != null and !#lists.isEmpty(mensaje.metadata.serviciosAdicionales)}">
+            <p class="text-white mb-2 mt-3"><strong>Servicios Adicionales:</strong></p>
+            <ul class="list-unstyled">
+              <li th:each="servicio : ${mensaje.metadata.serviciosAdicionales}" class="d-flex align-items-center mb-2">
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                <span th:if="${servicio.nombre != null}" th:text="${servicio.nombre}"></span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2" th:if="${mensaje.remitenteId != usuario.id}">
+          <button class="btn btn-success flex-grow-1" th:attr="data-propuesta-id=${mensaje.metadata.historialId}, data-contratacion-id=${mensaje.metadata.contratacionId}" onclick="aceptarPropuesta(this)"><i class="bi bi-check-lg"></i> Aceptar</button>
+          <button class="btn btn-danger flex-grow-1" th:attr="data-propuesta-id=${mensaje.metadata.historialId}, data-contratacion-id=${mensaje.metadata.contratacionId}" onclick="rechazarPropuesta(this)"><i class="bi bi-x-lg"></i> Rechazar</button>
+          <button class="btn btn-outline-primary flex-grow-1" th:attr="data-propuesta-id=${mensaje.metadata.historialId}, data-contratacion-id=${mensaje.metadata.contratacionId}" onclick="mostrarModalContraoferta(this)"><i class="bi bi-arrow-repeat"></i> Contraoferta</button>
+        </div>
+      </div>
+
+      <!-- Otros Mensajes de Sistema (Pago, Confirmación, etc.) -->
+      <div th:unless="${mensaje.tipoMensaje.name() == 'PROPUESTA_PLAN'}">
+        <span class="badge" th:text="${mensaje.contenido}"></span>
+      </div>
+    </div>
+
+    <!-- 2. MENSAJE NORMAL (con remitente) -->
+    <div th:if="${mensaje.remitenteId != null}" class="mensaje-bubble">
+      <!-- Contenido de texto -->
+      <p th:if="${mensaje.contenido != null and !mensaje.contenido.isEmpty()}" th:text="${mensaje.contenido}"></p>
+      
+      <!-- Contenido de archivo adjunto -->
+      <div th:if="${mensaje.metadata.nombre_archivo != null}" class="mensaje-archivo">
+        <!-- Es imagen -->
+        <a th:if="${#strings.startsWith(mensaje.metadata.tipo_archivo, 'image/')}" th:href="${'/chat_uploads/' + mensaje.metadata.nombre_archivo}" target="_blank">
+          <img th:src="${'/chat_uploads/' + mensaje.metadata.nombre_archivo}" alt="Imagen adjunta">
+        </a>
+        <!-- Es video -->
+        <video th:if="${#strings.startsWith(mensaje.metadata.tipo_archivo, 'video/')}" controls>
+          <source th:src="${'/chat_uploads/' + mensaje.metadata.nombre_archivo}" th:type="${mensaje.metadata.tipo_archivo}">
+          Tu navegador no soporta la etiqueta de video.
+        </video>
+        <!-- Es otro tipo de archivo -->
+        <a th:unless="${#strings.startsWith(mensaje.metadata.tipo_archivo, 'image/') or #strings.startsWith(mensaje.metadata.tipo_archivo, 'video/')}" 
+           th:href="${'/chat_uploads/' + mensaje.metadata.nombre_archivo}" 
+           target="_blank"
+           class="archivo-documento">
+          <i class="bi bi-file-earmark-text"></i>
+          <div class="archivo-info">
+            <div class="archivo-nombre" th:text="${mensaje.metadata.nombre_original}"></div>
+            <div class="archivo-tamano" th:text="${#numbers.formatDecimal(mensaje.metadata.tamano_archivo / 1024.0, 1, 2) + ' KB'}"></div>
+          </div>
+        </a>
+      </div>
+      
+      <!-- Fecha de envío -->
+      <small th:text="${#temporals.format(mensaje.fechaEnvio, 'HH:mm')}"></small>
+    </div>
+
+  </div>
+
+</body>
+</html>

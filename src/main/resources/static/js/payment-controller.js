@@ -11,11 +11,12 @@ class PaymentController {
         this.cardPaymentBrickController = null;
         this.config = null;
         this.paymentService = new PaymentService();
+        this.isSubmitting = false;
     }
 
     /**
      * Inicializa MercadoPago Bricks con la configuración del backend
-     * @param {Object} config - Configuración del pago {amount, email, description, negociacionId}
+     * @param {Object} config - Configuración del pago {amount, email, description, negociacionId, conversacionId}
      */
     async initialize(config) {
         this.config = config;
@@ -26,7 +27,8 @@ class PaymentController {
                 amount: config.amount,
                 email: config.email,
                 description: config.description,
-                negociacionId: config.negociacionId
+                negociacionId: config.negociacionId,
+                conversacionId: config.conversacionId
             });
             
             // Obtener la public key desde el backend
@@ -126,6 +128,12 @@ class PaymentController {
      * @param {Object} cardFormData - Datos del formulario incluido el token
      */
     async handlePaymentSubmit(cardFormData) {
+        if (this.isSubmitting) {
+            console.warn('⚠️ Pago ya en proceso; ignorando doble submit');
+            return;
+        }
+
+        this.isSubmitting = true;
         this.showLoading();
         this.hideMessages();
 
@@ -141,6 +149,7 @@ class PaymentController {
                 paymentMethodId: cardFormData.payment_method_id,
                 issuer: cardFormData.issuer_id,
                 negociacionId: this.config.negociacionId, // ID de la negociación en FlowFit
+                conversacionId: this.config.conversacionId, // ID del chat desde donde se inició el pago
                 payer: {
                     email: cardFormData.payer.email,
                     identification: {
@@ -162,6 +171,7 @@ class PaymentController {
             throw error; // Re-lanzar para que el brick maneje el error
         } finally {
             this.hideLoading();
+            this.isSubmitting = false;
         }
     }
 
@@ -190,11 +200,18 @@ class PaymentController {
             brickContainer.style.display = 'none';
         }
 
-        // Recargar la página después de 2 segundos para reflejar cambios
+        // No recargar: el chat se actualiza por WebSocket. Cerrar el modal.
         setTimeout(() => {
-            console.log('🔄 Recargando página para actualizar estado...');
-            location.reload();
-        }, 2000);
+            try {
+                const modalEl = document.getElementById('modalPago');
+                const modal = modalEl && window.bootstrap ? window.bootstrap.Modal.getInstance(modalEl) : null;
+                if (modal) {
+                    modal.hide();
+                }
+            } catch (e) {
+                // noop
+            }
+        }, 900);
     }
 
     /**

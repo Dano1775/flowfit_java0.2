@@ -50,6 +50,12 @@ public class PaymentRequestDTO {
     private Long negociacionId;
 
     /**
+     * (Opcional) ID de la conversación desde donde se inició el pago.
+     * Se usa para guardar y emitir la confirmación de pago en el chat correcto.
+     */
+    private Long conversacionId;
+
+    /**
      * Datos del pagador
      */
     private PayerDTO payer;

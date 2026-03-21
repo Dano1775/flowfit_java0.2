@@ -2,6 +2,9 @@ package com.example.flowfit.controller;
 
 import com.example.flowfit.model.*;
 import com.example.flowfit.repository.*;
+import com.example.flowfit.service.ChatService;
+import com.example.flowfit.dto.MensajeDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -36,6 +39,12 @@ public class ConfirmacionServicioController {
         /**
          * Usuario confirma que el servicio fue completado satisfactoriamente
          */
+        @Autowired
+        private ChatService chatService;
+
+        @Autowired
+        private ObjectMapper objectMapper;
+
         @PostMapping("/usuario/{pagoId}")
         @ResponseBody
         public ResponseEntity<Map<String, Object>> usuarioConfirmaServicio(
@@ -96,34 +105,29 @@ public class ConfirmacionServicioController {
                         ContratacionEntrenador contratacion = contratacionRepo.findById(pago.getContratacionId())
                                         .orElseThrow(() -> new RuntimeException("Contratación no encontrada"));
 
-                        List<Conversacion> conversaciones = conversacionRepo
-                                        .findByUsuarioIdAndEntrenadorIdOrderByFechaUltimoMensajeDesc(usuario.getId(),
-                                                        contratacion.getEntrenadorId());
-                        Conversacion conversacion = conversaciones.isEmpty() ? null : conversaciones.get(0);
-                        if (conversacion == null)
-                                throw new RuntimeException("Conversación no encontrada");
+                        Conversacion conversacion = chatService.obtenerOCrearConversacion(usuario.getId(),
+                                        contratacion.getEntrenadorId());
 
-                        Map<String, Object> notificacion = new HashMap<>();
-                        notificacion.put("tipo", "CONFIRMACION_USUARIO");
-                        notificacion.put("pagoId", pago.getId());
-                        notificacion.put("usuarioConfirma", true);
-                        notificacion.put("entrenadorConfirma", pago.getEntrenadorConfirmaServicio());
-                        notificacion.put("estadoEscrow", pago.getEstadoEscrow().name());
-                        notificacion.put("mensaje", Boolean.TRUE.equals(pago.getEntrenadorConfirmaServicio())
-                                        ? "✅ ¡Ambos han confirmado! Los fondos han sido liberados al entrenador."
-                                        : "✅ Has confirmado el servicio. Esperando confirmación del entrenador...");
-                        notificacion.put("timestamp", LocalDateTime.now().toString());
+                        // Crear mensaje de sistema para el chat SOLO si falta la confirmación del
+                        // entrenador
+                        if (!Boolean.TRUE.equals(pago.getEntrenadorConfirmaServicio())) {
+                                Map<String, Object> metadata = new HashMap<>();
+                                metadata.put("tipo", "ESPERANDO_ENTRENADOR");
+                                metadata.put("pagoId", pago.getId());
 
-                        messagingTemplate.convertAndSend(
-                                        "/topic/conversacion/" + conversacion.getId(),
-                                        notificacion);
+                                String contenidoMensaje = "El usuario ha confirmado la recepción del servicio. Esperando confirmación del entrenador.";
+                                Mensaje mensajeSistema = chatService.crearMensajeDeSistema(conversacion.getId(),
+                                                contenidoMensaje, metadata);
 
-                        log.info("✅ Usuario {} confirmó servicio para pago {}", usuario.getId(), pagoId);
+                                messagingTemplate.convertAndSend(
+                                                "/topic/conversacion/" + conversacion.getId(),
+                                                new MensajeDTO(mensajeSistema));
+                        }
 
                         Map<String, Object> response = new HashMap<>();
                         response.put("success", true);
                         response.put("message", Boolean.TRUE.equals(pago.getEntrenadorConfirmaServicio())
-                                        ? "¡Servicio confirmado! Los fondos han sido liberados."
+                                        ? "Servicio confirmado. Fondos liberados al entrenador."
                                         : "Confirmación registrada. Esperando confirmación del entrenador.");
                         response.put("ambosConfirmaron", Boolean.TRUE.equals(pago.getEntrenadorConfirmaServicio()));
                         response.put("estadoEscrow", pago.getEstadoEscrow().name());
@@ -201,34 +205,28 @@ public class ConfirmacionServicioController {
                         pagoRepo.save(pago);
 
                         // Notificar por WebSocket
-                        List<Conversacion> conversaciones = conversacionRepo
-                                        .findByUsuarioIdAndEntrenadorIdOrderByFechaUltimoMensajeDesc(
-                                                        pago.getUsuarioId(), entrenador.getId());
-                        Conversacion conversacion = conversaciones.isEmpty() ? null : conversaciones.get(0);
-                        if (conversacion == null)
-                                throw new RuntimeException("Conversación no encontrada");
+                        Conversacion conversacion = chatService.obtenerOCrearConversacion(pago.getUsuarioId(),
+                                        entrenador.getId());
 
-                        Map<String, Object> notificacion = new HashMap<>();
-                        notificacion.put("tipo", "CONFIRMACION_ENTRENADOR");
-                        notificacion.put("pagoId", pago.getId());
-                        notificacion.put("usuarioConfirma", pago.getUsuarioConfirmaServicio());
-                        notificacion.put("entrenadorConfirma", true);
-                        notificacion.put("estadoEscrow", pago.getEstadoEscrow().name());
-                        notificacion.put("mensaje", Boolean.TRUE.equals(pago.getUsuarioConfirmaServicio())
-                                        ? "✅ ¡Ambos han confirmado! Los fondos han sido liberados al entrenador."
-                                        : "✅ El entrenador confirmó el servicio. Esperando tu confirmación...");
-                        notificacion.put("timestamp", LocalDateTime.now().toString());
+                        // Crear mensaje de sistema para el chat
+                        Map<String, Object> metadata = new HashMap<>();
+                        if (!Boolean.TRUE.equals(pago.getUsuarioConfirmaServicio())) {
+                                metadata.put("tipo", "ESPERANDO_USUARIO");
+                                metadata.put("pagoId", pago.getId());
 
-                        messagingTemplate.convertAndSend(
-                                        "/topic/conversacion/" + conversacion.getId(),
-                                        notificacion);
+                                String contenidoMensaje = "El entrenador ha confirmado la entrega del servicio. Esperando confirmación del usuario para liberar los fondos.";
+                                Mensaje mensajeSistema = chatService.crearMensajeDeSistema(conversacion.getId(),
+                                                contenidoMensaje, metadata);
 
-                        log.info("✅ Entrenador {} confirmó servicio para pago {}", entrenador.getId(), pagoId);
+                                messagingTemplate.convertAndSend(
+                                                "/topic/conversacion/" + conversacion.getId(),
+                                                new MensajeDTO(mensajeSistema));
+                        }
 
                         Map<String, Object> response = new HashMap<>();
                         response.put("success", true);
                         response.put("message", Boolean.TRUE.equals(pago.getUsuarioConfirmaServicio())
-                                        ? "¡Servicio confirmado! Los fondos han sido liberados a tu cuenta."
+                                        ? "Servicio confirmado. Fondos liberados."
                                         : "Confirmación registrada. Esperando confirmación del usuario.");
                         response.put("ambosConfirmaron", Boolean.TRUE.equals(pago.getUsuarioConfirmaServicio()));
                         response.put("estadoEscrow", pago.getEstadoEscrow().name());
@@ -313,6 +311,37 @@ public class ConfirmacionServicioController {
 
                 // Aquí podrías integrar con MercadoPago para hacer el transfer real
                 // Por ahora solo marcamos como liberado en el sistema
+
+                // --- ADDED SYSTEM MESSAGE PARA VISTA EN CHAT ---
+                if (chatService != null) {
+                        try {
+                                ContratacionEntrenador contratacion = contratacionRepo
+                                                .findById(pago.getContratacionId()).orElse(null);
+                                if (contratacion != null) {
+                                        Conversacion conversacion = chatService.obtenerOCrearConversacion(
+                                                        pago.getUsuarioId(),
+                                                        contratacion.getEntrenadorId());
+
+                                        Map<String, Object> metadataLib = new HashMap<>();
+                                        metadataLib.put("tipo", "FONDOS_LIBERADOS");
+                                        metadataLib.put("pagoId", pago.getId());
+                                        metadataLib.put("monto", pago.getMonto());
+                                        metadataLib.put("estadoEscrow", pago.getEstadoEscrow().name());
+
+                                        Mensaje msj = chatService.crearMensajeDeSistema(
+                                                        conversacion.getId(),
+                                                        "¡Servicio confirmado! Ambos han aceptado el servicio. Los fondos han sido liberados al entrenador.",
+                                                        metadataLib);
+
+                                        messagingTemplate.convertAndSend(
+                                                        "/topic/conversacion/" + conversacion.getId(),
+                                                        new MensajeDTO(msj));
+                                        log.info("💬 Mensaje de sistema (FONDOS_LIBERADOS) enviado por web sockets.");
+                                }
+                        } catch (Exception e) {
+                                log.error("❌ Error enviando mensaje de FONDOS_LIBERADOS: {}", e.getMessage());
+                        }
+                }
 
                 log.info("✅ Fondos liberados exitosamente para pago {}", pago.getId());
         }

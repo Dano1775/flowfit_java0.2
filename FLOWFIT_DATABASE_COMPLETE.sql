@@ -180,13 +180,65 @@ CREATE TABLE boletin_informativo (
     total_destinatarios INT DEFAULT 0,
     enviados_exitosos INT DEFAULT 0,
     enviados_fallidos INT DEFAULT 0,
-    creado_por VARCHAR(100) NOT NULL,
+    creado_por VARCHAR(255) NOT NULL,
     actualizado_en DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_estado (estado_envio),
     INDEX idx_fecha_creacion (fecha_creacion),
     INDEX idx_tipo_destinatario (tipo_destinatario),
     INDEX idx_creado_por (creado_por)
 );
+
+-- =============================================
+-- TABLA DE ASIGNACIÓN ENTRENADOR (SOLICITUDES)
+-- =============================================
+CREATE TABLE asignacion_entrenador (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    entrenador_id INT NOT NULL,
+    estado ENUM('PENDIENTE', 'ACEPTADA', 'RECHAZADA') NOT NULL DEFAULT 'PENDIENTE',
+    fecha_solicitud DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fecha_aceptacion DATETIME DEFAULT NULL,
+    mensaje_solicitud VARCHAR(500) DEFAULT NULL,
+    mensaje_respuesta VARCHAR(500) DEFAULT NULL,
+    INDEX idx_usuario (usuario_id),
+    INDEX idx_entrenador (entrenador_id),
+    INDEX idx_estado (estado),
+    INDEX idx_fecha_solicitud (fecha_solicitud),
+    CONSTRAINT fk_asignacion_usuario
+        FOREIGN KEY (usuario_id)
+        REFERENCES usuario(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_asignacion_entrenador
+        FOREIGN KEY (entrenador_id)
+        REFERENCES usuario(id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- TABLA DE HISTORIAL DE EDICIONES (AUDITORÍA ADMIN)
+-- =============================================
+CREATE TABLE historial_ediciones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_editado_id INT NOT NULL,
+    admin_editor_id INT NOT NULL,
+    campo_editado VARCHAR(255) NOT NULL,
+    valor_anterior TEXT DEFAULT NULL,
+    valor_nuevo TEXT DEFAULT NULL,
+    fecha_edicion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    motivo_cambio TEXT DEFAULT NULL,
+    ip_origen VARCHAR(255) DEFAULT NULL,
+    INDEX idx_usuario_editado (usuario_editado_id),
+    INDEX idx_admin_editor (admin_editor_id),
+    INDEX idx_fecha_edicion (fecha_edicion),
+    CONSTRAINT fk_historial_ediciones_usuario_editado
+        FOREIGN KEY (usuario_editado_id)
+        REFERENCES usuario(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_historial_ediciones_admin_editor
+        FOREIGN KEY (admin_editor_id)
+        REFERENCES usuario(id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =============================================
 -- SISTEMA DE CHAT Y CONTRATACIÓN
@@ -225,12 +277,27 @@ CREATE TABLE mensaje (
     conversacion_id BIGINT NOT NULL,
     remitente_id INT DEFAULT NULL,
     contenido TEXT NOT NULL,
-    tipo_mensaje ENUM('TEXTO', 'IMAGEN', 'ARCHIVO', 'PROPUESTA_PLAN', 'PAGO_GENERADO', 'SISTEMA', 'CONFIRMACION_SERVICIO', 'DISPUTA_INICIADA') DEFAULT 'TEXTO',
+    tipo_mensaje ENUM(
+        'TEXTO',
+        'IMAGEN',
+        'ARCHIVO',
+        'PROPUESTA_PLAN',
+        'ACEPTACION_PROPUESTA',
+        'RECHAZO_PROPUESTA',
+        'PAGO_GENERADO',
+        'PAGO_REALIZADO',
+        'PAGO_CONFIRMADO',
+        'CONTRATO_ACTIVADO',
+        'CONTRATO_FINALIZADO',
+        'CONFIRMACION_SERVICIO',
+        'DISPUTA_INICIADA',
+        'SISTEMA'
+    ) DEFAULT 'TEXTO',
     
     -- Campos para envío de archivos
-    archivo_url VARCHAR(500) DEFAULT NULL COMMENT 'URL del archivo subido',
+    archivo_url VARCHAR(255) DEFAULT NULL COMMENT 'URL del archivo subido',
     archivo_nombre VARCHAR(255) DEFAULT NULL COMMENT 'Nombre original del archivo',
-    archivo_tipo VARCHAR(100) DEFAULT NULL COMMENT 'MIME type del archivo',
+    archivo_tipo VARCHAR(255) DEFAULT NULL COMMENT 'MIME type del archivo',
     archivo_tamano BIGINT DEFAULT NULL COMMENT 'Tamaño del archivo en bytes',
     
     fecha_envio DATETIME DEFAULT CURRENT_TIMESTAMP,

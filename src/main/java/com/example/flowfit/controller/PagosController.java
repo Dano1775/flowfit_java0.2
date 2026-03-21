@@ -5,7 +5,9 @@ import com.example.flowfit.model.PagoContratacion;
 import com.example.flowfit.model.Usuario;
 import com.example.flowfit.repository.ContratacionEntrenadorRepository;
 import com.example.flowfit.repository.PagoContratacionRepository;
+import com.example.flowfit.service.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Controlador para manejar las URLs de retorno de MercadoPago
@@ -26,6 +30,12 @@ public class PagosController {
 
     @Autowired
     private PagoContratacionRepository pagoRepo;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private ChatService chatService;
 
     /**
      * Página de éxito - Pago aprobado
@@ -84,9 +94,29 @@ public class PagosController {
 
                     pagoRepo.save(pago);
 
+                    // Crear mensaje de sistema
+                    String contenidoMensaje = String.format("Pago aprobado exitosamente por $%s COP.",
+                            contratacion.getPrecioAcordado());
+                    Map<String, Object> metadata = new HashMap<>();
+                    metadata.put("tipo", "PAGO_APROBADO");
+                    metadata.put("pagoId", pago.getId());
+                    metadata.put("monto", contratacion.getPrecioAcordado());
+
+                    com.example.flowfit.model.Conversacion conversacion = chatService
+                            .obtenerOCrearConversacion(contratacion.getUsuarioId(), contratacion.getEntrenadorId());
+
+                    com.example.flowfit.model.Mensaje mensajeSistema = chatService.crearMensajeDeSistema(
+                            conversacion.getId(), contenidoMensaje,
+                            metadata);
+
                     model.addAttribute("contratacion", contratacion);
                     model.addAttribute("pago", pago);
                     model.addAttribute("mensaje", "¡Pago completado exitosamente!");
+
+                    // Notificar al cliente a través de WebSocket con el mensaje completo
+                    String destination = "/topic/conversacion/" + conversacion.getId();
+                    messagingTemplate.convertAndSend(destination,
+                            new com.example.flowfit.dto.MensajeDTO(mensajeSistema));
 
                     System.out.println("✅ Pago procesado correctamente - Contratación ACTIVA");
                     return "pagos/success";

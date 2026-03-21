@@ -50,9 +50,11 @@ public class NegociacionController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            System.err.println("Error fatal al enviar propuesta en NegociacionController: " + e.getMessage());
+            e.printStackTrace(); // Imprimir todo el stack trace en la consola del servidor
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
-            error.put("message", "Error: " + e.getMessage());
+            error.put("message", "Error interno del servidor al procesar la propuesta.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }

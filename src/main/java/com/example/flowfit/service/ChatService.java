@@ -6,6 +6,7 @@ import com.example.flowfit.dto.MensajeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 
 @Service
@@ -19,6 +20,9 @@ public class ChatService {
 
     @Autowired
     private UsuarioRepository usuarioRepo;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
      * Obtener o crear conversación entre usuario y entrenador
@@ -128,5 +132,26 @@ public class ChatService {
         } else {
             return conversacionRepo.contarMensajesNoLeidosUsuario(personaId);
         }
+    }
+
+    /**
+     * Crea y guarda un mensaje de sistema.
+     */
+    @Transactional
+    public Mensaje crearMensajeDeSistema(Long conversacionId, String contenido, Map<String, Object> metadata) {
+        Mensaje mensajeSistema = new Mensaje();
+        mensajeSistema.setConversacionId(conversacionId);
+        mensajeSistema.setRemitenteId(null);
+        mensajeSistema.setContenido(contenido);
+        mensajeSistema.setTipoMensaje(Mensaje.TipoMensaje.SISTEMA);
+
+        if (metadata != null) {
+            try {
+                mensajeSistema.setMetadata(objectMapper.writeValueAsString(metadata));
+            } catch (Exception e) {
+                // log.error
+            }
+        }
+        return mensajeRepo.save(mensajeSistema);
     }
 }

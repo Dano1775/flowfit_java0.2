@@ -2,6 +2,7 @@ package com.example.flowfit.controller;
 
 import com.example.flowfit.model.*;
 import com.example.flowfit.repository.ContratacionEntrenadorRepository;
+import com.example.flowfit.repository.MensajeRepository;
 import com.example.flowfit.repository.PagoContratacionRepository;
 import com.example.flowfit.service.*;
 import com.example.flowfit.dto.MensajeDTO;
@@ -45,6 +46,9 @@ public class ChatController {
     private PagoContratacionRepository pagoContratacionRepository;
 
     @Autowired
+    private MensajeRepository mensajeRepository;
+
+    @Autowired
     private FileUploadService fileUploadService;
 
     /**
@@ -78,60 +82,114 @@ public class ChatController {
      */
     @GetMapping("/conversacion/{conversacionId}")
     public String verConversacion(@PathVariable Long conversacionId, Model model, HttpSession session) {
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
-        if (usuario == null) {
-            return "redirect:/login";
+        try {
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            if (usuario == null) {
+                return "redirect:/login";
+            }
+
+            boolean esUsuario = !usuario.getPerfilUsuario().name().equals("Entrenador");
+
+            // Obtener conversación primero
+            Conversacion conversacion = chatService.obtenerConversacion(conversacionId);
+            if (conversacion == null) {
+                return "redirect:/chat";
+            }
+
+            // Obtener información de la otra persona
+            Usuario otraPersona = null;
+            if (conversacion.getUsuarioId().equals(usuario.getId())) {
+                otraPersona = usuarioService.obtenerUsuarioPorId(conversacion.getEntrenadorId());
+            } else {
+                otraPersona = usuarioService.obtenerUsuarioPorId(conversacion.getUsuarioId());
+            }
+
+            // Si es entrenador, cargar sus planes activos
+            if (!esUsuario) {
+                List<PlanEntrenador> planesEntrenador = planEntrenadorService.obtenerPlanesActivos(usuario.getId());
+                model.addAttribute("planesEntrenador", planesEntrenador);
+            }
+
+            // Buscar contratación activa para esta conversación
+            Optional<ContratacionEntrenador> contratacionOpt = contratacionRepo.findByUsuarioIdAndEntrenadorId(
+                    conversacion.getUsuarioId(),
+                    conversacion.getEntrenadorId());
+
+            ContratacionEntrenador contratacion = null;
+            if (contratacionOpt.isPresent()) {
+                contratacion = contratacionOpt.get();
+            }
+
+            // Reconciliación en carga: si ya hay pago aprobado, no permitir que reaparezcan
+            // CTAs/propuestas y
+            // asegurar confirmación persistente en el historial.
+            if (contratacion != null && contratacion.getId() != null) {
+                Optional<PagoContratacion> pagoOpt = pagoContratacionRepository
+                        .findByContratacionId(contratacion.getId());
+                pagoOpt.ifPresent(pago -> model.addAttribute("pago", pago));
+
+                if (pagoOpt.isPresent() && pagoOpt.get().getEstadoPago() == PagoContratacion.EstadoPago.APROBADO) {
+                    // 1) Eliminar CTA obsoleto (pago pendiente)
+                    mensajeRepository.softDeleteSistemaByMetadataPattern(
+                            conversacionId,
+                            "\"tipo\":\"PAGO_PENDIENTE\"",
+                            "\"tipo\" : \"PAGO_PENDIENTE\"");
+
+                    // 2) Invalidar propuestas activas para evitar que se rendericen luego del pago
+                    List<Mensaje> propuestas = mensajeRepository.findPropuestasPorConversacion(conversacionId);
+                    if (!propuestas.isEmpty()) {
+                        for (Mensaje propuesta : propuestas) {
+                            propuesta.setEliminado(true);
+                        }
+                        mensajeRepository.saveAll(propuestas);
+                    }
+
+                    // 3) Garantizar presencia de mensaje PAGO_APROBADO en historial (una sola vez)
+                    long pagoAprobadoCount = mensajeRepository.countSistemaByMetadataPattern(
+                            conversacionId,
+                            "\"tipo\":\"PAGO_APROBADO\"",
+                            "\"tipo\" : \"PAGO_APROBADO\"");
+
+                    if (pagoAprobadoCount == 0) {
+                        Map<String, Object> metadata = new HashMap<>();
+                        metadata.put("tipo", "PAGO_APROBADO");
+                        metadata.put("pagoId", pagoOpt.get().getId());
+                        metadata.put("contratacionId", contratacion.getId());
+                        metadata.put("monto", pagoOpt.get().getMonto());
+                        metadata.put("duracionDias", contratacion.getDuracionDiasAcordada());
+                        metadata.put("status", "approved");
+
+                        chatService.crearMensajeDeSistema(
+                                conversacionId,
+                                "✅ Pago aprobado. Importante: no vuelvas a pagar por este servicio; tu pago ya fue registrado. Ya pueden comenzar con el entrenamiento.\n\nSiguiente paso: Confirmen la finalización del servicio cuando corresponda para liberar los fondos al entrenador.",
+                                metadata);
+                    }
+                }
+            }
+
+            // Obtener mensajes y convertir a DTOs (después de reconciliación)
+            List<Mensaje> mensajes = chatService.obtenerMensajes(conversacionId);
+            List<MensajeDTO> mensajesDTO = mensajes.stream()
+                    .map(MensajeDTO::new)
+                    .toList();
+
+            // Marcar mensajes como leídos
+            chatService.marcarComoLeidos(conversacionId, usuario.getId());
+
+            model.addAttribute("conversacion", conversacion);
+            model.addAttribute("mensajes", mensajesDTO);
+            model.addAttribute("otraPersona", otraPersona);
+            model.addAttribute("usuario", usuario);
+            model.addAttribute("esUsuario", esUsuario);
+            model.addAttribute("contratacion", contratacion);
+
+            return "chat/conversacion";
+        } catch (Exception e) {
+            System.err.println("Error fatal al cargar la conversación: " + e.getMessage());
+            e.printStackTrace();
+            // Considera redirigir a una página de error o devolver un estado de error
+            return "redirect:/chat?error=Error al cargar la conversación";
         }
-
-        boolean esUsuario = !usuario.getPerfilUsuario().name().equals("Entrenador");
-
-        // Obtener conversación primero
-        Conversacion conversacion = chatService.obtenerConversacion(conversacionId);
-        if (conversacion == null) {
-            return "redirect:/chat";
-        }
-
-        // Obtener mensajes y convertir a DTOs
-        List<Mensaje> mensajes = chatService.obtenerMensajes(conversacionId);
-        List<MensajeDTO> mensajesDTO = mensajes.stream()
-                .map(MensajeDTO::new)
-                .toList();
-
-        // Marcar mensajes como leídos
-        chatService.marcarComoLeidos(conversacionId, usuario.getId());
-
-        // Obtener información de la otra persona
-        Usuario otraPersona = null;
-        if (conversacion.getUsuarioId().equals(usuario.getId())) {
-            otraPersona = usuarioService.obtenerUsuarioPorId(conversacion.getEntrenadorId());
-        } else {
-            otraPersona = usuarioService.obtenerUsuarioPorId(conversacion.getUsuarioId());
-        }
-
-        // Si es entrenador, cargar sus planes activos
-        if (!esUsuario) {
-            List<PlanEntrenador> planesEntrenador = planEntrenadorService.obtenerPlanesActivos(usuario.getId());
-            model.addAttribute("planesEntrenador", planesEntrenador);
-        }
-
-        // Buscar contratación activa para esta conversación
-        Optional<ContratacionEntrenador> contratacionOpt = contratacionRepo.findByUsuarioIdAndEntrenadorId(
-                conversacion.getUsuarioId(),
-                conversacion.getEntrenadorId());
-
-        ContratacionEntrenador contratacion = null;
-        if (contratacionOpt.isPresent()) {
-            contratacion = contratacionOpt.get();
-        }
-
-        model.addAttribute("conversacion", conversacion);
-        model.addAttribute("mensajes", mensajesDTO);
-        model.addAttribute("otraPersona", otraPersona);
-        model.addAttribute("usuario", usuario);
-        model.addAttribute("esUsuario", esUsuario);
-        model.addAttribute("contratacion", contratacion);
-
-        return "chat/conversacion";
     }
 
     /**
@@ -319,6 +377,7 @@ public class ChatController {
             mensajeWs.put("archivoTamano", mensaje.getArchivoTamano());
             mensajeWs.put("fechaEnvio", mensaje.getFechaEnvio().toString());
             mensajeWs.put("remitenteNombre", usuario.getNombre());
+            mensajeWs.put("metadata", mensaje.getMetadata());
 
             // Enviar a todos los suscritos a esta conversación
             messagingTemplate.convertAndSend("/topic/conversacion/" + conversacionId, mensajeWs);

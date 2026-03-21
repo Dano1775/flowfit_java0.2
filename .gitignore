@@ -1,4 +1,16 @@
-target/*.jar  
-target/flowfit-*.jar 
-.history/  
-target/ 
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Local editor/history
+.history/
+
+# Local build/debug outputs
+compile_*.txt
+compile_output*.txt
+db_*check*.txt
+db_*check*
+*.log
+
+# Uploaded/user-generated files (do not commit)
+src/main/resources/static/chat_uploads/
+src/main/resources/static/ejercicio_image_uploads/user_uploads/
