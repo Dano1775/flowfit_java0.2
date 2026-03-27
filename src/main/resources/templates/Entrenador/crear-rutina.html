@@ -153,6 +153,33 @@
             </div>
           </div>
 
+          <!-- Plantillas de Días (Split) -->
+          <div class="col-12">
+            <div class="card-base card-entrenador">
+              <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                  <div>
+                    <h5 class="text-white fw-semibold mb-1">
+                      <i class="bi bi-calendar2-week me-2"></i>
+                      Plantillas de Día
+                    </h5>
+                    <p class="text-muted-flowfit small mb-0">Crea las plantillas (ej. “Día de brazo”, “Pierna”, “Descanso”). Luego podrás asignarlas a cualquier fecha en el calendario del usuario.</p>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-entrenador-outline btn-sm" id="btnAgregarDia">
+                      <i class="bi bi-plus-lg me-1"></i>
+                      Agregar día
+                    </button>
+                  </div>
+                </div>
+
+                <input type="hidden" name="diasCount" id="diasCount" value="0">
+
+                <div id="diasCicloContainer" class="row g-3 mt-2"></div>
+              </div>
+            </div>
+          </div>
+
           <!-- Selección de Ejercicios -->
           <div class="col-12">
             <div class="card-base card-entrenador">
@@ -233,6 +260,16 @@
               <input type="text" id="buscadorEjercicios" class="form-control bg-dark text-white border-secondary" 
                      placeholder="Buscar ejercicios por nombre...">
             </div>
+          </div>
+
+          <!-- Asignar a día -->
+          <div class="mb-4">
+            <label class="form-label text-white fw-semibold mb-2">
+              <i class="bi bi-calendar3 me-2"></i>
+              Asignar ejercicios al día
+            </label>
+            <select id="diaAsignacionDefault" class="form-select bg-dark text-white border-secondary"></select>
+            <small class="text-muted-flowfit">Los días marcados como descanso no permiten ejercicios.</small>
           </div>
 
           <!-- Ejercicios Globales -->
@@ -449,6 +486,9 @@
   
   <script>
     let ejerciciosSeleccionados = new Map();
+    let diasCiclo = [];
+    let bulkSeleccionados = new Set();
+    let bulkDiasSeleccionados = new Set();
 
     document.addEventListener('DOMContentLoaded', function() {
       // Sidebar Toggle Functionality
@@ -503,7 +543,291 @@
           actualizarListaSeleccionados();
         });
       }
+
+      // Inicializar plantillas de día
+      initDiasPlantilla();
     });
+
+    function initDiasPlantilla() {
+      // Default: 3 plantillas (puedes agregar/quitar libremente)
+      if (!diasCiclo || diasCiclo.length === 0) {
+        diasCiclo = [
+          { orden: 1, nombre: 'Día 1', tipo: 'ENTRENAMIENTO' },
+          { orden: 2, nombre: 'Día 2', tipo: 'ENTRENAMIENTO' },
+          { orden: 3, nombre: 'Día 3', tipo: 'ENTRENAMIENTO' }
+        ];
+      }
+
+      const btnAgregar = document.getElementById('btnAgregarDia');
+      if (btnAgregar) {
+        btnAgregar.addEventListener('click', function() {
+          agregarDiaPlantilla();
+        });
+      }
+
+      renderDiasCicloContainer();
+      refreshDiaAsignacionSelect();
+      syncDiasCount();
+    }
+
+    function syncDiasCount() {
+      const inp = document.getElementById('diasCount');
+      if (inp) inp.value = String(diasCiclo.length);
+    }
+
+    function agregarDiaPlantilla() {
+      if (diasCiclo.length >= 30) {
+        showNotification('Máximo 30 plantillas de día', 'warning');
+        return;
+      }
+      const next = diasCiclo.length + 1;
+      diasCiclo.push({ orden: next, nombre: `Día ${next}`, tipo: 'ENTRENAMIENTO' });
+      renderDiasCicloContainer();
+      refreshDiaAsignacionSelect();
+      syncDiasCount();
+    }
+
+    function eliminarDiaPlantilla(orden) {
+      if (diasCiclo.length <= 1) {
+        showNotification('Debes mantener al menos 1 plantilla', 'warning');
+        return;
+      }
+
+      const removedOrden = Number(orden);
+      const remaining = diasCiclo
+        .filter(d => d.orden !== removedOrden)
+        .sort((a, b) => a.orden - b.orden);
+
+      // Map old orden -> new orden (after renumber)
+      const oldToNew = new Map();
+      remaining.forEach((d, idx) => {
+        oldToNew.set(d.orden, idx + 1);
+      });
+
+      // Apply renumber
+      remaining.forEach((d, idx) => {
+        d.orden = idx + 1;
+      });
+      diasCiclo = remaining;
+
+      const destino = findPrimerDiaEntrenamiento();
+      ejerciciosSeleccionados.forEach((data, id) => {
+        const diasActuales = Array.isArray(data.diasOrdenes) ? data.diasOrdenes : [];
+        const diasMapeados = [];
+        const seen = new Set();
+        diasActuales.forEach(diaOrd => {
+          const oldOrd = Number(diaOrd);
+          if (!oldToNew.has(oldOrd)) {
+            return;
+          }
+          const nuevoOrd = oldToNew.get(oldOrd);
+          if (nuevoOrd != null && !seen.has(nuevoOrd)) {
+            seen.add(nuevoOrd);
+            diasMapeados.push(nuevoOrd);
+          }
+        });
+
+        data.diasOrdenes = diasMapeados.length > 0 ? diasMapeados : [destino];
+        ejerciciosSeleccionados.set(id, data);
+      });
+
+      renderDiasCicloContainer();
+      refreshDiaAsignacionSelect();
+      syncDiasCount();
+      actualizarListaSeleccionados();
+    }
+
+    function renderDiasCicloContainer() {
+      const container = document.getElementById('diasCicloContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      diasCiclo.forEach(dia => {
+        const col = document.createElement('div');
+        col.className = 'col-md-6 col-lg-4';
+
+        col.innerHTML = `
+          <div class="card-base card-entrenador">
+            <div class="card-body p-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="text-white fw-semibold">
+                  <i class="bi bi-calendar3 me-2"></i>
+                  Día ${dia.orden}
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge ${dia.tipo === 'DESCANSO' ? 'bg-secondary' : 'bg-primary'}" style="opacity: 0.9;">
+                    ${dia.tipo === 'DESCANSO' ? 'Descanso' : 'Entrenamiento'}
+                  </span>
+                  ${diasCiclo.length > 1 ? `<button type="button" class="btn btn-sm btn-outline-danger" data-ff-remove-dia="${dia.orden}" title="Eliminar">` +
+                    `<i class=\"bi bi-trash\"></i>` +
+                  `</button>` : ``}
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="form-label text-white small mb-1">Nombre</label>
+                <input type="text" class="form-control form-control-sm bg-dark text-white border-secondary"
+                       name="diaNombre_${dia.orden}" id="diaNombre_${dia.orden}" value="${escapeHtml(dia.nombre)}">
+              </div>
+              <div>
+                <label class="form-label text-white small mb-1">Tipo</label>
+                <select class="form-select form-select-sm bg-dark text-white border-secondary"
+                        name="diaTipo_${dia.orden}" id="diaTipo_${dia.orden}">
+                  <option value="ENTRENAMIENTO" ${dia.tipo === 'ENTRENAMIENTO' ? 'selected' : ''}>Entrenamiento</option>
+                  <option value="DESCANSO" ${dia.tipo === 'DESCANSO' ? 'selected' : ''}>Descanso</option>
+                </select>
+              </div>
+              <small class="text-muted-flowfit">Define qué toca ese día</small>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(col);
+
+        const removeBtn = col.querySelector('[data-ff-remove-dia]');
+        if (removeBtn) {
+          removeBtn.addEventListener('click', function() {
+            const ord = parseInt(this.getAttribute('data-ff-remove-dia'), 10);
+            eliminarDiaPlantilla(ord);
+          });
+        }
+
+        // Wire events
+        const nombreInput = col.querySelector(`#diaNombre_${dia.orden}`);
+        if (nombreInput) {
+          nombreInput.addEventListener('input', function() {
+            dia.nombre = this.value;
+            refreshDiaAsignacionSelect();
+            actualizarListaSeleccionados();
+          });
+        }
+
+        const tipoSelect = col.querySelector(`#diaTipo_${dia.orden}`);
+        if (tipoSelect) {
+          tipoSelect.addEventListener('change', function() {
+            const nuevoTipo = this.value;
+
+            // Evitar que todos los días queden en descanso
+            if (nuevoTipo === 'DESCANSO') {
+              const entrenos = diasCiclo.filter(x => x.tipo === 'ENTRENAMIENTO').length;
+              if (entrenos <= 1 && dia.tipo === 'ENTRENAMIENTO') {
+                this.value = 'ENTRENAMIENTO';
+                showNotification('Debes mantener al menos 1 día de entrenamiento', 'warning');
+                return;
+              }
+            }
+
+            dia.tipo = nuevoTipo;
+
+            // Si se marcó como descanso, mover ejercicios a un día de entrenamiento
+            if (dia.tipo === 'DESCANSO') {
+              const destino = findPrimerDiaEntrenamiento();
+              ejerciciosSeleccionados.forEach((data, id) => {
+                const diasActuales = Array.isArray(data.diasOrdenes) ? data.diasOrdenes : [];
+                const filtrados = diasActuales.filter(x => Number(x) !== Number(dia.orden));
+                data.diasOrdenes = filtrados.length > 0 ? filtrados : [destino];
+                ejerciciosSeleccionados.set(id, data);
+              });
+              showNotification(`Día ${dia.orden} marcado como descanso. Ejercicios movidos al Día ${destino}.`, 'warning');
+            }
+
+            refreshDiaAsignacionSelect();
+            actualizarListaSeleccionados();
+          });
+        }
+      });
+
+      syncDiasCount();
+    }
+
+    function refreshDiaAsignacionSelect() {
+      const select = document.getElementById('diaAsignacionDefault');
+      if (!select) return;
+      const current = select.value;
+
+      const opciones = diasCiclo
+        .filter(d => d.tipo !== 'DESCANSO')
+        .map(d => ({ value: String(d.orden), label: `Día ${d.orden}: ${d.nombre || ('Día ' + d.orden)}` }));
+
+      select.innerHTML = '';
+      opciones.forEach(op => {
+        const opt = document.createElement('option');
+        opt.value = op.value;
+        opt.textContent = op.label;
+        select.appendChild(opt);
+      });
+
+      if (opciones.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'No hay días de entrenamiento';
+        select.appendChild(opt);
+        select.disabled = true;
+      } else {
+        select.disabled = false;
+        // Mantener selección si sigue disponible
+        const still = opciones.some(o => o.value === current);
+        select.value = still ? current : opciones[0].value;
+      }
+    }
+
+    function findPrimerDiaEntrenamiento() {
+      const d = diasCiclo.find(x => x.tipo !== 'DESCANSO');
+      return d ? d.orden : 1;
+    }
+
+    function getDiasEntrenamiento() {
+      return diasCiclo.filter(d => d.tipo !== 'DESCANSO').sort((a, b) => a.orden - b.orden);
+    }
+
+    function normalizeDiasOrdenes(diasOrdenes) {
+      const entreno = new Set(getDiasEntrenamiento().map(d => Number(d.orden)));
+      const result = [];
+      const seen = new Set();
+      (Array.isArray(diasOrdenes) ? diasOrdenes : []).forEach(v => {
+        const n = Number(v);
+        if (!Number.isFinite(n) || n < 1) return;
+        if (!entreno.has(n)) return;
+        if (seen.has(n)) return;
+        seen.add(n);
+        result.push(n);
+      });
+      if (result.length === 0) {
+        result.push(findPrimerDiaEntrenamiento());
+      }
+      return result;
+    }
+
+    function getDiaLabel(orden) {
+      const dia = diasCiclo.find(d => d.orden === orden);
+      if (!dia) return `Día ${orden}`;
+      return `Día ${dia.orden}: ${dia.nombre || ('Día ' + dia.orden)}`;
+    }
+
+    function getDiaOptionsHtml(selectedOrden) {
+      const opciones = diasCiclo
+        .filter(d => d.tipo !== 'DESCANSO')
+        .map(d => {
+          const sel = String(d.orden) === String(selectedOrden) ? 'selected' : '';
+          return `<option value="${d.orden}" ${sel}>${escapeHtml(getDiaLabel(d.orden))}</option>`;
+        })
+        .join('');
+      return opciones;
+    }
+
+    function clampInt(value, min, max, fallback) {
+      const n = parseInt(value, 10);
+      if (Number.isNaN(n)) return fallback;
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
 
     // Habilitar/Deshabilitar inputs cuando se marca/desmarca checkbox
     function toggleEjercicioInputs(checkbox) {
@@ -527,6 +851,21 @@
         const nombre = checkbox.dataset.nombre;
         const descripcion = checkbox.dataset.descripcion;
         const tipo = checkbox.dataset.tipo;
+
+        const diaSelect = document.getElementById('diaAsignacionDefault');
+        const diaOrden = diaSelect && diaSelect.value ? parseInt(diaSelect.value, 10) : findPrimerDiaEntrenamiento();
+        const dia = diasCiclo.find(d => d.orden === diaOrden);
+        if (!dia || dia.tipo === 'DESCANSO') {
+          checkbox.checked = false;
+          setsInput.disabled = true;
+          repsInput.disabled = true;
+          duracionInput.disabled = true;
+          descansoInput.disabled = true;
+          notasInput.disabled = true;
+          card.classList.remove('selected');
+          showNotification('Selecciona un día de entrenamiento para asignar el ejercicio', 'warning');
+          return;
+        }
         
         ejerciciosSeleccionados.set(id, {
           nombre: nombre,
@@ -537,7 +876,8 @@
           duracion: duracionInput.value,
           descanso: descansoInput.value,
           notas: notasInput.value,
-          orden: ejerciciosSeleccionados.size + 1
+          orden: ejerciciosSeleccionados.size + 1,
+          diasOrdenes: [diaOrden]
         });
       } else {
         setsInput.disabled = true;
@@ -565,94 +905,252 @@
       const lista = document.getElementById('listaEjercicios');
       const emptyState = document.getElementById('emptyState');
       const btnGuardar = document.getElementById('btnGuardar');
-      
+
       if (ejerciciosSeleccionados.size === 0) {
+        bulkSeleccionados = new Set();
+        bulkDiasSeleccionados = new Set();
         lista.style.display = 'none';
         emptyState.style.display = 'block';
         if (btnGuardar) btnGuardar.disabled = true;
-      } else {
-        lista.style.display = 'flex';
-        emptyState.style.display = 'none';
-        if (btnGuardar) btnGuardar.disabled = false;
-        
-        lista.innerHTML = '';
-        
-        // Convertir Map a array y ordenar por orden
-        const ejerciciosArray = Array.from(ejerciciosSeleccionados.entries())
-          .map(([id, data]) => ({ id, ...data }))
-          .sort((a, b) => a.orden - b.orden);
-        
-        ejerciciosArray.forEach((ejercicio, index) => {
-          const id = ejercicio.id;
-          const data = ejercicio;
-          
-          const setsInput = document.getElementById(`sets_${id}`);
-          const repsInput = document.getElementById(`reps_${id}`);
-          const duracionInput = document.getElementById(`duracion_${id}`);
-          const descansoInput = document.getElementById(`descanso_${id}`);
-          const notasInput = document.getElementById(`notas_${id}`);
-          
-          const sets = setsInput ? setsInput.value : 3;
-          const reps = repsInput ? repsInput.value : 12;
-          const duracion = duracionInput ? duracionInput.value : 0;
-          const descanso = descansoInput ? descansoInput.value : 60;
-          const notas = notasInput ? notasInput.value : '';
-          
-          const badgeClass = data.tipo === 'global' ? 'badge-global' : 'badge-personal';
-          const tipoText = data.tipo === 'global' ? 'Global' : 'Personal';
-          
-          const col = document.createElement('div');
-          col.className = 'col-md-6 col-lg-4 ejercicio-sortable';
-          col.draggable = true;
-          col.dataset.ejercicioId = id;
-          col.innerHTML = `
-            <div class="card-base card-entrenador h-100 ejercicio-card-sortable">
-              <div class="card-body p-3">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                  <div class="d-flex align-items-center gap-2 flex-grow-1">
-                    <div class="drag-handle" style="cursor: grab; color: rgba(255,255,255,0.5);">
-                      <i class="bi bi-grip-vertical fs-5"></i>
-                    </div>
-                    <div class="orden-badge-small" style="min-width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 14px;">
-                      ${index + 1}
-                    </div>
-                    <div>
-                      <h6 class="text-white fw-semibold mb-1">${data.nombre}</h6>
-                      <span class="badge ${badgeClass} small">${tipoText}</span>
-                    </div>
-                  </div>
-                  <button type="button" class="btn btn-sm remove-ejercicio" onclick="removerEjercicio('${id}')">
-                    <i class="bi bi-x-lg"></i>
-                  </button>
+        return;
+      }
+
+      lista.style.display = 'flex';
+      emptyState.style.display = 'none';
+      if (btnGuardar) btnGuardar.disabled = false;
+
+      // Limpiar selección bulk de IDs que ya no existen
+      const idsVigentes = new Set(Array.from(ejerciciosSeleccionados.keys()).map(String));
+      Array.from(bulkSeleccionados).forEach(id => {
+        if (!idsVigentes.has(String(id))) {
+          bulkSeleccionados.delete(id);
+        }
+      });
+
+      lista.innerHTML = '';
+
+      const diasEntreno = getDiasEntrenamiento();
+      const bulkCol = document.createElement('div');
+      bulkCol.className = 'col-12';
+      bulkCol.innerHTML = `
+        <div class="card-base card-entrenador">
+          <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div>
+                <div class="text-white fw-semibold">
+                  <i class="bi bi-calendar3 me-2"></i>
+                  Asignación Masiva (tipo calendario)
                 </div>
-                <p class="text-muted-flowfit small mb-3">${data.descripcion || 'Sin descripción'}</p>
-                <div class="d-flex gap-2 align-items-center mb-2 flex-wrap">
-                  <span class="text-white small"><i class="bi bi-repeat me-1"></i>Sets:</span>
-                  <strong class="text-primary">${sets}</strong>
-                  <span class="text-muted-flowfit mx-2">|</span>
-                  <span class="text-white small"><i class="bi bi-list-ol me-1"></i>Reps:</span>
-                  <strong class="text-primary">${reps}</strong>
-                  ${duracion > 0 ? `<span class="text-muted-flowfit mx-2">|</span><span class="text-white small"><i class="bi bi-clock me-1"></i>${duracion}s</span>` : ''}
-                </div>
-                <div class="d-flex gap-2 align-items-center mb-2 flex-wrap">
-                  ${descanso > 0 ? `<span class="text-white small"><i class="bi bi-pause-circle me-1"></i>Descanso: ${descanso}s</span>` : ''}
-                </div>
-                ${notas ? `<div class="mt-2"><small class="text-muted-flowfit"><i class="bi bi-sticky me-1"></i>${notas}</small></div>` : ''}
-                <input type="hidden" name="ejercicios" value="${id}">
-                <input type="hidden" name="sets_${id}" value="${sets}">
-                <input type="hidden" name="reps_${id}" value="${reps}">
-                <input type="hidden" name="duracion_${id}" value="${duracion}">
-                <input type="hidden" name="descanso_${id}" value="${descanso}">
-                <input type="hidden" name="notas_${id}" value="${notas}">
+                <div class="text-muted-flowfit small">Marca ejercicios abajo y aplica uno o varios días.</div>
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="btn btn-entrenador-outline btn-sm" onclick="bulkSeleccionarTodos(true)">
+                  Seleccionar todos
+                </button>
+                <button type="button" class="btn btn-entrenador-outline btn-sm" onclick="bulkSeleccionarTodos(false)">
+                  Limpiar selección
+                </button>
+                <button type="button" class="btn btn-flowfit-primary btn-entrenador-primary btn-sm" onclick="aplicarDiasBulk()">
+                  Aplicar días
+                </button>
               </div>
             </div>
-          `;
-          lista.appendChild(col);
-        });
-        
-        // Habilitar drag and drop
-        initDragAndDrop();
+
+            <div class="mt-3 d-flex flex-wrap gap-2">
+              ${diasEntreno.map(d => {
+                const ord = Number(d.orden);
+                const active = bulkDiasSeleccionados.has(ord);
+                const cls = active ? 'btn-flowfit-primary btn-entrenador-primary' : 'btn btn-entrenador-outline';
+                return `<button type="button" class="btn btn-sm ${cls}" onclick="toggleBulkDia(${ord})" title="${escapeHtml(getDiaLabel(ord))}">D${ord}</button>`;
+              }).join('')}
+            </div>
+            <div class="text-muted-flowfit small mt-2">Tip: puedes seleccionar múltiples días (D1, D3, ...).</div>
+          </div>
+        </div>
+      `;
+      lista.appendChild(bulkCol);
+
+      // Convertir Map a array y ordenar por orden
+      const ejerciciosArray = Array.from(ejerciciosSeleccionados.entries())
+        .map(([id, data]) => ({ id, ...data }))
+        .sort((a, b) => a.orden - b.orden);
+
+      ejerciciosArray.forEach((ejercicio, index) => {
+        const id = ejercicio.id;
+        const data = ejercicio;
+
+        const setsInput = document.getElementById(`sets_${id}`);
+        const repsInput = document.getElementById(`reps_${id}`);
+        const duracionInput = document.getElementById(`duracion_${id}`);
+        const descansoInput = document.getElementById(`descanso_${id}`);
+        const notasInput = document.getElementById(`notas_${id}`);
+
+        const sets = setsInput ? setsInput.value : 3;
+        const reps = repsInput ? repsInput.value : 12;
+        const duracion = duracionInput ? duracionInput.value : 0;
+        const descanso = descansoInput ? descansoInput.value : 60;
+        const notas = notasInput ? notasInput.value : '';
+
+        const badgeClass = data.tipo === 'global' ? 'badge-global' : 'badge-personal';
+        const tipoText = data.tipo === 'global' ? 'Global' : 'Personal';
+
+        const diasOrdenes = normalizeDiasOrdenes(data.diasOrdenes);
+        data.diasOrdenes = diasOrdenes;
+        ejerciciosSeleccionados.set(id, data);
+
+        const diasBadges = diasOrdenes
+          .map(o => `<span class=\"badge bg-primary small me-1\" title=\"${escapeHtml(getDiaLabel(o))}\">D${o}</span>`)
+          .join('');
+
+        const diaButtons = diasEntreno.map(d => {
+          const ord = Number(d.orden);
+          const active = diasOrdenes.includes(ord);
+          const cls = active ? 'btn-flowfit-primary btn-entrenador-primary' : 'btn btn-entrenador-outline';
+          return `<button type=\"button\" class=\"btn btn-sm ${cls}\" onclick=\"toggleDiaEjercicio('${id}', ${ord})\" title=\"${escapeHtml(getDiaLabel(ord))}\">D${ord}</button>`;
+        }).join('');
+
+        const checkedBulk = bulkSeleccionados.has(String(id)) || bulkSeleccionados.has(id);
+
+        const col = document.createElement('div');
+        col.className = 'col-md-6 col-lg-4 ejercicio-sortable';
+        col.draggable = true;
+        col.dataset.ejercicioId = id;
+        col.innerHTML = `
+          <div class="card-base card-entrenador h-100 ejercicio-card-sortable">
+            <div class="card-body p-3">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="d-flex align-items-center gap-2 flex-grow-1">
+                  <div class="drag-handle" style="cursor: grab; color: rgba(255,255,255,0.5);">
+                    <i class="bi bi-grip-vertical fs-5"></i>
+                  </div>
+                  <div class="form-check m-0" title="Seleccionar para asignación masiva">
+                    <input class="form-check-input" type="checkbox" ${checkedBulk ? 'checked' : ''} onchange="toggleBulkSeleccion('${id}', this.checked)">
+                  </div>
+                  <div class="orden-badge-small" style="min-width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 14px;">
+                    ${index + 1}
+                  </div>
+                  <div>
+                    <h6 class="text-white fw-semibold mb-1">${data.nombre}</h6>
+                    <span class="badge ${badgeClass} small me-1">${tipoText}</span>
+                    ${diasBadges}
+                  </div>
+                </div>
+                <button type="button" class="btn btn-sm remove-ejercicio" onclick="removerEjercicio('${id}')">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+              <p class="text-muted-flowfit small mb-3">${data.descripcion || 'Sin descripción'}</p>
+
+              <div class="mb-3">
+                <label class="form-label text-white small mb-1">Días (puedes seleccionar varios)</label>
+                <div class="d-flex flex-wrap gap-2">
+                  ${diaButtons}
+                </div>
+              </div>
+
+              <div class="d-flex gap-2 align-items-center mb-2 flex-wrap">
+                <span class="text-white small"><i class="bi bi-repeat me-1"></i>Sets:</span>
+                <strong class="text-primary">${sets}</strong>
+                <span class="text-muted-flowfit mx-2">|</span>
+                <span class="text-white small"><i class="bi bi-list-ol me-1"></i>Reps:</span>
+                <strong class="text-primary">${reps}</strong>
+                ${duracion > 0 ? `<span class="text-muted-flowfit mx-2">|</span><span class="text-white small"><i class="bi bi-clock me-1"></i>${duracion}s</span>` : ''}
+              </div>
+              <div class="d-flex gap-2 align-items-center mb-2 flex-wrap">
+                ${descanso > 0 ? `<span class="text-white small"><i class="bi bi-pause-circle me-1"></i>Descanso: ${descanso}s</span>` : ''}
+              </div>
+              ${notas ? `<div class="mt-2"><small class="text-muted-flowfit"><i class="bi bi-sticky me-1"></i>${escapeHtml(notas)}</small></div>` : ''}
+
+              <input type="hidden" name="ejercicios" value="${id}">
+              ${diasOrdenes.map(o => `<input type=\"hidden\" name=\"dia_${id}\" value=\"${o}\">`).join('')}
+              <input type="hidden" name="sets_${id}" value="${sets}">
+              <input type="hidden" name="reps_${id}" value="${reps}">
+              <input type="hidden" name="duracion_${id}" value="${duracion}">
+              <input type="hidden" name="descanso_${id}" value="${descanso}">
+              <input type="hidden" name="notas_${id}" value="${escapeHtml(notas)}">
+            </div>
+          </div>
+        `;
+        lista.appendChild(col);
+      });
+
+      initDragAndDrop();
+    }
+
+    function toggleDiaEjercicio(id, diaOrden) {
+      const ejercicio = ejerciciosSeleccionados.get(id);
+      if (!ejercicio) return;
+      const orden = Number(diaOrden);
+      const dia = diasCiclo.find(d => Number(d.orden) === orden);
+      if (!dia || dia.tipo === 'DESCANSO') {
+        showNotification('Ese día es descanso. Elige un día de entrenamiento.', 'warning');
+        return;
       }
+
+      const actuales = normalizeDiasOrdenes(ejercicio.diasOrdenes);
+      const idx = actuales.indexOf(orden);
+      if (idx >= 0) {
+        if (actuales.length <= 1) {
+          showNotification('Cada ejercicio debe tener al menos 1 día asignado.', 'warning');
+          return;
+        }
+        actuales.splice(idx, 1);
+      } else {
+        actuales.push(orden);
+      }
+      ejercicio.diasOrdenes = normalizeDiasOrdenes(actuales);
+      ejerciciosSeleccionados.set(id, ejercicio);
+      actualizarListaSeleccionados();
+    }
+
+    function toggleBulkSeleccion(id, checked) {
+      const key = String(id);
+      if (checked) {
+        bulkSeleccionados.add(key);
+      } else {
+        bulkSeleccionados.delete(key);
+      }
+    }
+
+    function bulkSeleccionarTodos(checked) {
+      if (!checked) {
+        bulkSeleccionados = new Set();
+        actualizarListaSeleccionados();
+        return;
+      }
+      bulkSeleccionados = new Set(Array.from(ejerciciosSeleccionados.keys()).map(String));
+      actualizarListaSeleccionados();
+    }
+
+    function toggleBulkDia(orden) {
+      const o = Number(orden);
+      if (bulkDiasSeleccionados.has(o)) {
+        bulkDiasSeleccionados.delete(o);
+      } else {
+        bulkDiasSeleccionados.add(o);
+      }
+      actualizarListaSeleccionados();
+    }
+
+    function aplicarDiasBulk() {
+      if (bulkSeleccionados.size === 0) {
+        showNotification('Selecciona al menos un ejercicio para aplicar la asignación masiva.', 'warning');
+        return;
+      }
+      if (bulkDiasSeleccionados.size === 0) {
+        showNotification('Selecciona al menos un día de entrenamiento para aplicar.', 'warning');
+        return;
+      }
+
+      const dias = normalizeDiasOrdenes(Array.from(bulkDiasSeleccionados));
+
+      bulkSeleccionados.forEach(id => {
+        const ejercicio = ejerciciosSeleccionados.get(id);
+        if (!ejercicio) return;
+        ejercicio.diasOrdenes = dias.slice();
+        ejerciciosSeleccionados.set(id, ejercicio);
+      });
+      actualizarListaSeleccionados();
     }
 
     function removerEjercicio(id) {

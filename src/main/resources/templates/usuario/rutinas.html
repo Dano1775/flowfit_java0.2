@@ -12,6 +12,9 @@
   <!-- FlowFit VIP CSS -->
   <link th:href="@{/css/flowfit-base.css}" rel="stylesheet">
   <link th:href="@{/css/flowfit-usuario.css}" rel="stylesheet">
+
+  <!-- FullCalendar (Calendario de Rutinas) -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
 </head>
 <body>
 
@@ -29,23 +32,17 @@
   <!-- Main Content -->
   <main class="main-content-base fade-in-up">
     <div class="container-fluid">
-      <!-- Page Header - Estilo Moderno -->
-      <div class="mb-4" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(52, 211, 153, 0.08) 100%); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 20px; padding: 2rem; position: relative; overflow: hidden;">
-        <div style="content: ''; position: absolute; top: -50%; right: -20%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+      <!-- Page Header -->
+      <div class="welcome-header-enhanced">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
           <div class="d-flex align-items-center gap-3">
-            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #10b981 0%, #34d399 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);">
+            <div class="d-flex align-items-center justify-content-center rounded-4" style="width: 60px; height: 60px; background: var(--usuario-gradient); box-shadow: var(--usuario-shadow);">
               <i class="bi bi-clipboard-check" style="font-size: 1.75rem; color: white;"></i>
             </div>
             <div>
               <h1 class="text-white mb-1 fw-bold" style="font-size: 2rem;">Mis Rutinas</h1>
-              <p class="text-muted-flowfit mb-0">Entrena con propósito, alcanza tus metas 💪</p>
+              <p class="text-muted-flowfit mb-0">Entrena con propósito y alcanza tus metas</p>
             </div>
-          </div>
-          <div class="d-flex gap-2">
-            <button class="btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 600; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-              <i class="bi bi-filter me-2"></i>Filtrar
-            </button>
           </div>
         </div>
       </div>
@@ -129,6 +126,52 @@
                 <h2 class="text-white mb-0 fw-bold" style="font-size: 2rem;" th:text="${progresoGeneral != null ? progresoGeneral + '%' : '0%'}">0%</h2>
                 <small class="text-muted-flowfit">general</small>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calendario de Rutinas (por día) -->
+      <div class="row mb-5">
+        <div class="col-12">
+          <div class="card-base card-usuario" style="padding: 2.5rem;">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+              <h4 class="text-white mb-0 d-flex align-items-center fw-bold">
+                <div style="width: 40px; height: 40px; background: rgba(59, 130, 246, 0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                  <i class="bi bi-calendar3" style="color: #60a5fa; font-size: 1.25rem;"></i>
+                </div>
+                Calendario de Rutinas
+              </h4>
+              <span class="text-muted-flowfit small">Rutina del día → clic para iniciar sesión</span>
+            </div>
+            <div id="calendarUsuario"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal: Evento de rutina -->
+      <div class="modal fade" id="modalEventoRutina" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content" style="background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 16px;">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <h5 class="modal-title text-white fw-bold" data-ff-title>Rutina</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="text-muted-flowfit small">Fecha</div>
+                <div class="text-white" data-ff-date></div>
+              </div>
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="text-muted-flowfit small">Estado</div>
+                <div class="text-white" data-ff-state></div>
+              </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid rgba(255, 255, 255, 0.08);">
+              <a class="btn" data-ff-start style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; padding: 0.7rem 1.1rem; font-weight: 600; border-radius: 12px;">
+                <i class="bi bi-play-fill me-2"></i>Iniciar sesión
+              </a>
+              <button type="button" class="btn" data-bs-dismiss="modal" style="background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); padding: 0.7rem 1.1rem; border-radius: 12px;">Cerrar</button>
             </div>
           </div>
         </div>
@@ -601,6 +644,10 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- FullCalendar -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+  <script th:src="@{/js/rutinas-calendario.js}"></script>
   
   <!-- Usuario Rutinas JS -->
   <script th:src="@{/js/usuario-rutinas.js}"></script>

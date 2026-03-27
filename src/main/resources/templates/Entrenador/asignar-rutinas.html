@@ -804,12 +804,18 @@
                       </td>
                       <td>
                         <span th:class="'status-badge status-' + ${asignacion.estado.name().toLowerCase()}"
-                              th:text="${asignacion.estado.name() == 'ACTIVA' ? 'ACTIVA' : 'COMPLETADA'}">
+                              th:text="${asignacion.estado.name()}">
                           ESTADO
                         </span>
                       </td>
                       <td>
                         <div class="d-flex gap-2 justify-content-center action-buttons">
+                          <a th:if="${asignacion.rutina != null and asignacion.rutina.entrenadorId == entrenador.id}"
+                             th:href="@{/entrenador/asignaciones/{id}/planificar-ejercicios(id=${asignacion.id})}"
+                             class="btn-action btn-action-view"
+                             title="Planificar ejercicios">
+                            <i class="bi bi-calendar2-plus"></i>
+                          </a>
                           <button th:attr="onclick=|verRutinaModal(${asignacion.rutinaId})|" 
                              class="btn-action btn-action-view"
                              title="Ver detalles">

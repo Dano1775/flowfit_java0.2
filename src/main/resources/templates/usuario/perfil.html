@@ -37,10 +37,10 @@
               <p class="flowfit-subtitle">Gestiona tu información personal y configuración</p>
             </div>
             <div class="flowfit-page-actions">
-              <button class="btn btn-usuario-primary" id="editarPerfilBtn">
+              <a class="btn btn-usuario-primary" th:href="@{/perfil/editar}">
                 <i class="bi bi-pencil me-2"></i>
                 Editar Perfil
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -182,41 +182,6 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Funcionalidad para editar perfil
-    document.getElementById('editarPerfilBtn').addEventListener('click', function() {
-      const inputs = document.querySelectorAll('#perfilForm input[readonly]');
-      const botonesEdicion = document.getElementById('botonesEdicion');
-      
-      // Hacer campos editables (excepto algunos que no deben cambiar)
-      inputs.forEach(input => {
-        if (input.id !== 'numeroDocumento' && input.id !== 'perfilUsuario' && input.id !== 'correo') {
-          input.removeAttribute('readonly');
-          input.classList.add('border-success');
-        }
-      });
-      
-      // Mostrar botones de guardar/cancelar
-      botonesEdicion.classList.remove('d-none');
-      this.classList.add('d-none');
-    });
-
-    // Cancelar edición
-    document.getElementById('cancelarBtn').addEventListener('click', function() {
-      location.reload(); // Recargar página para cancelar cambios
-    });
-
-    // Validar confirmación de contraseña
-    document.querySelector('form[action*="cambiar-password"]').addEventListener('submit', function(e) {
-      const passwordNuevo = document.getElementById('passwordNuevo').value;
-      const passwordConfirmar = document.getElementById('passwordConfirmar').value;
-      
-      if (passwordNuevo !== passwordConfirmar) {
-        e.preventDefault();
-        alert('Las contraseñas no coinciden');
-      }
-    });
-  </script>
 
   <!-- Sidebar Responsive JS -->
   <!-- FlowFit VIP Usuario Script -->

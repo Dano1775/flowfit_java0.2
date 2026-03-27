@@ -17,46 +17,46 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Rutina {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
+
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
-    
+
     @Column(name = "descripcion", columnDefinition = "TEXT")
     private String descripcion;
-    
+
     @Column(name = "entrenador_id")
     private Integer entrenadorId;
-    
+
     // @Column(name = "fecha_creacion")
     // private LocalDate fechaCreacion;
-    
+
     @Transient
     private LocalDate fechaCreacion;
-    
+
     // Campos adicionales calculados
     @Transient
     private Integer duracionMinutos;
-    
+
     @Transient
     private Integer caloriasEstimadas;
-    
+
     @Transient
     private String dificultad;
-    
+
     @Transient
     private String categoria;
-    
+
     // Relación con ejercicios (opcional, para futuro)
     @OneToMany(mappedBy = "rutinaId", fetch = FetchType.LAZY)
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<RutinaEjercicio> ejercicios;
-    
+
     // Relación con entrenador
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entrenador_id", insertable = false, updatable = false)
@@ -64,16 +64,16 @@ public class Rutina {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Usuario entrenador;
-    
+
     // Métodos de utilidad
     public boolean esRutinaGlobal() {
         return entrenadorId == null;
     }
-    
+
     public boolean esRutinaPersonalizada() {
         return entrenadorId != null;
     }
-    
+
     // Getters y setters adicionales para campos calculados
     public Integer getDuracionMinutos() {
         if (duracionMinutos == null) {
@@ -82,39 +82,121 @@ public class Rutina {
         }
         return duracionMinutos;
     }
-    
+
     public Integer getCaloriasEstimadas() {
         if (caloriasEstimadas == null) {
             return calcularCalorias();
         }
         return caloriasEstimadas;
     }
-    
+
     public String getDificultad() {
         if (dificultad == null) {
             return calcularDificultad();
         }
         return dificultad;
     }
-    
+
     private Integer calcularDuracion() {
         // Lógica básica - se puede mejorar con ejercicios reales
-        if (nombre.toLowerCase().contains("hiit")) return 30;
-        if (nombre.toLowerCase().contains("cardio")) return 35;
-        if (nombre.toLowerCase().contains("fuerza")) return 45;
-        if (nombre.toLowerCase().contains("yoga") || nombre.toLowerCase().contains("flexibilidad")) return 25;
+        if (nombre.toLowerCase().contains("hiit"))
+            return 30;
+        if (nombre.toLowerCase().contains("cardio"))
+            return 35;
+        if (nombre.toLowerCase().contains("fuerza"))
+            return 45;
+        if (nombre.toLowerCase().contains("yoga") || nombre.toLowerCase().contains("flexibilidad"))
+            return 25;
         return 40; // valor por defecto
     }
-    
+
     private Integer calcularCalorias() {
         Integer duracion = getDuracionMinutos();
         // Estimación aproximada: 8 calorías por minuto promedio
         return duracion * 8;
     }
-    
+
     private String calcularDificultad() {
-        if (nombre.toLowerCase().contains("principiante") || nombre.toLowerCase().contains("básico")) return "Principiante";
-        if (nombre.toLowerCase().contains("avanzado") || nombre.toLowerCase().contains("intenso")) return "Avanzado";
+        if (nombre.toLowerCase().contains("principiante") || nombre.toLowerCase().contains("básico"))
+            return "Principiante";
+        if (nombre.toLowerCase().contains("avanzado") || nombre.toLowerCase().contains("intenso"))
+            return "Avanzado";
         return "Intermedio";
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public Integer getEntrenadorId() {
+        return entrenadorId;
+    }
+
+    public void setEntrenadorId(Integer entrenadorId) {
+        this.entrenadorId = entrenadorId;
+    }
+
+    public LocalDate getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(LocalDate fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public void setDuracionMinutos(Integer duracionMinutos) {
+        this.duracionMinutos = duracionMinutos;
+    }
+
+    public void setCaloriasEstimadas(Integer caloriasEstimadas) {
+        this.caloriasEstimadas = caloriasEstimadas;
+    }
+
+    public void setDificultad(String dificultad) {
+        this.dificultad = dificultad;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
+    }
+
+    public List<RutinaEjercicio> getEjercicios() {
+        return ejercicios;
+    }
+
+    public void setEjercicios(List<RutinaEjercicio> ejercicios) {
+        this.ejercicios = ejercicios;
+    }
+
+    public Usuario getEntrenador() {
+        return entrenador;
+    }
+
+    public void setEntrenador(Usuario entrenador) {
+        this.entrenador = entrenador;
     }
 }

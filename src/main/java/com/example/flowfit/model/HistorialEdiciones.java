@@ -12,37 +12,37 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HistorialEdiciones {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
+
     @ManyToOne
     @JoinColumn(name = "usuario_editado_id", nullable = false)
     private Usuario usuarioEditado;
-    
+
     @ManyToOne
     @JoinColumn(name = "admin_editor_id", nullable = false)
     private Usuario adminEditor;
-    
+
     @Column(name = "campo_editado", nullable = false)
     private String campoEditado;
-    
+
     @Column(name = "valor_anterior", columnDefinition = "TEXT")
     private String valorAnterior;
-    
+
     @Column(name = "valor_nuevo", columnDefinition = "TEXT")
     private String valorNuevo;
-    
+
     @Column(name = "fecha_edicion", nullable = false)
     private LocalDateTime fechaEdicion = LocalDateTime.now();
-    
+
     @Column(name = "motivo_cambio", columnDefinition = "TEXT")
     private String motivoCambio;
-    
+
     @Column(name = "ip_origen")
     private String ipOrigen;
-    
+
     // Enumeration for field types
     public enum CampoEditado {
         NOMBRE("Nombre"),
@@ -53,15 +53,87 @@ public class HistorialEdiciones {
         ESTADO("Estado"),
         CONTRASEÑA("Contraseña"),
         FOTO_PERFIL("Foto de Perfil");
-        
+
         private final String descripcion;
-        
+
         CampoEditado(String descripcion) {
             this.descripcion = descripcion;
         }
-        
+
         public String getDescripcion() {
             return descripcion;
         }
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Usuario getUsuarioEditado() {
+        return usuarioEditado;
+    }
+
+    public void setUsuarioEditado(Usuario usuarioEditado) {
+        this.usuarioEditado = usuarioEditado;
+    }
+
+    public Usuario getAdminEditor() {
+        return adminEditor;
+    }
+
+    public void setAdminEditor(Usuario adminEditor) {
+        this.adminEditor = adminEditor;
+    }
+
+    public String getCampoEditado() {
+        return campoEditado;
+    }
+
+    public void setCampoEditado(String campoEditado) {
+        this.campoEditado = campoEditado;
+    }
+
+    public String getValorAnterior() {
+        return valorAnterior;
+    }
+
+    public void setValorAnterior(String valorAnterior) {
+        this.valorAnterior = valorAnterior;
+    }
+
+    public String getValorNuevo() {
+        return valorNuevo;
+    }
+
+    public void setValorNuevo(String valorNuevo) {
+        this.valorNuevo = valorNuevo;
+    }
+
+    public LocalDateTime getFechaEdicion() {
+        return fechaEdicion;
+    }
+
+    public void setFechaEdicion(LocalDateTime fechaEdicion) {
+        this.fechaEdicion = fechaEdicion;
+    }
+
+    public String getMotivoCambio() {
+        return motivoCambio;
+    }
+
+    public void setMotivoCambio(String motivoCambio) {
+        this.motivoCambio = motivoCambio;
+    }
+
+    public String getIpOrigen() {
+        return ipOrigen;
+    }
+
+    public void setIpOrigen(String ipOrigen) {
+        this.ipOrigen = ipOrigen;
     }
 }

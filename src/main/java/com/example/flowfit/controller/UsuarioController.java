@@ -52,6 +52,12 @@ public class UsuarioController {
     private com.example.flowfit.service.ProgresoService progresoService;
 
     @Autowired
+    private com.example.flowfit.service.RutinaSesionProgramadaService rutinaSesionProgramadaService;
+
+    @Autowired
+    private com.example.flowfit.service.RutinaEjercicioProgramadoService rutinaEjercicioProgramadoService;
+
+    @Autowired
     private com.example.flowfit.service.PdfService pdfService;
 
     /**
@@ -151,6 +157,20 @@ public class UsuarioController {
                     .stream()
                     .filter(ra -> ra.getRutina() != null && ra.getRutina().getEntrenadorId() != null)
                     .toList();
+
+            // Backfill suave (solo rutinas globales/auto-asignadas):
+            // para rutinas de entrenador, el calendario se construye desde la planificación
+            // por fecha.
+            for (RutinaAsignada ra : rutinasActivas) {
+                try {
+                    boolean esRutinaEntrenador = ra.getRutina() != null && ra.getRutina().getEntrenadorId() != null;
+                    if (!esRutinaEntrenador) {
+                        rutinaSesionProgramadaService.crearSesionesMesPorDefecto(ra.getId());
+                    }
+                } catch (Exception ignored) {
+                    // no romper la página por backfill
+                }
+            }
 
             // Estadísticas del usuario
             Double progresoGeneral = rutinaService.calcularProgresoGeneralUsuario(usuario.getId());
@@ -450,7 +470,10 @@ public class UsuarioController {
                 return "redirect:/login";
             }
 
-            rutinaService.asignarRutinaAUsuario(rutinaId, usuario.getId());
+            RutinaAsignada asignacion = rutinaService.asignarRutinaAUsuario(rutinaId, usuario.getId());
+            if (asignacion != null && asignacion.getId() != null) {
+                rutinaSesionProgramadaService.crearSesionesMesPorDefecto(asignacion.getId());
+            }
             redirectAttributes.addFlashAttribute("successMessage", "¡Rutina asignada correctamente!");
 
         } catch (Exception e) {
@@ -512,6 +535,11 @@ public class UsuarioController {
             // Marcar rutina como completada
             rutinaService.marcarRutinaComoCompletada(rutinaAsignadaId);
 
+            // Cancelar sesiones futuras pendientes (para que el calendario no siga
+            // mostrando el mes activo)
+            rutinaSesionProgramadaService.cancelarSesionesFuturasPendientes(rutinaAsignadaId,
+                    java.time.LocalDate.now());
+
             redirectAttributes.addFlashAttribute("successMessage",
                     "¡Rutina completada! ¡Felicitaciones! Tu progreso ha sido registrado.");
 
@@ -527,6 +555,7 @@ public class UsuarioController {
      */
     @GetMapping("/sesion/{rutinaAsignadaId}")
     public String iniciarSesion(@PathVariable Integer rutinaAsignadaId,
+            @RequestParam(required = false) String fecha,
             HttpSession session,
             Model model,
             RedirectAttributes redirectAttributes) {
@@ -548,10 +577,72 @@ public class UsuarioController {
             }
 
             RutinaAsignada rutinaAsignada = rutinaOpt.get();
-            List<com.example.flowfit.model.RutinaEjercicio> ejercicios = rutinaAsignada.getRutina().getEjercicios();
+
+            java.time.LocalDate fechaSesion = null;
+            if (fecha != null && !fecha.isBlank()) {
+                try {
+                    fechaSesion = java.time.LocalDate.parse(fecha);
+                } catch (Exception ignored) {
+                    fechaSesion = null;
+                }
+            }
+            if (fechaSesion == null) {
+                fechaSesion = java.time.LocalDate.now();
+            }
+
+            // Si el entrenador planificó ejercicios específicamente para esta fecha, se
+            // usan esos.
+            List<com.example.flowfit.model.RutinaEjercicio> ejerciciosProgramados = rutinaEjercicioProgramadoService
+                    .obtenerEjerciciosProgramadosParaSesion(rutinaAsignadaId, fechaSesion);
+
+            List<com.example.flowfit.model.RutinaEjercicio> ejercicios;
+
+            boolean esRutinaDeEntrenador = rutinaAsignada.getRutina() != null
+                    && rutinaAsignada.getRutina().getEntrenadorId() != null;
+
+            if (esRutinaDeEntrenador) {
+                if (ejerciciosProgramados == null || ejerciciosProgramados.isEmpty()) {
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Tu entrenador aún no ha planificado ejercicios para esa fecha. Revisa tu calendario o consulta con tu entrenador.");
+                    return "redirect:/usuario/rutinas";
+                }
+                ejercicios = ejerciciosProgramados;
+            } else {
+                // Rutinas globales/auto-asignadas: mantener lógica anterior por plantilla
+                if (ejerciciosProgramados != null && !ejerciciosProgramados.isEmpty()) {
+                    ejercicios = ejerciciosProgramados;
+                } else {
+                    Integer diaOrden = null;
+                    var sesionOpt = rutinaSesionProgramadaService.obtenerSesion(rutinaAsignadaId, fechaSesion);
+                    if (sesionOpt.isEmpty() || sesionOpt.get().getRutinaDia() == null) {
+                        redirectAttributes.addFlashAttribute("errorMessage",
+                                "Esa fecha aún no está disponible. Revisa tu calendario.");
+                        return "redirect:/usuario/rutinas";
+                    }
+
+                    var dia = sesionOpt.get().getRutinaDia();
+                    if (dia.getTipo() == com.example.flowfit.model.RutinaDia.TipoDia.DESCANSO) {
+                        redirectAttributes.addFlashAttribute("errorMessage",
+                                "Hoy es día de descanso para esta rutina. Elige un día de entrenamiento en el calendario.");
+                        return "redirect:/usuario/rutinas";
+                    }
+                    diaOrden = dia.getOrden();
+
+                    if (diaOrden != null) {
+                        ejercicios = rutinaService.obtenerEjerciciosDeRutinaPorDia(rutinaAsignada.getRutinaId(),
+                                diaOrden);
+                        if (ejercicios == null || ejercicios.isEmpty()) {
+                            ejercicios = rutinaService.obtenerEjerciciosDeRutina(rutinaAsignada.getRutinaId());
+                        }
+                    } else {
+                        ejercicios = rutinaService.obtenerEjerciciosDeRutina(rutinaAsignada.getRutinaId());
+                    }
+                }
+            }
 
             model.addAttribute("rutinaAsignada", rutinaAsignada);
             model.addAttribute("ejercicios", ejercicios);
+            model.addAttribute("fechaSesion", fechaSesion);
 
             return "usuario/sesion-entrenamiento";
 
@@ -567,6 +658,7 @@ public class UsuarioController {
      */
     @PostMapping("/sesion/completar")
     public String completarSesion(@RequestParam Integer rutinaAsignadaId,
+            @RequestParam(required = false) String fecha,
             @RequestParam Map<String, String> allParams,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
@@ -574,6 +666,71 @@ public class UsuarioController {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             if (usuario == null) {
                 return "redirect:/login";
+            }
+
+            java.time.LocalDate fechaSesion = null;
+            if (fecha != null && !fecha.isBlank()) {
+                try {
+                    fechaSesion = java.time.LocalDate.parse(fecha);
+                } catch (Exception ignored) {
+                    fechaSesion = null;
+                }
+            }
+            if (fechaSesion == null) {
+                fechaSesion = java.time.LocalDate.now();
+            }
+
+            boolean hayProgramacion = false;
+            try {
+                List<com.example.flowfit.model.RutinaEjercicio> programados = rutinaEjercicioProgramadoService
+                        .obtenerEjerciciosProgramadosParaSesion(rutinaAsignadaId, fechaSesion);
+                hayProgramacion = programados != null && !programados.isEmpty();
+            } catch (Exception ignored) {
+                hayProgramacion = false;
+            }
+
+            var sesionOpt = rutinaSesionProgramadaService.obtenerSesion(rutinaAsignadaId, fechaSesion);
+            // Si es rutina de entrenador, exigir programación por fecha
+            boolean esRutinaDeEntrenador = false;
+            try {
+                Optional<RutinaAsignada> raOpt = rutinaService.obtenerRutinasAsignadas(usuario.getId())
+                        .stream()
+                        .filter(r -> r.getId().equals(rutinaAsignadaId))
+                        .findFirst();
+                esRutinaDeEntrenador = raOpt.isPresent()
+                        && raOpt.get().getRutina() != null
+                        && raOpt.get().getRutina().getEntrenadorId() != null;
+            } catch (Exception ignored) {
+                esRutinaDeEntrenador = false;
+            }
+
+            if (esRutinaDeEntrenador && !hayProgramacion) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Tu entrenador aún no ha planificado ejercicios para esa fecha.");
+                return "redirect:/usuario/rutinas";
+            }
+
+            if (!hayProgramacion) {
+                // Bloquear completar si no está programada o si es descanso
+                if (sesionOpt.isEmpty() || sesionOpt.get().getRutinaDia() == null) {
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Esa fecha aún no está programada por tu entrenador.");
+                    return "redirect:/usuario/rutinas";
+                }
+
+                if (sesionOpt.get().getRutinaDia().getTipo() == com.example.flowfit.model.RutinaDia.TipoDia.DESCANSO) {
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Ese día es descanso. No se puede completar una sesión.");
+                    return "redirect:/usuario/rutinas";
+                }
+            } else {
+                if (sesionOpt.isPresent()
+                        && sesionOpt.get()
+                                .getEstado() == com.example.flowfit.model.RutinaSesionProgramada.EstadoSesion.CANCELADA) {
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Esa sesión está cancelada. No se puede completar.");
+                    return "redirect:/usuario/rutinas";
+                }
             }
 
             int ejerciciosRegistrados = 0;
@@ -610,7 +767,8 @@ public class UsuarioController {
                                     series,
                                     repeticiones,
                                     peso,
-                                    comentarios);
+                                    comentarios,
+                                    fechaSesion);
                             ejerciciosRegistrados++;
                             ejerciciosCompletados++;
                         } catch (Exception ex) {
@@ -621,8 +779,8 @@ public class UsuarioController {
             }
 
             if (ejerciciosRegistrados > 0) {
-                // Actualizar progreso de la rutina
-                rutinaService.marcarRutinaComoCompletada(rutinaAsignadaId);
+                // Marcar la sesión del día como realizada (calendario) y recalcular progreso
+                rutinaSesionProgramadaService.marcarSesionComoRealizada(rutinaAsignadaId, fechaSesion);
 
                 redirectAttributes.addFlashAttribute("successMessage",
                         "¡Sesión completada! Se registraron " + ejerciciosRegistrados
@@ -630,7 +788,7 @@ public class UsuarioController {
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage",
                         "No se registraron ejercicios. Marca los ejercicios completados.");
-                return "redirect:/usuario/sesion/" + rutinaAsignadaId;
+                return "redirect:/usuario/sesion/" + rutinaAsignadaId + "?fecha=" + fechaSesion;
             }
 
         } catch (Exception e) {

@@ -2,12 +2,17 @@ package com.example.flowfit.service;
 
 import com.example.flowfit.model.Rutina;
 import com.example.flowfit.model.RutinaAsignada;
+import com.example.flowfit.model.RutinaDia;
 import com.example.flowfit.model.RutinaEjercicio;
+import com.example.flowfit.model.RutinaEjercicioDia;
 import com.example.flowfit.model.RutinaAsignada.EstadoRutina;
+import com.example.flowfit.dto.EjercicioRutinaMultiDiaDto;
 import com.example.flowfit.dto.EjercicioRutinaDto;
 import com.example.flowfit.repository.RutinaRepository;
 import com.example.flowfit.repository.RutinaAsignadaRepository;
+import com.example.flowfit.repository.RutinaDiaRepository;
 import com.example.flowfit.repository.RutinaEjercicioRepository;
+import com.example.flowfit.repository.RutinaEjercicioDiaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +34,12 @@ public class RutinaService {
 
     @Autowired
     private RutinaEjercicioRepository rutinaEjercicioRepository;
+
+    @Autowired
+    private RutinaDiaRepository rutinaDiaRepository;
+
+    @Autowired
+    private RutinaEjercicioDiaRepository rutinaEjercicioDiaRepository;
 
     // ===== GESTIÓN DE RUTINAS =====
 
@@ -73,6 +84,28 @@ public class RutinaService {
 
         Rutina rutinaSalvada = rutinaRepository.save(rutina);
 
+        // Si vienen ejercicios con diaOrden y no existe ciclo aún, crear uno básico
+        // mínimo
+        // (por compatibilidad: algunas rutinas pueden ser legacy sin ciclo explícito)
+        if (rutinaDiaRepository.countByRutinaId(rutinaSalvada.getId()) == 0) {
+            // Si no se envió diaOrden, dejamos sin ciclo. Si se envió, creamos ciclo con
+            // max(diaOrden).
+            int maxDia = ejercicios.stream()
+                    .map(e -> e.getDiaOrden() == null ? 0 : e.getDiaOrden())
+                    .max(Integer::compareTo)
+                    .orElse(0);
+            if (maxDia > 0) {
+                for (int d = 1; d <= maxDia; d++) {
+                    RutinaDia dia = new RutinaDia();
+                    dia.setRutinaId(rutinaSalvada.getId());
+                    dia.setOrden(d);
+                    dia.setNombre("Día " + d);
+                    dia.setTipo(RutinaDia.TipoDia.ENTRENAMIENTO);
+                    rutinaDiaRepository.save(dia);
+                }
+            }
+        }
+
         // Agregar ejercicios a la rutina con orden
         int orden = 1;
         for (com.example.flowfit.dto.EjercicioRutinaSimpleDto ejercicioDto : ejercicios) {
@@ -80,6 +113,7 @@ public class RutinaService {
             rutinaEjercicio.setRutinaId(rutinaSalvada.getId());
             rutinaEjercicio.setEjercicioId(ejercicioDto.getEjercicioId());
             rutinaEjercicio.setOrden(orden++);
+            rutinaEjercicio.setDiaOrden(ejercicioDto.getDiaOrden());
             rutinaEjercicio.setSeries(ejercicioDto.getSets());
             rutinaEjercicio.setRepeticiones(ejercicioDto.getRepeticiones());
             rutinaEjercicio.setDuracionSegundos(ejercicioDto.getDuracionSegundos());
@@ -87,6 +121,65 @@ public class RutinaService {
             rutinaEjercicio.setNotas(ejercicioDto.getNotas());
 
             rutinaEjercicioRepository.save(rutinaEjercicio);
+        }
+    }
+
+    public void crearRutinaConCiclo(String nombre,
+            String descripcion,
+            Integer entrenadorId,
+            List<RutinaDia> diasCiclo,
+            List<EjercicioRutinaMultiDiaDto> ejercicios) {
+        if (diasCiclo == null || diasCiclo.isEmpty()) {
+            throw new RuntimeException("Debes definir al menos 1 día en el ciclo");
+        }
+
+        // Crear rutina
+        Rutina rutina = new Rutina();
+        rutina.setNombre(nombre);
+        rutina.setDescripcion(descripcion);
+        rutina.setEntrenadorId(entrenadorId);
+        rutina.setFechaCreacion(LocalDate.now());
+
+        Rutina rutinaSalvada = rutinaRepository.save(rutina);
+
+        // Guardar días
+        for (RutinaDia dia : diasCiclo) {
+            RutinaDia nuevo = new RutinaDia();
+            nuevo.setRutinaId(rutinaSalvada.getId());
+            nuevo.setOrden(dia.getOrden());
+            nuevo.setNombre(dia.getNombre() != null && !dia.getNombre().isBlank() ? dia.getNombre()
+                    : ("Día " + dia.getOrden()));
+            nuevo.setTipo(dia.getTipo() != null ? dia.getTipo() : RutinaDia.TipoDia.ENTRENAMIENTO);
+            rutinaDiaRepository.save(nuevo);
+        }
+
+        // Guardar ejercicios (en rutina_ejercicio) + mapeo rutina_ejercicio_dia
+        int orden = 1;
+        for (EjercicioRutinaMultiDiaDto ejercicioDto : ejercicios) {
+            RutinaEjercicio rutinaEjercicio = new RutinaEjercicio();
+            rutinaEjercicio.setRutinaId(rutinaSalvada.getId());
+            rutinaEjercicio.setEjercicioId(ejercicioDto.getEjercicioId());
+            rutinaEjercicio.setOrden(orden++);
+            Integer primerDia = (ejercicioDto.getDiasOrdenes() != null && !ejercicioDto.getDiasOrdenes().isEmpty())
+                    ? ejercicioDto.getDiasOrdenes().get(0)
+                    : null;
+            rutinaEjercicio.setDiaOrden(primerDia);
+            rutinaEjercicio.setSeries(ejercicioDto.getSets());
+            rutinaEjercicio.setRepeticiones(ejercicioDto.getRepeticiones());
+            rutinaEjercicio.setDuracionSegundos(ejercicioDto.getDuracionSegundos());
+            rutinaEjercicio.setDescansoSegundos(ejercicioDto.getDescansoSegundos());
+            rutinaEjercicio.setNotas(ejercicioDto.getNotas());
+            rutinaEjercicioRepository.save(rutinaEjercicio);
+
+            if (ejercicioDto.getDiasOrdenes() != null) {
+                for (Integer diaOrden : ejercicioDto.getDiasOrdenes()) {
+                    if (diaOrden == null) {
+                        continue;
+                    }
+                    rutinaEjercicioDiaRepository.save(
+                            new RutinaEjercicioDia(rutinaSalvada.getId(), ejercicioDto.getEjercicioId(), diaOrden));
+                }
+            }
         }
     }
 
@@ -162,7 +255,12 @@ public class RutinaService {
     }
 
     public List<RutinaAsignada> obtenerRutinasAsignadas(Integer usuarioId) {
-        return rutinaAsignadaRepository.findByUsuarioId(usuarioId);
+        // Excluir BORRADOR: no debe ser visible al usuario hasta que el entrenador
+        // guarde.
+        return rutinaAsignadaRepository.findByUsuarioId(usuarioId)
+                .stream()
+                .filter(ra -> ra.getEstado() != EstadoRutina.BORRADOR)
+                .toList();
     }
 
     public List<Object[]> obtenerProgresoSemanal(Integer usuarioId) {
@@ -193,6 +291,45 @@ public class RutinaService {
 
     public List<RutinaEjercicio> obtenerEjerciciosDeRutina(Integer rutinaId) {
         return rutinaEjercicioRepository.findByRutinaIdOrderByOrdenAsc(rutinaId);
+    }
+
+    public List<RutinaEjercicio> obtenerEjerciciosDeRutinaPorDia(Integer rutinaId, Integer diaOrden) {
+        List<Integer> ejercicioIds = rutinaEjercicioDiaRepository
+                .findEjercicioIdsByRutinaIdAndDiaOrden(rutinaId, diaOrden);
+        if (ejercicioIds != null && !ejercicioIds.isEmpty()) {
+            return rutinaEjercicioRepository.findByRutinaIdAndEjercicioIdInOrderByOrdenAsc(rutinaId, ejercicioIds);
+        }
+        // Fallback legacy (rutinas antiguas que aún usan rutina_ejercicio.dia_orden)
+        return rutinaEjercicioRepository.findByRutinaIdAndDiaOrdenOrderByOrdenAsc(rutinaId, diaOrden);
+    }
+
+    public List<RutinaDia> obtenerDiasDeRutina(Integer rutinaId) {
+        return rutinaDiaRepository.findByRutinaIdOrderByOrdenAsc(rutinaId);
+    }
+
+    /**
+     * Rutinas legacy/globales: si no tienen ciclo, crea un ciclo básico de 1 día
+     * y asigna cualquier ejercicio sin diaOrden a ese día.
+     */
+    public void asegurarCicloBasicoSiNoExiste(Integer rutinaId) {
+        if (rutinaDiaRepository.countByRutinaId(rutinaId) > 0) {
+            return;
+        }
+
+        RutinaDia dia = new RutinaDia();
+        dia.setRutinaId(rutinaId);
+        dia.setOrden(1);
+        dia.setNombre("Entrenamiento");
+        dia.setTipo(RutinaDia.TipoDia.ENTRENAMIENTO);
+        rutinaDiaRepository.save(dia);
+
+        List<RutinaEjercicio> ejercicios = rutinaEjercicioRepository.findByRutinaIdOrderByOrdenAsc(rutinaId);
+        for (RutinaEjercicio e : ejercicios) {
+            if (e.getDiaOrden() == null) {
+                e.setDiaOrden(1);
+                rutinaEjercicioRepository.save(e);
+            }
+        }
     }
 
     // Comentado temporalmente debido a problemas con el campo id en la tabla

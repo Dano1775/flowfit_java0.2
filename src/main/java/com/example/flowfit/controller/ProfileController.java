@@ -17,25 +17,25 @@ public class ProfileController {
     @Autowired
     private UsuarioService usuarioService;
 
-    @GetMapping("/editar-perfil")
+    @GetMapping({ "/editar-perfil", "/perfil/editar" })
     public String mostrarEditarPerfil(HttpSession session, Model model) {
-        // Verificar si el usuario está logueado
-        if (session.getAttribute("id") == null) {
+        Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
+        if (usuarioSesion == null) {
             return "redirect:/login";
         }
 
-        Integer usuarioId = (Integer) session.getAttribute("id");
-        Usuario usuario = usuarioService.buscarPorId(usuarioId);
-        
+        Usuario usuario = usuarioService.buscarPorId(usuarioSesion.getId());
         if (usuario == null) {
+            session.invalidate();
             return "redirect:/login";
         }
 
         model.addAttribute("usuario", usuario);
+        model.addAttribute("esUsuario", "Usuario".equalsIgnoreCase(String.valueOf(usuario.getPerfilUsuario())));
         return "editar-perfil";
     }
 
-    @PostMapping("/editar-perfil")
+    @PostMapping({ "/editar-perfil", "/perfil/editar" })
     public String procesarEditarPerfil(
             @RequestParam("nombre") String nombre,
             @RequestParam("numero_documento") String numeroDocumento,
@@ -43,16 +43,15 @@ public class ProfileController {
             @RequestParam("correo") String correo,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
-        
-        // Verificar si el usuario está logueado
-        if (session.getAttribute("id") == null) {
+
+        Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
+        if (usuarioSesion == null) {
             return "redirect:/login";
         }
 
         try {
-            Integer usuarioId = (Integer) session.getAttribute("id");
-            Usuario usuario = usuarioService.buscarPorId(usuarioId);
-            
+            Usuario usuario = usuarioService.buscarPorId(usuarioSesion.getId());
+
             if (usuario == null) {
                 return "redirect:/login";
             }
@@ -64,16 +63,16 @@ public class ProfileController {
             usuario.setCorreo(correo.trim());
 
             usuarioService.guardarUsuario(usuario);
-            
-            // Actualizar el nombre en la sesión
-            session.setAttribute("nombre", usuario.getNombre());
+
+            // refrescar usuario en sesión para reflejar cambios
+            session.setAttribute("usuario", usuario);
 
             redirectAttributes.addFlashAttribute("exito", "Perfil actualizado correctamente");
-            return "redirect:/editar-perfil?exito=1";
-            
+            return "redirect:/perfil/editar?exito=1";
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error al actualizar el perfil");
-            return "redirect:/editar-perfil?error=1";
+            return "redirect:/perfil/editar?error=1";
         }
     }
 

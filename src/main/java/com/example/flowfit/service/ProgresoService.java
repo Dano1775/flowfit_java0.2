@@ -30,6 +30,17 @@ public class ProgresoService {
     public ProgresoEjercicio registrarProgreso(Usuario usuario, Integer rutinaAsignadaId,
             Integer ejercicioId, Integer series,
             Integer repeticiones, Double peso, String comentarios) {
+        return registrarProgreso(usuario, rutinaAsignadaId, ejercicioId, series, repeticiones, peso, comentarios,
+                LocalDate.now());
+    }
+
+    /**
+     * Registrar progreso de un ejercicio con fecha explícita.
+     */
+    @Transactional
+    public ProgresoEjercicio registrarProgreso(Usuario usuario, Integer rutinaAsignadaId,
+            Integer ejercicioId, Integer series,
+            Integer repeticiones, Double peso, String comentarios, LocalDate fecha) {
         RutinaAsignada rutina = rutinaAsignadaRepository.findById(rutinaAsignadaId)
                 .orElseThrow(() -> new RuntimeException("Rutina no encontrada"));
 
@@ -37,6 +48,9 @@ public class ProgresoService {
                 .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
 
         ProgresoEjercicio progreso = new ProgresoEjercicio(usuario, rutina, ejercicio);
+        if (fecha != null) {
+            progreso.setFecha(fecha);
+        }
         progreso.setSeriesCompletadas(series);
         progreso.setRepeticionesRealizadas(repeticiones);
         progreso.setPesoUtilizado(peso);

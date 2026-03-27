@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,16 +32,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.example.flowfit.dto.EjercicioRutinaSimpleDto;
+import com.example.flowfit.dto.EjercicioRutinaMultiDiaDto;
 import com.example.flowfit.model.AsignacionEntrenador;
 import com.example.flowfit.model.ContratacionEntrenador;
 import com.example.flowfit.model.EjercicioCatalogo;
 import com.example.flowfit.model.Rutina;
 import com.example.flowfit.model.RutinaAsignada;
+import com.example.flowfit.model.RutinaDia;
 import com.example.flowfit.model.RutinaEjercicio;
+import com.example.flowfit.model.RutinaSesionProgramada;
 import com.example.flowfit.model.Usuario;
 import com.example.flowfit.repository.ContratacionEntrenadorRepository;
 import com.example.flowfit.repository.RutinaAsignadaRepository;
+import com.example.flowfit.repository.RutinaEjercicioProgramadoRepository;
+import com.example.flowfit.service.RutinaEjercicioProgramadoService;
 import com.example.flowfit.service.AsignacionEntrenadorService;
 import com.example.flowfit.service.EjercicioService;
 import com.example.flowfit.service.RutinaService;
@@ -59,6 +64,9 @@ public class EntrenadorController {
     private RutinaService rutinaService;
 
     @Autowired
+    private com.example.flowfit.service.RutinaSesionProgramadaService rutinaSesionProgramadaService;
+
+    @Autowired
     private EjercicioService ejercicioService;
 
     @Autowired
@@ -69,6 +77,12 @@ public class EntrenadorController {
 
     @Autowired
     private ContratacionEntrenadorRepository contratacionRepo;
+
+    @Autowired
+    private RutinaEjercicioProgramadoService rutinaEjercicioProgramadoService;
+
+    @Autowired
+    private RutinaEjercicioProgramadoRepository rutinaEjercicioProgramadoRepository;
 
     /**
      * Dashboard principal del entrenador
@@ -107,6 +121,19 @@ public class EntrenadorController {
         model.addAttribute("progresoPromedio", asignacionesActivas.size() > 0 ? "85%" : "0%");
 
         return "Entrenador/dashboard";
+    }
+
+    @GetMapping("/perfil")
+    public String perfil(Model model, HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("entrenador", entrenador);
+        model.addAttribute("usuario", entrenador);
+        model.addAttribute("currentPage", "perfil");
+        return "perfil-entrenador";
     }
 
     /**
@@ -207,8 +234,10 @@ public class EntrenadorController {
     @PostMapping("/rutinas/crear")
     public String crearRutina(@RequestParam String nombre,
             @RequestParam String descripcion,
+            @RequestParam(required = false) Integer diasCount,
+            @RequestParam(required = false) Integer cicloDias,
             @RequestParam(required = false) List<Integer> ejercicios,
-            @RequestParam Map<String, String> allParams,
+            @RequestParam MultiValueMap<String, String> allParams,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
         try {
@@ -217,32 +246,118 @@ public class EntrenadorController {
                 return "redirect:/login";
             }
 
-            if (nombre.trim().isEmpty() || ejercicios == null || ejercicios.isEmpty()) {
+            if (nombre.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Debes ingresar un nombre");
+                return "redirect:/entrenador/rutinas/crear";
+            }
+
+            int cantidadDias = 0;
+            if (diasCount != null && diasCount >= 1 && diasCount <= 30) {
+                cantidadDias = diasCount;
+            } else if (cicloDias != null && cicloDias >= 1 && cicloDias <= 30) {
+                cantidadDias = cicloDias;
+            } else {
+                cantidadDias = 3;
+            }
+
+            // Construir días del ciclo
+            List<com.example.flowfit.model.RutinaDia> diasCiclo = new java.util.ArrayList<>();
+            for (int d = 1; d <= cantidadDias; d++) {
+                String nombreDia = allParams.getFirst("diaNombre_" + d);
+                String tipoDiaStr = allParams.getFirst("diaTipo_" + d);
+                com.example.flowfit.model.RutinaDia dia = new com.example.flowfit.model.RutinaDia();
+                dia.setOrden(d);
+                dia.setNombre((nombreDia != null && !nombreDia.isBlank()) ? nombreDia : ("Día " + d));
+                try {
+                    dia.setTipo(tipoDiaStr != null
+                            ? com.example.flowfit.model.RutinaDia.TipoDia.valueOf(tipoDiaStr)
+                            : com.example.flowfit.model.RutinaDia.TipoDia.ENTRENAMIENTO);
+                } catch (Exception ignored) {
+                    dia.setTipo(com.example.flowfit.model.RutinaDia.TipoDia.ENTRENAMIENTO);
+                }
+                diasCiclo.add(dia);
+            }
+
+            if (ejercicios == null || ejercicios.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage",
-                        "Debes ingresar un nombre y al menos un ejercicio");
+                        "Debes seleccionar al menos un ejercicio y asignarlo a un día de entrenamiento");
                 return "redirect:/entrenador/rutinas/crear";
             }
 
             // Preparar lista de ejercicios con sets y repeticiones
-            List<EjercicioRutinaSimpleDto> ejerciciosRutina = ejercicios.stream()
+            List<EjercicioRutinaMultiDiaDto> ejerciciosRutina = ejercicios.stream()
                     .map(ejercicioId -> {
-                        String sets = allParams.get("sets_" + ejercicioId);
-                        String reps = allParams.get("reps_" + ejercicioId);
-                        String duracion = allParams.get("duracion_" + ejercicioId);
-                        String descanso = allParams.get("descanso_" + ejercicioId);
-                        String notas = allParams.get("notas_" + ejercicioId);
+                        String sets = allParams.getFirst("sets_" + ejercicioId);
+                        String reps = allParams.getFirst("reps_" + ejercicioId);
+                        String duracion = allParams.getFirst("duracion_" + ejercicioId);
+                        String descanso = allParams.getFirst("descanso_" + ejercicioId);
+                        String notas = allParams.getFirst("notas_" + ejercicioId);
 
-                        return new EjercicioRutinaSimpleDto(
-                                ejercicioId,
-                                sets != null ? Integer.parseInt(sets) : 1,
-                                reps != null ? Integer.parseInt(reps) : 1,
-                                duracion != null && !duracion.isEmpty() ? Integer.parseInt(duracion) : 0,
-                                descanso != null && !descanso.isEmpty() ? Integer.parseInt(descanso) : 0,
-                                notas);
+                        List<String> diaStrs = allParams.get("dia_" + ejercicioId);
+                        List<Integer> diasOrdenes = new ArrayList<>();
+                        if (diaStrs != null) {
+                            for (String diaStr : diaStrs) {
+                                if (diaStr == null || diaStr.isBlank()) {
+                                    continue;
+                                }
+                                try {
+                                    diasOrdenes.add(Integer.parseInt(diaStr));
+                                } catch (Exception ignored) {
+                                    // Ignorar
+                                }
+                            }
+                        }
+
+                        // Deduplicar manteniendo orden
+                        List<Integer> diasFinal = new ArrayList<>();
+                        java.util.HashSet<Integer> seen = new java.util.HashSet<>();
+                        for (Integer d : diasOrdenes) {
+                            if (d == null) {
+                                continue;
+                            }
+                            if (seen.add(d)) {
+                                diasFinal.add(d);
+                            }
+                        }
+
+                        EjercicioRutinaMultiDiaDto dto = new EjercicioRutinaMultiDiaDto();
+                        dto.setEjercicioId(ejercicioId);
+                        dto.setSets(sets != null && !sets.isBlank() ? Integer.parseInt(sets) : 1);
+                        dto.setRepeticiones(reps != null && !reps.isBlank() ? Integer.parseInt(reps) : 1);
+                        dto.setDuracionSegundos(
+                                duracion != null && !duracion.isBlank() ? Integer.parseInt(duracion) : 0);
+                        dto.setDescansoSegundos(
+                                descanso != null && !descanso.isBlank() ? Integer.parseInt(descanso) : 0);
+                        dto.setNotas(notas);
+                        dto.setDiasOrdenes(diasFinal);
+                        return dto;
                     })
                     .toList();
 
-            rutinaService.crearRutina(nombre, descripcion, entrenador.getId(), ejerciciosRutina);
+            // Validación: todos los ejercicios deben tener día asignado y ese día no puede
+            // ser DESCANSO
+            for (EjercicioRutinaMultiDiaDto e : ejerciciosRutina) {
+                if (e.getDiasOrdenes() == null || e.getDiasOrdenes().isEmpty()) {
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Asigna cada ejercicio a al menos un día de entrenamiento");
+                    return "redirect:/entrenador/rutinas/crear";
+                }
+                for (Integer diaOrden : e.getDiasOrdenes()) {
+                    if (diaOrden == null || diaOrden < 1 || diaOrden > cantidadDias) {
+                        redirectAttributes.addFlashAttribute("errorMessage",
+                                "Asigna cada ejercicio a un día válido del ciclo");
+                        return "redirect:/entrenador/rutinas/crear";
+                    }
+                    com.example.flowfit.model.RutinaDia dia = diasCiclo.get(diaOrden - 1);
+                    if (dia.getTipo() == com.example.flowfit.model.RutinaDia.TipoDia.DESCANSO) {
+                        redirectAttributes.addFlashAttribute("errorMessage",
+                                "No puedes asignar ejercicios a un día marcado como Descanso (Día " + diaOrden + ")");
+                        return "redirect:/entrenador/rutinas/crear";
+                    }
+                }
+            }
+
+            rutinaService.crearRutinaConCiclo(nombre, descripcion, entrenador.getId(), diasCiclo, ejerciciosRutina);
 
             redirectAttributes.addFlashAttribute("successMessage", "¡Rutina creada exitosamente!");
             return "redirect:/entrenador/rutinas";
@@ -445,16 +560,567 @@ public class EntrenadorController {
             asignacion.setRutinaId(rutinaId);
             asignacion.setUsuarioId(usuarioId);
             asignacion.setFechaAsignacion(LocalDate.now());
-            asignacion.setEstado(RutinaAsignada.EstadoRutina.ACTIVA);
+            // BORRADOR: el usuario no la verá hasta que el entrenador presione "Guardar"
+            asignacion.setEstado(RutinaAsignada.EstadoRutina.BORRADOR);
 
             rutinaAsignadaRepository.save(asignacion);
 
-            redirectAttributes.addFlashAttribute("successMessage", "¡Rutina asignada exitosamente!");
-            return "redirect:/entrenador/asignar-rutinas";
+            if (asignacion.getId() == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "No se pudo crear la asignación");
+                return "redirect:/entrenador/asignar-rutinas";
+            }
+
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Rutina creada como borrador. Planifica los ejercicios y presiona GUARDAR para asignarla al usuario.");
+            return "redirect:/entrenador/asignaciones/" + asignacion.getId() + "/planificar-ejercicios";
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al asignar rutina: " + e.getMessage());
             return "redirect:/entrenador/asignar-rutinas";
+        }
+    }
+
+    /**
+     * Confirmar y activar la planificación: la rutina pasa de BORRADOR a ACTIVA.
+     */
+    @PostMapping("/asignaciones/{rutinaAsignadaId}/guardar-planificacion")
+    @ResponseBody
+    public ResponseEntity<?> guardarPlanificacion(@PathVariable Integer rutinaAsignadaId, HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "No autorizado"));
+        }
+
+        try {
+            RutinaAsignada asignacion = rutinaAsignadaRepository.findById(rutinaAsignadaId)
+                    .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+            Rutina rutina = rutinaService.obtenerRutinaPorId(asignacion.getRutinaId());
+            if (rutina == null || rutina.getEntrenadorId() == null
+                    || !rutina.getEntrenadorId().equals(entrenador.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Sin permisos"));
+            }
+
+            long totalPlan = rutinaEjercicioProgramadoRepository.countByRutinaAsignadaId(rutinaAsignadaId);
+            if (totalPlan <= 0) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Planifica al menos un ejercicio antes de guardar."));
+            }
+
+            // Si es BORRADOR, guardar = activar. Si ya es ACTIVA, guardar = confirmar
+            // cambios (sin cambiar estado).
+            if (asignacion.getEstado() == RutinaAsignada.EstadoRutina.BORRADOR) {
+                asignacion.setEstado(RutinaAsignada.EstadoRutina.ACTIVA);
+                rutinaAsignadaRepository.save(asignacion);
+            }
+
+            return ResponseEntity.ok(Map.of("ok", true));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al guardar: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Programar calendario (asignar día/plantilla a fechas) para una rutina
+     * asignada.
+     */
+    @GetMapping("/asignaciones/{rutinaAsignadaId}/programar")
+    public String programarRutinaAsignada(@PathVariable Integer rutinaAsignadaId,
+            Model model,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return "redirect:/login";
+        }
+
+        try {
+            RutinaAsignada asignacion = rutinaAsignadaRepository.findById(rutinaAsignadaId)
+                    .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+
+            Rutina rutina = rutinaService.obtenerRutinaPorId(asignacion.getRutinaId());
+            if (rutina == null || rutina.getEntrenadorId() == null
+                    || !rutina.getEntrenadorId().equals(entrenador.getId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "No tienes permisos para programar esta rutina");
+                return "redirect:/entrenador/asignar-rutinas";
+            }
+
+            List<RutinaDia> dias = rutinaService.obtenerDiasDeRutina(rutina.getId());
+            List<Map<String, Object>> diasOptions = dias.stream().map(d -> {
+                Map<String, Object> m = new HashMap<>();
+                m.put("id", d.getId());
+                m.put("orden", d.getOrden());
+                m.put("nombre", d.getNombre());
+                m.put("tipo", d.getTipo() != null ? d.getTipo().toString() : null);
+                return m;
+            }).collect(Collectors.toList());
+
+            model.addAttribute("currentPage", "asignar-rutinas");
+            model.addAttribute("entrenador", entrenador);
+            model.addAttribute("asignacion", asignacion);
+            model.addAttribute("rutina", rutina);
+            model.addAttribute("diasOptions", diasOptions);
+
+            LocalDate inicio = asignacion.getFechaAsignacion() != null ? asignacion.getFechaAsignacion()
+                    : LocalDate.now();
+            model.addAttribute("programacionInicio", inicio);
+            model.addAttribute("programacionFin", inicio.plusDays(29));
+
+            return "Entrenador/programar-rutina";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar programación: " + e.getMessage());
+            return "redirect:/entrenador/asignar-rutinas";
+        }
+    }
+
+    /**
+     * Planificar ejercicios por fecha para una rutina asignada (drag & drop).
+     */
+    @GetMapping("/asignaciones/{rutinaAsignadaId}/planificar-ejercicios")
+    public String planificarEjerciciosAsignacion(@PathVariable Integer rutinaAsignadaId,
+            Model model,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return "redirect:/login";
+        }
+
+        try {
+            RutinaAsignada asignacion = rutinaAsignadaRepository.findById(rutinaAsignadaId)
+                    .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+
+            Rutina rutina = rutinaService.obtenerRutinaPorId(asignacion.getRutinaId());
+            if (rutina == null || rutina.getEntrenadorId() == null
+                    || !rutina.getEntrenadorId().equals(entrenador.getId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "No tienes permisos para planificar esta rutina");
+                return "redirect:/entrenador/asignar-rutinas";
+            }
+
+            // Biblioteca: ejercicios con detalles para arrastrar
+            List<com.example.flowfit.dto.EjercicioRutinaDto> ejercicios = rutinaService
+                    .obtenerEjerciciosConDetallesDto(rutina.getId());
+
+            // Días del ciclo (para asignar la rutina por día)
+            List<RutinaDia> diasCiclo = rutinaService.obtenerDiasDeRutina(rutina.getId()).stream()
+                    .filter(d -> d != null && d.getTipo() != RutinaDia.TipoDia.DESCANSO)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("currentPage", "asignar-rutinas");
+            model.addAttribute("entrenador", entrenador);
+            model.addAttribute("asignacion", asignacion);
+            model.addAttribute("rutina", rutina);
+            model.addAttribute("ejercicios", ejercicios);
+            model.addAttribute("diasCiclo", diasCiclo);
+
+            java.time.LocalDate inicio = asignacion.getFechaAsignacion() != null ? asignacion.getFechaAsignacion()
+                    : java.time.LocalDate.now();
+            model.addAttribute("programacionInicio", inicio);
+            // Sin límite de rango: el entrenador puede planificar en cualquier fecha
+            model.addAttribute("programacionFin", null);
+
+            return "Entrenador/planificar-ejercicios";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar planificación: " + e.getMessage());
+            return "redirect:/entrenador/asignar-rutinas";
+        }
+    }
+
+    /**
+     * API: obtener ejercicios programados por fecha (eventos FullCalendar).
+     */
+    @GetMapping("/api/asignaciones/{rutinaAsignadaId}/ejercicios-programados")
+    @ResponseBody
+    public ResponseEntity<?> obtenerEjerciciosProgramadosEventos(
+            @PathVariable Integer rutinaAsignadaId,
+            @RequestParam String start,
+            @RequestParam String end,
+            HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "No autorizado"));
+        }
+
+        try {
+            RutinaAsignada asignacion = rutinaAsignadaRepository.findById(rutinaAsignadaId)
+                    .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+            Rutina rutina = rutinaService.obtenerRutinaPorId(asignacion.getRutinaId());
+            if (rutina == null || rutina.getEntrenadorId() == null
+                    || !rutina.getEntrenadorId().equals(entrenador.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Sin permisos"));
+            }
+
+            LocalDate startDate = LocalDate.parse(start);
+            LocalDate endDate = LocalDate.parse(end);
+
+            List<com.example.flowfit.model.RutinaEjercicioProgramado> programados = rutinaEjercicioProgramadoService
+                    .listarEnRango(rutinaAsignadaId, startDate, endDate);
+
+            // UX: 1 evento por día (contador)
+            Map<LocalDate, Long> countByDate = programados.stream()
+                    .filter(p -> p.getFecha() != null)
+                    .collect(Collectors.groupingBy(
+                            com.example.flowfit.model.RutinaEjercicioProgramado::getFecha,
+                            Collectors.counting()));
+
+            List<Map<String, Object>> eventos = countByDate.entrySet().stream()
+                    .map(entry -> {
+                        LocalDate fechaDia = entry.getKey();
+                        long count = entry.getValue() != null ? entry.getValue() : 0L;
+
+                        Map<String, Object> e = new HashMap<>();
+                        e.put("id", fechaDia.toString());
+                        e.put("title", "Entrenamiento (" + count + " ejercicios)");
+                        e.put("start", fechaDia.toString());
+                        e.put("allDay", true);
+
+                        Map<String, Object> extended = new HashMap<>();
+                        extended.put("rutinaAsignadaId", rutinaAsignadaId);
+                        extended.put("fecha", fechaDia.toString());
+                        extended.put("count", count);
+                        e.put("extendedProps", extended);
+                        return e;
+                    })
+                    .sorted((a, b) -> String.valueOf(a.get("start")).compareTo(String.valueOf(b.get("start"))))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(eventos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al cargar ejercicios programados: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * API: detalle de ejercicios programados para una fecha.
+     */
+    @GetMapping("/api/asignaciones/{rutinaAsignadaId}/ejercicios-programados/dia")
+    @ResponseBody
+    public ResponseEntity<?> obtenerDetalleDiaProgramado(
+            @PathVariable Integer rutinaAsignadaId,
+            @RequestParam String fecha,
+            HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "No autorizado"));
+        }
+
+        try {
+            RutinaAsignada asignacion = rutinaAsignadaRepository.findById(rutinaAsignadaId)
+                    .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+            Rutina rutina = rutinaService.obtenerRutinaPorId(asignacion.getRutinaId());
+            if (rutina == null || rutina.getEntrenadorId() == null
+                    || !rutina.getEntrenadorId().equals(entrenador.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Sin permisos"));
+            }
+
+            LocalDate f = LocalDate.parse(fecha);
+            List<com.example.flowfit.model.RutinaEjercicioProgramado> programados = rutinaEjercicioProgramadoService
+                    .listarDia(rutinaAsignadaId, f);
+
+            List<com.example.flowfit.dto.EjercicioRutinaDto> ejercicios = rutinaService
+                    .obtenerEjerciciosConDetallesDto(rutina.getId());
+            Map<Integer, String> nombres = new HashMap<>();
+            for (var e : ejercicios) {
+                nombres.put(e.getEjercicioId(), e.getEjercicioNombre());
+            }
+
+            List<Map<String, Object>> resp = programados.stream().map(p -> {
+                Map<String, Object> m = new HashMap<>();
+                m.put("id", p.getId());
+                m.put("ejercicioId", p.getEjercicioId());
+                m.put("nombre", nombres.getOrDefault(p.getEjercicioId(), "Ejercicio"));
+                m.put("orden", p.getOrden());
+                return m;
+            }).collect(Collectors.toList());
+
+            return ResponseEntity.ok(resp);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * API: reordenar ejercicios programados de una fecha.
+     */
+    @PostMapping("/api/asignaciones/{rutinaAsignadaId}/ejercicios-programados/reordenar")
+    @ResponseBody
+    public ResponseEntity<?> reordenarDiaProgramado(
+            @PathVariable Integer rutinaAsignadaId,
+            @RequestParam String fecha,
+            @RequestParam(name = "ids") List<Integer> ids,
+            HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "No autorizado"));
+        }
+
+        try {
+            RutinaAsignada asignacion = rutinaAsignadaRepository.findById(rutinaAsignadaId)
+                    .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+            Rutina rutina = rutinaService.obtenerRutinaPorId(asignacion.getRutinaId());
+            if (rutina == null || rutina.getEntrenadorId() == null
+                    || !rutina.getEntrenadorId().equals(entrenador.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Sin permisos"));
+            }
+
+            LocalDate f = LocalDate.parse(fecha);
+            rutinaEjercicioProgramadoService.reordenarDia(rutinaAsignadaId, f, ids);
+            return ResponseEntity.ok(Map.of("ok", true));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * API: crear un ejercicio programado (al soltar en fecha).
+     */
+    @PostMapping("/api/asignaciones/{rutinaAsignadaId}/ejercicios-programados")
+    @ResponseBody
+    public ResponseEntity<?> crearEjercicioProgramado(
+            @PathVariable Integer rutinaAsignadaId,
+            @RequestParam String fecha,
+            @RequestParam Integer ejercicioId,
+            HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "No autorizado"));
+        }
+
+        try {
+            RutinaAsignada asignacion = rutinaAsignadaRepository.findById(rutinaAsignadaId)
+                    .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+            Rutina rutina = rutinaService.obtenerRutinaPorId(asignacion.getRutinaId());
+            if (rutina == null || rutina.getEntrenadorId() == null
+                    || !rutina.getEntrenadorId().equals(entrenador.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Sin permisos"));
+            }
+
+            LocalDate f = LocalDate.parse(fecha);
+            var saved = rutinaEjercicioProgramadoService.programarEjercicio(rutinaAsignadaId, f, ejercicioId);
+            return ResponseEntity.ok(Map.of("ok", true, "id", saved.getId()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * API: programar todos los ejercicios de un día del ciclo (arrastrar "Día X").
+     */
+    @PostMapping("/api/asignaciones/{rutinaAsignadaId}/ejercicios-programados/programar-dia")
+    @ResponseBody
+    public ResponseEntity<?> programarDiaCiclo(
+            @PathVariable Integer rutinaAsignadaId,
+            @RequestParam String fecha,
+            @RequestParam Integer diaOrden,
+            HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "No autorizado"));
+        }
+
+        try {
+            RutinaAsignada asignacion = rutinaAsignadaRepository.findById(rutinaAsignadaId)
+                    .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+            Rutina rutina = rutinaService.obtenerRutinaPorId(asignacion.getRutinaId());
+            if (rutina == null || rutina.getEntrenadorId() == null
+                    || !rutina.getEntrenadorId().equals(entrenador.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Sin permisos"));
+            }
+
+            LocalDate f = LocalDate.parse(fecha);
+            int created = rutinaEjercicioProgramadoService.programarDiaCiclo(rutinaAsignadaId, f, diaOrden);
+            return ResponseEntity.ok(Map.of("ok", true, "created", created));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * API: mover un ejercicio programado a otra fecha (drag dentro del calendario).
+     */
+    @PostMapping("/api/ejercicios-programados/{programadoId}/mover")
+    @ResponseBody
+    public ResponseEntity<?> moverEjercicioProgramado(
+            @PathVariable Integer programadoId,
+            @RequestParam String fecha,
+            HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "No autorizado"));
+        }
+
+        try {
+            var programado = rutinaEjercicioProgramadoService.obtenerPorId(programadoId);
+
+            RutinaAsignada asignacion = rutinaAsignadaRepository.findById(programado.getRutinaAsignadaId())
+                    .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+            Rutina rutina = rutinaService.obtenerRutinaPorId(asignacion.getRutinaId());
+            if (rutina == null || rutina.getEntrenadorId() == null
+                    || !rutina.getEntrenadorId().equals(entrenador.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Sin permisos"));
+            }
+
+            LocalDate f = LocalDate.parse(fecha);
+            rutinaEjercicioProgramadoService.moverProgramado(programadoId, f);
+            return ResponseEntity.ok(Map.of("ok", true));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * API: eliminar ejercicio programado.
+     */
+    @PostMapping("/api/ejercicios-programados/{programadoId}/eliminar")
+    @ResponseBody
+    public ResponseEntity<?> eliminarEjercicioProgramado(
+            @PathVariable Integer programadoId,
+            HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "No autorizado"));
+        }
+
+        try {
+            var programado = rutinaEjercicioProgramadoService.obtenerPorId(programadoId);
+
+            RutinaAsignada asignacion = rutinaAsignadaRepository.findById(programado.getRutinaAsignadaId())
+                    .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+            Rutina rutina = rutinaService.obtenerRutinaPorId(asignacion.getRutinaId());
+            if (rutina == null || rutina.getEntrenadorId() == null
+                    || !rutina.getEntrenadorId().equals(entrenador.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Sin permisos"));
+            }
+
+            rutinaEjercicioProgramadoService.eliminarProgramado(programadoId);
+            return ResponseEntity.ok(Map.of("ok", true));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * API: eventos del calendario para una asignación concreta.
+     */
+    @GetMapping("/api/asignaciones/{rutinaAsignadaId}/sesiones")
+    @ResponseBody
+    public ResponseEntity<?> obtenerEventosAsignacion(
+            @PathVariable Integer rutinaAsignadaId,
+            @RequestParam String start,
+            @RequestParam String end,
+            HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "No autorizado"));
+        }
+
+        try {
+            RutinaAsignada asignacion = rutinaAsignadaRepository.findById(rutinaAsignadaId)
+                    .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+            Rutina rutina = rutinaService.obtenerRutinaPorId(asignacion.getRutinaId());
+            if (rutina == null || rutina.getEntrenadorId() == null
+                    || !rutina.getEntrenadorId().equals(entrenador.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Sin permisos"));
+            }
+
+            LocalDate startDate = LocalDate.parse(start);
+            LocalDate endDate = LocalDate.parse(end);
+
+            List<RutinaSesionProgramada> sesiones = rutinaSesionProgramadaService
+                    .obtenerSesionesAsignacionEnRango(rutinaAsignadaId, startDate, endDate);
+
+            List<Map<String, Object>> eventos = sesiones.stream().map(s -> {
+                Map<String, Object> e = new HashMap<>();
+                e.put("id", String.valueOf(s.getId()));
+
+                String nombreRutina = (s.getRutinaAsignada() != null && s.getRutinaAsignada().getRutina() != null)
+                        ? s.getRutinaAsignada().getRutina().getNombre()
+                        : "Rutina";
+
+                String diaNombre = null;
+                String diaTipo = null;
+                Integer diaId = null;
+                boolean esDescanso = false;
+                if (s.getRutinaDia() != null) {
+                    diaId = s.getRutinaDia().getId();
+                    diaNombre = s.getRutinaDia().getNombre();
+                    diaTipo = s.getRutinaDia().getTipo() != null ? s.getRutinaDia().getTipo().toString() : null;
+                    esDescanso = "DESCANSO".equals(diaTipo);
+                }
+
+                if (diaNombre != null && !diaNombre.isBlank()) {
+                    e.put("title", (esDescanso ? "Descanso — " : "") + diaNombre);
+                } else {
+                    e.put("title", nombreRutina);
+                }
+
+                e.put("start", s.getFecha().toString());
+                e.put("allDay", true);
+
+                Map<String, Object> extended = new HashMap<>();
+                extended.put("rutinaAsignadaId", rutinaAsignadaId);
+                extended.put("rutinaId", asignacion.getRutinaId());
+                extended.put("estado", s.getEstado().toString());
+                extended.put("diaId", diaId);
+                extended.put("diaNombre", diaNombre);
+                extended.put("diaTipo", diaTipo);
+                extended.put("esDescanso", esDescanso);
+                e.put("extendedProps", extended);
+
+                if (s.getEstado() == RutinaSesionProgramada.EstadoSesion.REALIZADA) {
+                    e.put("backgroundColor", "#10b981");
+                    e.put("borderColor", "#10b981");
+                } else if (s.getEstado() == RutinaSesionProgramada.EstadoSesion.CANCELADA) {
+                    e.put("backgroundColor", "#64748b");
+                    e.put("borderColor", "#64748b");
+                } else {
+                    e.put("backgroundColor", "#3b82f6");
+                    e.put("borderColor", "#3b82f6");
+                }
+
+                return e;
+            }).collect(Collectors.toList());
+
+            return ResponseEntity.ok(eventos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al cargar eventos: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * API: asignar una plantilla de día a una fecha concreta.
+     */
+    @PostMapping("/api/asignaciones/{rutinaAsignadaId}/sesiones/asignar-dia")
+    @ResponseBody
+    public ResponseEntity<?> asignarDiaAsignacion(
+            @PathVariable Integer rutinaAsignadaId,
+            @RequestParam String fecha,
+            @RequestParam(required = false) Integer rutinaDiaId,
+            HttpSession session) {
+        Usuario entrenador = (Usuario) session.getAttribute("usuario");
+        if (entrenador == null || !Usuario.PerfilUsuario.Entrenador.equals(entrenador.getPerfilUsuario())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "No autorizado"));
+        }
+
+        try {
+            RutinaAsignada asignacion = rutinaAsignadaRepository.findById(rutinaAsignadaId)
+                    .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+            Rutina rutina = rutinaService.obtenerRutinaPorId(asignacion.getRutinaId());
+            if (rutina == null || rutina.getEntrenadorId() == null
+                    || !rutina.getEntrenadorId().equals(entrenador.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Sin permisos"));
+            }
+
+            LocalDate f = LocalDate.parse(fecha);
+            rutinaSesionProgramadaService.asignarDiaSesion(rutinaAsignadaId, f, rutinaDiaId);
+
+            return ResponseEntity.ok(Map.of("ok", true));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 

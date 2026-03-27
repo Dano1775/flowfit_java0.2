@@ -7,9 +7,11 @@ public class EjercicioRutinaSimpleDto {
     private Integer duracionSegundos;
     private Integer descansoSegundos;
     private String notas;
+    private Integer diaOrden;
 
     // Constructors
-    public EjercicioRutinaSimpleDto() {}
+    public EjercicioRutinaSimpleDto() {
+    }
 
     public EjercicioRutinaSimpleDto(Integer ejercicioId, Integer sets, Integer repeticiones) {
         this.ejercicioId = ejercicioId;
@@ -17,15 +19,27 @@ public class EjercicioRutinaSimpleDto {
         this.repeticiones = repeticiones;
     }
 
-    public EjercicioRutinaSimpleDto(Integer ejercicioId, Integer sets, Integer repeticiones, 
-                                    Integer duracionSegundos, Integer descansoSegundos, 
-                                    String notas) {
+    public EjercicioRutinaSimpleDto(Integer ejercicioId, Integer sets, Integer repeticiones,
+            Integer duracionSegundos, Integer descansoSegundos,
+            String notas) {
         this.ejercicioId = ejercicioId;
         this.sets = sets;
         this.repeticiones = repeticiones;
         this.duracionSegundos = duracionSegundos;
         this.descansoSegundos = descansoSegundos;
         this.notas = notas;
+    }
+
+    public EjercicioRutinaSimpleDto(Integer ejercicioId, Integer sets, Integer repeticiones,
+            Integer duracionSegundos, Integer descansoSegundos,
+            String notas, Integer diaOrden) {
+        this.ejercicioId = ejercicioId;
+        this.sets = sets;
+        this.repeticiones = repeticiones;
+        this.duracionSegundos = duracionSegundos;
+        this.descansoSegundos = descansoSegundos;
+        this.notas = notas;
+        this.diaOrden = diaOrden;
     }
 
     // Getters and Setters
@@ -75,5 +89,13 @@ public class EjercicioRutinaSimpleDto {
 
     public void setNotas(String notas) {
         this.notas = notas;
+    }
+
+    public Integer getDiaOrden() {
+        return diaOrden;
+    }
+
+    public void setDiaOrden(Integer diaOrden) {
+        this.diaOrden = diaOrden;
     }
 }

@@ -93,6 +93,7 @@ CREATE TABLE rutina_ejercicio (
     rutina_id INT NOT NULL,
     ejercicio_id INT NOT NULL,
     orden INT NOT NULL DEFAULT 1,
+    dia_orden INT DEFAULT NULL,
     series INT DEFAULT 1,
     repeticiones INT DEFAULT 1,
     duracion_segundos INT DEFAULT NULL,
@@ -107,6 +108,38 @@ CREATE TABLE rutina_ejercicio (
 );
 
 -- =============================================
+-- MAPEO EJERCICIOS POR DÍA (CICLO)
+-- Un mismo ejercicio puede aparecer en múltiples días del ciclo.
+-- (Usado por la entidad RutinaEjercicioDia)
+-- =============================================
+CREATE TABLE rutina_ejercicio_dia (
+    rutina_id INT NOT NULL,
+    ejercicio_id INT NOT NULL,
+    dia_orden INT NOT NULL,
+    PRIMARY KEY (rutina_id, ejercicio_id, dia_orden),
+    FOREIGN KEY (rutina_id) REFERENCES rutina(id) ON DELETE CASCADE,
+    FOREIGN KEY (ejercicio_id) REFERENCES ejercicio_catalogo(id) ON DELETE CASCADE,
+    INDEX idx_rutina_dia (rutina_id, dia_orden),
+    INDEX idx_ejercicio (ejercicio_id)
+);
+
+-- =============================================
+-- DÍAS DEL CICLO DE RUTINA (SPLIT)
+-- Define el ciclo (N días) y si cada día es ENTRENAMIENTO o DESCANSO.
+-- =============================================
+CREATE TABLE rutina_dia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rutina_id INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    orden INT NOT NULL,
+    tipo ENUM('ENTRENAMIENTO', 'DESCANSO') DEFAULT 'ENTRENAMIENTO',
+    FOREIGN KEY (rutina_id) REFERENCES rutina(id) ON DELETE CASCADE,
+    UNIQUE KEY uq_rutina_dia_orden (rutina_id, orden),
+    INDEX idx_rutina_dia_rutina (rutina_id),
+    INDEX idx_rutina_dia_rutina_orden (rutina_id, orden)
+);
+
+-- =============================================
 -- RUTINAS ASIGNADAS
 -- =============================================
 CREATE TABLE rutina_asignada (
@@ -115,7 +148,7 @@ CREATE TABLE rutina_asignada (
     usuario_id INT NOT NULL,
     fecha_asignacion DATE DEFAULT (CURRENT_DATE),
     fecha_completada DATE DEFAULT NULL,
-    estado ENUM('ACTIVA', 'COMPLETADA', 'PAUSADA') DEFAULT 'ACTIVA',
+    estado ENUM('BORRADOR', 'ACTIVA', 'COMPLETADA', 'PAUSADA') DEFAULT 'ACTIVA',
     progreso INT DEFAULT 0,
     veces_completada INT DEFAULT 0,
     asignado_por INT DEFAULT NULL,
@@ -127,6 +160,56 @@ CREATE TABLE rutina_asignada (
     INDEX idx_rutina (rutina_id),
     INDEX idx_estado (estado),
     INDEX idx_fecha_asignacion (fecha_asignacion)
+);
+
+-- =============================================
+-- SESIONES PROGRAMADAS DE RUTINA (CALENDARIO)
+-- 1 rutina asignada ocupa un espacio de 30 días (mes) con una sesión por día.
+-- =============================================
+CREATE TABLE rutina_sesion_programada (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rutina_asignada_id INT NOT NULL,
+    rutina_dia_id INT DEFAULT NULL,
+    fecha DATE NOT NULL,
+    estado ENUM('PROGRAMADA', 'REALIZADA', 'CANCELADA') DEFAULT 'PROGRAMADA',
+    notas TEXT DEFAULT NULL,
+    CONSTRAINT fk_rutina_sesion_rutina_asignada
+        FOREIGN KEY (rutina_asignada_id)
+        REFERENCES rutina_asignada(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_rutina_sesion_rutina_dia
+        FOREIGN KEY (rutina_dia_id)
+        REFERENCES rutina_dia(id)
+        ON DELETE SET NULL,
+    UNIQUE KEY uq_rutina_asignada_fecha (rutina_asignada_id, fecha),
+    INDEX idx_fecha (fecha),
+    INDEX idx_rutina_asignada_fecha (rutina_asignada_id, fecha)
+);
+
+-- =============================================
+-- EJERCICIOS PROGRAMADOS POR FECHA (PLANNER)
+-- 1 fila = 1 ejercicio en una fecha concreta dentro de una rutina asignada.
+-- (Usado por la entidad RutinaEjercicioProgramado)
+-- =============================================
+CREATE TABLE rutina_ejercicio_programado (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rutina_asignada_id INT NOT NULL,
+    fecha DATE NOT NULL,
+    ejercicio_id INT NOT NULL,
+    orden INT NOT NULL DEFAULT 1,
+    CONSTRAINT fk_rep_rutina_asignada
+        FOREIGN KEY (rutina_asignada_id)
+        REFERENCES rutina_asignada(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_rep_ejercicio
+        FOREIGN KEY (ejercicio_id)
+        REFERENCES ejercicio_catalogo(id)
+        ON DELETE CASCADE,
+    UNIQUE KEY uq_rep_rutina_fecha_orden (rutina_asignada_id, fecha, orden),
+    INDEX idx_rep_rutina_fecha (rutina_asignada_id, fecha),
+    INDEX idx_rep_rutina (rutina_asignada_id),
+    INDEX idx_rep_fecha (fecha),
+    INDEX idx_rep_ejercicio (ejercicio_id)
 );
 
 -- =============================================
@@ -593,6 +676,25 @@ INSERT INTO usuario (numero_documento, nombre, telefono, correo, clave, perfil_u
 ('6003', 'Carmen Vega', '6661110003', 'carmen@flowfit.com', 'usuario123', 'Usuario', 'A');
 
 -- =============================================
+-- ASIGNAR USUARIOS AL ENTRENADOR CARLOS (DATOS DE PRUEBA)
+-- Nota: el panel del entrenador lista asignaciones con estado = 'ACEPTADA'.
+-- Con este script, Carlos queda con Juan (id=4) y los 3 usuarios extra creados al final.
+-- =============================================
+INSERT INTO asignacion_entrenador (
+    usuario_id,
+    entrenador_id,
+    estado,
+    fecha_solicitud,
+    fecha_aceptacion,
+    mensaje_solicitud,
+    mensaje_respuesta
+) VALUES
+(4, 2, 'ACEPTADA', NOW(), NOW(), 'Asignación de prueba', 'Aceptado automáticamente'),
+(10, 2, 'ACEPTADA', NOW(), NOW(), 'Asignación de prueba', 'Aceptado automáticamente'),
+(11, 2, 'ACEPTADA', NOW(), NOW(), 'Asignación de prueba', 'Aceptado automáticamente'),
+(12, 2, 'ACEPTADA', NOW(), NOW(), 'Asignación de prueba', 'Aceptado automáticamente');
+
+-- =============================================
 -- INSERTAR EJERCICIOS COMPLETOS
 -- =============================================
 INSERT INTO ejercicio_catalogo (nombre, descripcion, imagen, grupo_muscular, nivel_dificultad, calorias_por_minuto) VALUES
@@ -636,6 +738,84 @@ INSERT INTO rutina_ejercicio (rutina_id, ejercicio_id, orden, series, repeticion
 (6, 13, 1, 4, 20, 0, 90), (6, 14, 2, 3, 12, 0, 90), (6, 11, 3, 4, 15, 0, 60), (6, 7, 4, 3, 10, 0, 75),
 (7, 2, 1, 3, 5, 0, 15), (7, 13, 2, 3, 15, 0, 15), (7, 6, 3, 3, 10, 0, 15), (7, 8, 4, 2, 20, 0, 15),
 (8, 13, 1, 3, 12, 0, 60), (8, 6, 2, 3, 8, 0, 60), (8, 1, 3, 3, 15, 0, 45), (8, 14, 4, 2, 8, 0, 60), (8, 9, 5, 2, 0, 20, 45), (8, 11, 6, 3, 12, 0, 45);
+
+-- =============================================
+-- AUTO: DIVIDIR RUTINAS EXISTENTES EN DÍAS (CICLO)
+-- Crea `rutina_dia` si no existe ciclo, y distribuye los ejercicios por día en
+-- `rutina_ejercicio_dia` según el orden.
+-- Regla simple: rutinas de 1-4 ejercicios => 2 días; 5-6 => 3 días; 7+ => 4 días.
+-- Además rellena `rutina_ejercicio.dia_orden` (compatibilidad legacy).
+-- =============================================
+
+-- 1) Crear días del ciclo por rutina (solo si NO tiene ningún día definido)
+INSERT INTO rutina_dia (rutina_id, nombre, orden, tipo)
+SELECT stats.rutina_id,
+       CONCAT('Día ', n.d) AS nombre,
+       n.d AS orden,
+       'ENTRENAMIENTO' AS tipo
+FROM (
+    SELECT re.rutina_id,
+           COUNT(*) AS cnt,
+           CASE
+               WHEN COUNT(*) <= 4 THEN 2
+               WHEN COUNT(*) <= 6 THEN 3
+               ELSE 4
+           END AS num_days
+    FROM rutina_ejercicio re
+    GROUP BY re.rutina_id
+) stats
+JOIN (
+    SELECT 1 AS d UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+) n ON n.d <= stats.num_days
+WHERE NOT EXISTS (
+    SELECT 1 FROM rutina_dia rd WHERE rd.rutina_id = stats.rutina_id
+);
+
+-- 2) Mapear ejercicios a días (solo si la rutina no tiene mapeo aún)
+INSERT INTO rutina_ejercicio_dia (rutina_id, ejercicio_id, dia_orden)
+SELECT re.rutina_id,
+       re.ejercicio_id,
+       LEAST(s.num_days, 1 + FLOOR((re.orden - 1) / s.chunk_size)) AS dia_orden
+FROM rutina_ejercicio re
+JOIN (
+    SELECT base.rutina_id,
+           base.cnt,
+           base.num_days,
+           CEIL(base.cnt / base.num_days) AS chunk_size
+    FROM (
+        SELECT re2.rutina_id,
+               COUNT(*) AS cnt,
+               CASE
+                   WHEN rd.max_orden IS NOT NULL AND rd.max_orden > 0 THEN rd.max_orden
+                   WHEN COUNT(*) <= 4 THEN 2
+                   WHEN COUNT(*) <= 6 THEN 3
+                   ELSE 4
+               END AS num_days
+        FROM rutina_ejercicio re2
+        LEFT JOIN (
+            SELECT rutina_id, MAX(orden) AS max_orden
+            FROM rutina_dia
+            GROUP BY rutina_id
+        ) rd ON rd.rutina_id = re2.rutina_id
+        GROUP BY re2.rutina_id, rd.max_orden
+    ) base
+) s ON s.rutina_id = re.rutina_id
+WHERE NOT EXISTS (
+    SELECT 1 FROM rutina_ejercicio_dia red WHERE red.rutina_id = re.rutina_id
+);
+
+-- 3) Backfill dia_orden en rutina_ejercicio para compatibilidad (si está NULL)
+SET @OLD_SQL_SAFE_UPDATES = @@SQL_SAFE_UPDATES;
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE rutina_ejercicio re
+JOIN rutina_ejercicio_dia red
+    ON red.rutina_id = re.rutina_id AND red.ejercicio_id = re.ejercicio_id
+SET re.dia_orden = red.dia_orden
+WHERE re.dia_orden IS NULL
+    AND re.rutina_id IN (SELECT DISTINCT rutina_id FROM rutina_ejercicio_dia);
+
+SET SQL_SAFE_UPDATES = @OLD_SQL_SAFE_UPDATES;
 
 -- =============================================
 -- ASIGNAR RUTINAS A USUARIOS
@@ -709,9 +889,9 @@ INSERT INTO registro_aprobaciones (usuario_id, admin_id, accion, comentarios) VA
 -- PLANES DEL ENTRENADOR CARLOS (SISTEMA HÍBRIDO)
 -- =============================================
 INSERT INTO plan_entrenador (entrenador_id, nombre, descripcion, precio_mensual, rango_precio_min, rango_precio_max, duracion_dias, rutinas_mes, seguimiento_semanal, chat_directo, videollamadas_mes, plan_nutricional, es_publico, permite_personalizacion, destacado) VALUES
-(2, 'Plan Básico', 'Plan perfecto para empezar tu transformación. Ideal para principiantes que buscan establecer hábitos saludables.', 599.00, 419.30, 778.70, 30, 4, FALSE, TRUE, 0, FALSE, TRUE, TRUE, FALSE),
-(2, 'Plan Premium', 'Plan completo con seguimiento personalizado, rutinas adaptadas y nutrición incluida. Perfecto para resultados serios.', 1299.00, 909.30, 1688.70, 30, 8, TRUE, TRUE, 2, TRUE, TRUE, TRUE, TRUE),
-(2, 'Plan Elite', 'Transformación total con atención personalizada VIP. Incluye todo lo necesario para alcanzar tus objetivos.', 2499.00, 1749.30, 3248.70, 30, 12, TRUE, TRUE, 4, TRUE, TRUE, TRUE, TRUE);
+(2, 'Plan Básico', 'Plan perfecto para empezar tu transformación. Ideal para principiantes que buscan establecer hábitos saludables.', 5990.00, 4193.00, 7787.00, 30, 4, FALSE, TRUE, 0, FALSE, TRUE, TRUE, FALSE),
+(2, 'Plan Premium', 'Plan completo con seguimiento personalizado, rutinas adaptadas y nutrición incluida. Perfecto para resultados serios.', 12990.00, 9093.00, 16887.00, 30, 8, TRUE, TRUE, 2, TRUE, TRUE, TRUE, TRUE),
+(2, 'Plan Elite', 'Transformación total con atención personalizada VIP. Incluye todo lo necesario para alcanzar tus objetivos.', 24990.00, 17493.00, 32487.00, 30, 12, TRUE, TRUE, 4, TRUE, TRUE, TRUE, TRUE);
 
 -- =============================================
 -- CONVERSACIONES DE PRUEBA
@@ -722,27 +902,27 @@ INSERT INTO conversacion (usuario_id, entrenador_id, fecha_ultimo_mensaje, estad
 -- Mensajes de prueba
 INSERT INTO mensaje (conversacion_id, remitente_id, contenido, tipo_mensaje, leido, fecha_lectura) VALUES
 (1, 4, 'Hola Carlos! Me interesa empezar a entrenar contigo. ¿Qué planes tienes?', 'TEXTO', TRUE, NOW()),
-(1, 2, 'Hola Juan! 😊 Tengo 3 opciones: Básico ($599), Premium ($1,299) y Personalizado ($2,499).', 'TEXTO', TRUE, NOW()),
+(1, 2, 'Hola Juan! 😊 Tengo 3 opciones: Básico ($5,990), Premium ($12,990) y Personalizado ($24,990).', 'TEXTO', TRUE, NOW()),
 (1, 4, 'Quiero perder peso y ganar masa muscular. ¿El Premium incluye nutrición?', 'TEXTO', TRUE, NOW()),
 (1, 2, 'Perfecto! Sí, el Premium incluye plan nutricional y 2 videollamadas al mes.', 'TEXTO', FALSE, NULL);
 
 -- Contrataciones de ejemplo (SISTEMA HÍBRIDO)
 -- Contratación 1: Compra directa (sin negociación)
 INSERT INTO contratacion_entrenador (usuario_id, entrenador_id, plan_base_id, tipo_contratacion, estado, precio_acordado, duracion_dias_acordada, rutinas_mes_acordadas, seguimiento_semanal_acordado, chat_directo_acordado, videollamadas_mes_acordadas, plan_nutricional_acordado, version_negociacion, rondas_negociacion, ultima_propuesta_de, nota_usuario) VALUES
-(6, 2, 1, 'PLAN_FIJO', 'PENDIENTE_PAGO', 599.00, 30, 4, FALSE, TRUE, 0, FALSE, 1, 0, 'USUARIO', 'Compra directa del Plan Básico. ¡Listo para empezar!');
+(6, 2, 1, 'PLAN_FIJO', 'PENDIENTE_PAGO', 5990.00, 30, 4, FALSE, TRUE, 0, FALSE, 1, 0, 'USUARIO', 'Compra directa del Plan Básico. ¡Listo para empezar!');
 
 -- Contratación 2: Con negociación personalizada
 INSERT INTO contratacion_entrenador (usuario_id, entrenador_id, plan_base_id, tipo_contratacion, estado, precio_acordado, duracion_dias_acordada, rutinas_mes_acordadas, seguimiento_semanal_acordado, chat_directo_acordado, videollamadas_mes_acordadas, plan_nutricional_acordado, version_negociacion, rondas_negociacion, porcentaje_variacion_permitido, ultima_propuesta_de, nota_usuario) VALUES
-(7, 2, 2, 'PERSONALIZADO', 'NEGOCIACION', 1299.00, 30, 10, TRUE, TRUE, 2, TRUE, 1, 1, 30.00, 'USUARIO', 'Quiero el Premium pero con más rutinas mensuales.');
+(7, 2, 2, 'PERSONALIZADO', 'NEGOCIACION', 12990.00, 30, 10, TRUE, TRUE, 2, TRUE, 1, 1, 30.00, 'USUARIO', 'Quiero el Premium pero con más rutinas mensuales.');
 
 -- Historial de negociación (SISTEMA INTELIGENTE)
 -- Ronda 1: Usuario propone personalización
 INSERT INTO historial_negociacion (contratacion_id, version, ronda_numero, propuesto_por, precio_propuesto, precio_base_referencia, porcentaje_variacion, duracion_propuesta, mensaje, estado_propuesta, es_ultima_ronda, servicios_propuestos) VALUES
-(2, 1, 1, 'USUARIO', 1299.00, 1299.00, 0.00, 30, 'Me interesa el Plan Premium. ¿Podríamos ajustar las rutinas a 10 en lugar de 8? Estoy dispuesto a pagar el mismo precio.', 'PENDIENTE', FALSE, JSON_OBJECT('rutinas_mes', 10, 'seguimiento_semanal', TRUE, 'videollamadas_mes', 2, 'plan_nutricional', TRUE, 'chat_directo', TRUE));
+(2, 1, 1, 'USUARIO', 12990.00, 12990.00, 0.00, 30, 'Me interesa el Plan Premium. ¿Podríamos ajustar las rutinas a 10 en lugar de 8? Estoy dispuesto a pagar el mismo precio.', 'PENDIENTE', FALSE, JSON_OBJECT('rutinas_mes', 10, 'seguimiento_semanal', TRUE, 'videollamadas_mes', 2, 'plan_nutricional', TRUE, 'chat_directo', TRUE));
 
 -- Historial de negociación
 INSERT INTO historial_negociacion (contratacion_id, version, propuesto_por, precio_propuesto, duracion_propuesta, mensaje, estado_propuesta, servicios_propuestos) VALUES
-(1, 1, 'USUARIO', 1299.00, 30, 'Me gustaría iniciar con el Plan Premium completo', 'PENDIENTE', JSON_OBJECT('rutinas_mes', NULL, 'seguimiento_semanal', TRUE, 'videollamadas_mes', 2, 'plan_nutricional', TRUE, 'chat_directo', TRUE));
+(1, 1, 'USUARIO', 12990.00, 30, 'Me gustaría iniciar con el Plan Premium completo', 'PENDIENTE', JSON_OBJECT('rutinas_mes', NULL, 'seguimiento_semanal', TRUE, 'videollamadas_mes', 2, 'plan_nutricional', TRUE, 'chat_directo', TRUE));
 
 -- =============================================
 -- TRIGGERS
