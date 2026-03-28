@@ -21,8 +21,8 @@ COPY src ./src
 # Se saltean los tests para un despliegue más rápido
 RUN ./mvnw package -DskipTests
 
-# Expone el puerto en el que correrá la aplicación (configurado en application.properties)
-EXPOSE 8081
+# Expone el puerto en el que correrá la aplicación (Railway usa la variable PORT)
+EXPOSE ${PORT:-8081}
 
 # Comando para ejecutar la aplicación cuando se inicie el contenedor
 ENTRYPOINT ["java", "-jar", "target/flowfit-0.0.1-SNAPSHOT.jar"]
