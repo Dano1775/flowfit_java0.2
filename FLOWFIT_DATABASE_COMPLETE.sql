@@ -19,7 +19,7 @@ CREATE TABLE usuario (
     correo VARCHAR(100) NOT NULL UNIQUE,
     clave VARCHAR(100) NOT NULL,
     perfil_usuario ENUM('Usuario', 'Administrador', 'Entrenador', 'Nutricionista') NOT NULL,
-    estado CHAR(1) NOT NULL DEFAULT 'A',
+    estado VARCHAR(1) NOT NULL DEFAULT 'A',
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_correo (correo),
