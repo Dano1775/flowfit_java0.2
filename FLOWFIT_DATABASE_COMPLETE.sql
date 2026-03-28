@@ -511,7 +511,7 @@ CREATE TABLE historial_negociacion (
     ronda_numero INT DEFAULT 1 COMMENT 'Número de ronda (1-3)',
     propuesto_por ENUM('USUARIO', 'ENTRENADOR') NOT NULL,
     precio_propuesto DECIMAL(10,2) NOT NULL,
-    precio_base_referencia DECIMAL(10,2) NOT NULL COMMENT 'Precio base del plan',
+    precio_base_referencia DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT 'Precio base del plan',
     porcentaje_variacion DECIMAL(5,2) DEFAULT NULL COMMENT 'Variación respecto al precio base',
     duracion_propuesta INT NOT NULL,
     servicios_propuestos JSON DEFAULT NULL,
@@ -921,8 +921,8 @@ INSERT INTO historial_negociacion (contratacion_id, version, ronda_numero, propu
 (2, 1, 1, 'USUARIO', 12990.00, 12990.00, 0.00, 30, 'Me interesa el Plan Premium. ¿Podríamos ajustar las rutinas a 10 en lugar de 8? Estoy dispuesto a pagar el mismo precio.', 'PENDIENTE', FALSE, JSON_OBJECT('rutinas_mes', 10, 'seguimiento_semanal', TRUE, 'videollamadas_mes', 2, 'plan_nutricional', TRUE, 'chat_directo', TRUE));
 
 -- Historial de negociación
-INSERT INTO historial_negociacion (contratacion_id, version, propuesto_por, precio_propuesto, duracion_propuesta, mensaje, estado_propuesta, servicios_propuestos) VALUES
-(1, 1, 'USUARIO', 12990.00, 30, 'Me gustaría iniciar con el Plan Premium completo', 'PENDIENTE', JSON_OBJECT('rutinas_mes', NULL, 'seguimiento_semanal', TRUE, 'videollamadas_mes', 2, 'plan_nutricional', TRUE, 'chat_directo', TRUE));
+INSERT INTO historial_negociacion (contratacion_id, version, propuesto_por, precio_propuesto, precio_base_referencia, duracion_propuesta, mensaje, estado_propuesta, servicios_propuestos) VALUES
+(1, 1, 'USUARIO', 12990.00, 12990.00, 30, 'Me gustaría iniciar con el Plan Premium completo', 'PENDIENTE', JSON_OBJECT('rutinas_mes', NULL, 'seguimiento_semanal', TRUE, 'videollamadas_mes', 2, 'plan_nutricional', TRUE, 'chat_directo', TRUE));
 
 -- =============================================
 -- TRIGGERS
