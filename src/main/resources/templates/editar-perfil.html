@@ -72,25 +72,8 @@
         <div class="card-body">
           <form th:action="@{/perfil/editar}" method="POST">
             <div class="row g-4">
-              <!-- Profile Image Section -->
-              <div class="col-lg-4">
-                <div style="background: rgba(59, 130, 246, 0.1); padding: 2rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.3); text-align: center;">
-                  <div style="width: 120px; height: 120px; border-radius: 50%; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; overflow: hidden; border: 3px solid rgba(59, 130, 246, 0.5);">
-                    <img src="/assets/perfil_default.png" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover;">
-                  </div>
-                  <h5 class="text-white mb-2" style="font-weight: 600;" th:text="${usuario.nombre}">Usuario</h5>
-                  <span class="badge mb-3" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); padding: 0.375rem 0.75rem; border-radius: 50px; font-size: 0.875rem;" th:text="${usuario.perfilUsuario}">Entrenador</span>
-                  <div class="mt-4 pt-4" style="border-top: 1px solid rgba(59, 130, 246, 0.3);">
-                    <small style="color: rgba(255, 255, 255, 0.7); display: block; margin-bottom: 0.75rem;">JPG o PNG menor a 5MB</small>
-                    <button class="btn" type="button" disabled style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.875rem; cursor: not-allowed;">
-                      <i class="bi bi-camera me-1"></i>Cambiar foto
-                    </button>
-                  </div>
-                </div>
-              </div>
-
               <!-- Form Fields -->
-              <div class="col-lg-8">
+              <div class="col-lg-12">
                 <div class="row g-4">
                   <div class="col-12">
                     <label for="nombre" class="form-label" style="color: #e2e8f0; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.9375rem;">

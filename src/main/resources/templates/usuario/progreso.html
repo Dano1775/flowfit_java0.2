@@ -134,7 +134,7 @@
                 <h5 class="text-white mb-2" style="font-size: 1.125rem; font-weight: 600;">
                   <i class="bi bi-graph-up me-2" style="color: #60a5fa;"></i>Progreso Semanal
                 </h5>
-                <p class="mb-0" style="color: #cbd5e1; font-size: 0.875rem;">Rutinas completadas en los últimos 7 días</p>
+                <p class="mb-0" style="color: #cbd5e1; font-size: 0.875rem;">Sesiones realizadas en los últimos 7 días</p>
               </div>
             </div>
             <div class="chart-container" style="position: relative; height: 300px;">
@@ -313,7 +313,7 @@
 
     // Datos desde el backend para gráfico de progreso semanal
     const fechasBackend = /*[[${fechasArray}]]*/ [];
-    const rutinasBackend = /*[[${ejerciciosArray}]]*/ []; // Ahora contiene rutinas completadas, no ejercicios
+    const rutinasBackend = /*[[${ejerciciosArray}]]*/ []; // Sesiones realizadas por día
     
     // Datos para gráfico de distribución de rutinas
     const rutinasCompletadasData = /*[[${rutinasCompletadas}]]*/ 0;
@@ -337,7 +337,7 @@
         // Formato DD/MM ya viene del backend
         return fechaStr;
       });
-      data = rutinasBackend; // Rutinas completadas por día
+      data = rutinasBackend; // Sesiones realizadas por día
     } else {
       // No hay datos, mostrar últimos 7 días vacíos
       const hoy = new Date();
@@ -374,7 +374,7 @@
         data: {
           labels: labels,
           datasets: [{
-            label: 'Rutinas completadas',
+            label: 'Sesiones realizadas',
             data: data,
             borderColor: '#4ade80',
             backgroundColor: 'rgba(74, 222, 128, 0.1)',
@@ -404,7 +404,7 @@
               borderWidth: 1,
               callbacks: {
                 label: function(context) {
-                  return 'Rutinas: ' + context.parsed.y;
+                  return 'Sesiones: ' + context.parsed.y;
                 }
               }
             }

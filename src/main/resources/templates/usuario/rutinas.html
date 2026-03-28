@@ -15,6 +15,8 @@
 
   <!-- FullCalendar (Calendario de Rutinas) -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+
+
 </head>
 <body>
 
@@ -142,472 +144,88 @@
                 </div>
                 Calendario de Rutinas
               </h4>
-              <span class="text-muted-flowfit small">Rutina del día → clic para iniciar sesión</span>
+              <span class="text-muted-flowfit small">Clic en un día para ver detalles de la rutina</span>
             </div>
-            <div id="calendarUsuario"></div>
+            <div id="calendarUsuario" class="ff-calendar"></div>
           </div>
         </div>
       </div>
 
-      <!-- Modal: Evento de rutina -->
-      <div class="modal fade" id="modalEventoRutina" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content" style="background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 16px;">
-            <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-              <h5 class="modal-title text-white fw-bold" data-ff-title>Rutina</h5>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <div class="text-muted-flowfit small">Fecha</div>
-                <div class="text-white" data-ff-date></div>
-              </div>
-              <div class="d-flex align-items-center justify-content-between">
-                <div class="text-muted-flowfit small">Estado</div>
-                <div class="text-white" data-ff-state></div>
-              </div>
-            </div>
-            <div class="modal-footer" style="border-top: 1px solid rgba(255, 255, 255, 0.08);">
-              <a class="btn" data-ff-start style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; padding: 0.7rem 1.1rem; font-weight: 600; border-radius: 12px;">
-                <i class="bi bi-play-fill me-2"></i>Iniciar sesión
-              </a>
-              <button type="button" class="btn" data-bs-dismiss="modal" style="background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); padding: 0.7rem 1.1rem; border-radius: 12px;">Cerrar</button>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Rutinas Asignadas por mi Entrenador -->
-      <div class="row mb-5" th:if="${rutinasAsignadasPorEntrenador != null and not #lists.isEmpty(rutinasAsignadasPorEntrenador)}">
-        <div class="col-12">
-          <div class="card-base card-usuario" style="padding: 2.5rem;">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <h4 class="text-white mb-0 d-flex align-items-center fw-bold">
-                <div style="width: 40px; height: 40px; background: rgba(251, 146, 60, 0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                  <i class="bi bi-award" style="color: #fb923c; font-size: 1.25rem;"></i>
-                </div>
-                Rutinas de mi Entrenador
-              </h4>
-              <span class="badge" style="background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: white; padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3);" th:text="${rutinasEntrenadorCount + ' asignadas'}">0 asignadas</span>
-            </div>
-            
-            <!-- Lista de rutinas del entrenador -->
-            <div class="row g-5">
-              <div th:each="rutinaAsignada : ${rutinasAsignadasPorEntrenador}" class="col-lg-4 col-md-6">
-                <div class="h-100" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(251, 146, 60, 0.3); border-radius: 20px; padding: 2rem; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(251, 146, 60, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                  
-                  <!-- Header de la tarjeta -->
-                  <div class="d-flex justify-content-between align-items-start mb-3">
-                    <h5 class="text-white mb-0 fw-bold" style="font-size: 1.25rem; line-height: 1.3;" th:text="${rutinaAsignada.rutina.nombre}">Nombre de la Rutina</h5>
-                    <span class="badge" style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(251, 146, 60, 0.3);">
-                      <i class="bi bi-person-badge me-1"></i>Entrenador
-                    </span>
-                  </div>
-                  
-                  <!-- Descripción -->
-                  <p class="mb-3" style="font-size: 0.875rem; line-height: 1.5; color: #cbd5e1; min-height: 60px;" th:text="${rutinaAsignada.rutina.descripcion}">Descripción de la rutina personalizada.</p>
-                  
-                  <!-- Info badges -->
-                  <div class="d-flex flex-wrap gap-2 mb-3">
-                    <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3);" th:text="${rutinaAsignada.rutina.categoria}">Categoría</span>
-                    <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
-                      <i class="bi bi-clock me-1"></i><span th:text="${rutinaAsignada.rutina.duracionMinutos}">30</span> min
-                    </span>
-                    <span class="badge" style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(251, 146, 60, 0.3);">
-                      <i class="bi bi-fire me-1"></i><span th:text="${rutinaAsignada.rutina.caloriasEstimadas}">200</span> kcal
-                    </span>
-                  </div>
-                  
-                  <!-- Progreso -->
-                  <div class="mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                      <span class="text-muted-flowfit small" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Progreso</span>
-                      <span class="fw-bold" style="color: #fb923c; font-size: 1rem;" th:text="${rutinaAsignada.progreso ?: 0} + '%'">0%</span>
-                    </div>
-                    <div class="progress" style="height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 10px; overflow: hidden;">
-                      <div class="progress-bar" style="background: linear-gradient(90deg, #fb923c 0%, #f97316 100%); box-shadow: 0 0 12px rgba(251, 146, 60, 0.5);" th:style="'width: ' + ${rutinaAsignada.progreso ?: 0} + '%'"></div>
-                    </div>
-                  </div>
-                  
-                  <!-- Estado badge -->
-                  <div class="mb-3">
-                    <span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #22c55e; padding: 0.5rem 0.75rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);" th:if="${rutinaAsignada.estado.toString() == 'ACTIVA'}">
-                      <i class="bi bi-check-circle me-1"></i>Activa
-                    </span>
-                    <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.5rem 0.75rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);" th:if="${rutinaAsignada.estado.toString() == 'COMPLETADA'}">
-                      <i class="bi bi-trophy me-1"></i>Completada
-                    </span>
-                  </div>
-                  
-                  <!-- Botones -->
-                  <div class="d-flex gap-2">
-                    <form th:action="@{/usuario/rutinas/completar}" method="post" class="flex-grow-1">
-                      <input type="hidden" name="rutinaAsignadaId" th:value="${rutinaAsignada.id}">
-                      <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: white; border: none; padding: 0.7rem 1rem; font-weight: 600; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                        <i class="bi bi-check-circle-fill me-2"></i>Completar
-                      </button>
-                    </form>
-                    <button class="btn" style="background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); padding: 0.7rem 1rem; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease;" th:onclick="'abrirModalDetalles(' + ${rutinaAsignada.rutina.id} + ')'" onmouseover="this.style.background='rgba(255, 255, 255, 0.12)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'">
-                      <i class="bi bi-eye-fill"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Rutinas Activas -->
-      <div class="row mb-5">
-        <div class="col-12">
-          <div class="card-base card-usuario" style="padding: 2.5rem;">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <h4 class="text-white mb-0 d-flex align-items-center fw-bold">
-                <div style="width: 40px; height: 40px; background: rgba(16, 185, 129, 0.15); border-radius: 10px; display: flex; align-items-center; justify-content: center; margin-right: 12px;">
-                  <i class="bi bi-play-circle" style="color: #10b981; font-size: 1.25rem;"></i>
-                </div>
-                Rutinas Activas
-              </h4>
-              <span class="badge" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);" th:text="${rutinasActivasCount + ' activas'}">0 activas</span>
-            </div>
-            
-            <!-- Mensaje si no hay rutinas activas -->
-            <div th:if="${rutinasActivas == null or #lists.isEmpty(rutinasActivas)}" class="text-center py-5">
-              <div style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-                <i class="bi bi-calendar-plus" style="font-size: 2.5rem; color: #10b981;"></i>
-              </div>
-              <h4 class="text-white mb-3">¡Comienza tu Journey Fitness!</h4>
-              <p class="text-white mb-4" style="max-width: 500px; margin: 0 auto; opacity: 0.9;">No tienes rutinas activas aún. Explora nuestras rutinas recomendadas y empieza a entrenar.</p>
-              <a href="#rutinas-recomendadas" class="btn-flowfit-primary btn-usuario-primary rounded-pill px-4 py-2">
-                <i class="bi bi-rocket-takeoff me-2"></i>Explorar Rutinas
-              </a>
-            </div>
-            
-            <!-- Lista de rutinas activas -->
-            <div th:if="${rutinasActivas != null and not #lists.isEmpty(rutinasActivas)}" class="row g-4">
-            <div th:each="rutinaAsignada : ${rutinasActivas}" class="col-lg-4 col-md-6">
-              <div class="h-100" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; padding: 2rem; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(16, 185, 129, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                
-                <!-- Header de la tarjeta -->
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                  <h5 class="text-white mb-0 fw-bold" style="font-size: 1.25rem; line-height: 1.3;" th:text="${rutinaAsignada.rutina.nombre}">Nombre de la Rutina</h5>
-                </div>
-                
-                <!-- Descripción -->
-                <p class="mb-3" style="font-size: 0.875rem; line-height: 1.5; color: #cbd5e1; min-height: 60px;" th:text="${rutinaAsignada.rutina.descripcion}">Descripción de la rutina.</p>
-                
-                <!-- Info badges -->
-                <div class="d-flex flex-wrap gap-2 mb-3">
-                  <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);" th:text="${rutinaAsignada.rutina.categoria}">Categoría</span>
-                  <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
-                    <i class="bi bi-clock me-1"></i><span th:text="${rutinaAsignada.rutina.duracionMinutos}">30</span> min
-                  </span>
-                  <span class="badge" style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(251, 146, 60, 0.3);">
-                    <i class="bi bi-fire me-1"></i><span th:text="${rutinaAsignada.rutina.caloriasEstimadas}">200</span> kcal
-                  </span>
-                </div>
-                
-                <!-- Barra de progreso -->
-                <div class="mb-4">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span style="color: #cbd5e1; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Progreso</span>
-                    <span style="color: #10b981; font-size: 1rem; font-weight: 700;"><span th:text="${rutinaAsignada.progreso}">0</span>%</span>
-                  </div>
-                  <div class="progress" style="height: 8px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden;">
-                    <div class="progress-bar" style="background: linear-gradient(90deg, #10b981 0%, #34d399 100%); border-radius: 10px; box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);" th:style="'width: ' + ${rutinaAsignada.progreso} + '%'"></div>
-                  </div>
-                </div>
-                
-                <!-- Botones -->
-                <div class="d-flex gap-2">
-                  <form th:action="@{/usuario/rutinas/completar}" method="post" class="flex-grow-1">
-                    <input type="hidden" name="rutinaAsignadaId" th:value="${rutinaAsignada.id}">
-                    <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 0.7rem 1rem; font-weight: 600; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                      <i class="bi bi-check-circle-fill me-2"></i>Completar
-                    </button>
-                  </form>
-                  <button class="btn" style="background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); padding: 0.7rem 1rem; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease;" th:onclick="'abrirModalDetalles(' + ${rutinaAsignada.rutina.id} + ')'" onmouseover="this.style.background='rgba(255, 255, 255, 0.12)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'">
-                    <i class="bi bi-eye-fill"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Rutinas Recomendadas -->
-      <div class="row mb-5" id="rutinas-recomendadas">
-        <div class="col-12">
-          <div class="card-base card-usuario" style="padding: 2.5rem;">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <h4 class="text-white mb-0 d-flex align-items-center fw-bold">
-                <div style="width: 40px; height: 40px; background: rgba(59, 130, 246, 0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                  <i class="bi bi-star-fill" style="color: #3b82f6; font-size: 1.25rem;"></i>
-                </div>
-                Rutinas Recomendadas
-              </h4>
-              <span class="badge" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);" th:text="${rutinasDisponibles != null ? rutinasDisponibles.size() + ' disponibles' : '0 disponibles'}">0 disponibles</span>
-            </div>
-          
-            <!-- Mensaje si no hay rutinas disponibles -->
-            <div th:if="${rutinasDisponibles == null or #lists.isEmpty(rutinasDisponibles)}" class="text-center py-5">
-              <div style="width: 80px; height: 80px; background: rgba(251, 191, 36, 0.1); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-                <i class="bi bi-star" style="font-size: 2.5rem; color: #fbbf24;"></i>
-              </div>
-              <h4 class="text-white mb-3">No hay rutinas disponibles</h4>
-              <p class="text-white" style="opacity: 0.9;">Pronto tendremos más rutinas personalizadas para ti.</p>
-            </div>            <div th:if="${rutinasDisponibles != null and not #lists.isEmpty(rutinasDisponibles)}" class="row g-5">
-              <div th:each="rutina : ${rutinasDisponibles}" class="col-lg-4 col-md-6">
-                <div class="h-100" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 20px; padding: 2rem; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(59, 130, 246, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                  
-                  <!-- Header de la tarjeta -->
-                  <div class="d-flex justify-content-between align-items-start mb-3">
-                    <h5 class="text-white mb-0 fw-bold" style="font-size: 1.25rem; line-height: 1.3;" th:text="${rutina.nombre}">Nombre de la Rutina</h5>
-                  </div>
-                  
-                  <!-- Descripción -->
-                  <p class="mb-3" style="font-size: 0.875rem; line-height: 1.5; color: #cbd5e1; min-height: 60px;" th:text="${rutina.descripcion}">Descripción de la rutina.</p>
-                  
-                  <!-- Info badges -->
-                  <div class="d-flex flex-wrap gap-2 mb-3">
-                    <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);" th:text="${rutina.dificultad}">Nivel</span>
-                    <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3);" th:text="${rutina.categoria}">Categoría</span>
-                    <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
-                      <i class="bi bi-clock me-1"></i><span th:text="${rutina.duracionMinutos}">30</span> min
-                    </span>
-                    <span class="badge" style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(251, 146, 60, 0.3);">
-                      <i class="bi bi-fire me-1"></i><span th:text="${rutina.caloriasEstimadas}">200</span> kcal
-                    </span>
-                  </div>
-                  
-                  <!-- Info adicional -->
-                  <div class="d-flex flex-wrap gap-2 mb-4">
-                    <span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #22c55e; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);" th:if="${rutina.entrenadorId != null}">
-                      <i class="bi bi-award me-1"></i>Con Entrenador
-                    </span>
-                    <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);" th:if="${rutina.entrenadorId == null}">
-                      <i class="bi bi-globe me-1"></i>Global
-                    </span>
-                  </div>
-                  
-                  <!-- Botones -->
-                  <div class="d-flex gap-2">
-                    <form th:action="@{/usuario/rutinas/asignar}" method="post" class="flex-grow-1">
-                      <input type="hidden" name="rutinaId" th:value="${rutina.id}">
-                      <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; padding: 0.7rem 1rem; font-weight: 600; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                        <i class="bi bi-plus-circle-fill me-2"></i>Agregar
-                      </button>
-                    </form>
-                    <button class="btn" style="background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); padding: 0.7rem 1rem; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease;" th:onclick="'abrirModalDetalles(' + ${rutina.id} + ')'" onmouseover="this.style.background='rgba(255, 255, 255, 0.12)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'">
-                      <i class="bi bi-eye-fill"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-        </div>
-      </div>
-    </div>
-
-      <!-- Rutinas Populares -->
-      <div class="row mb-5" th:if="${rutinasPopulares != null and not #lists.isEmpty(rutinasPopulares)}">
-        <div class="col-12">
-          <div class="card-base card-usuario" style="padding: 2.5rem;">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <h4 class="text-white mb-0 d-flex align-items-center fw-bold">
-                <div style="width: 40px; height: 40px; background: rgba(239, 68, 68, 0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                  <i class="bi bi-fire" style="color: #ef4444; font-size: 1.25rem;"></i>
-                </div>
-                Rutinas Populares
-              </h4>
-              <span class="badge" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">Más Elegidas</span>
-            </div>
-            
-            <div class="row g-5">
-              <div th:each="rutina : ${rutinasPopulares}" class="col-lg-4 col-md-6">
-                <div class="h-100" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 20px; padding: 2rem; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(239, 68, 68, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                  
-                  <!-- Header de la tarjeta -->
-                  <div class="d-flex justify-content-between align-items-start mb-3">
-                    <h5 class="text-white mb-0 fw-bold" style="font-size: 1.25rem; line-height: 1.3;" th:text="${rutina.nombre}">Rutina Popular</h5>
-                    <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
-                      <i class="bi bi-fire me-1"></i>Popular
-                    </span>
-                  </div>
-                  
-                  <!-- Descripción -->
-                  <p class="mb-3" style="font-size: 0.875rem; line-height: 1.5; color: #cbd5e1; min-height: 60px;" th:text="${rutina.descripcion}">Descripción de la rutina.</p>
-                  
-                  <!-- Info badges -->
-                  <div class="d-flex flex-wrap gap-2 mb-3">
-                    <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);" th:text="${rutina.dificultad}">Nivel</span>
-                    <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3);" th:text="${rutina.categoria}">Categoría</span>
-                    <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
-                      <i class="bi bi-clock me-1"></i><span th:text="${rutina.duracionMinutos}">30</span> min
-                    </span>
-                    <span class="badge" style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px; border: 1px solid rgba(251, 146, 60, 0.3);">
-                      <i class="bi bi-fire me-1"></i><span th:text="${rutina.caloriasEstimadas}">200</span> kcal
-                    </span>
-                  </div>
-                  
-                  <!-- Botones -->
-                  <div class="d-flex gap-2 mt-4">
-                    <form th:action="@{/usuario/rutinas/asignar}" method="post" class="flex-grow-1">
-                      <input type="hidden" name="rutinaId" th:value="${rutina.id}">
-                      <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 0.7rem 1rem; font-weight: 600; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                        <i class="bi bi-star me-2"></i>Probar
-                      </button>
-                    </form>
-                    <button class="btn" style="background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); padding: 0.7rem 1rem; font-size: 0.875rem; border-radius: 12px; transition: all 0.3s ease;" th:onclick="'abrirModalDetalles(' + ${rutina.id} + ')'" onmouseover="this.style.background='rgba(255, 255, 255, 0.12)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'">
-                      <i class="bi bi-eye-fill"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div> <!-- Cierre container-fluid -->
 
   </main>
 
-  <!-- Modal de Detalles de Rutina -->
-  <div class="modal fade" id="rutinaDetallesModal" tabindex="-1" data-bs-backdrop="static">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-      <div class="modal-content" style="background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(30px); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);">
-        
-        <!-- Header -->
+  <!-- Modal: Detalle del día (ejercicios) — fuera de <main> para evitar conflictos de stacking context -->
+  <div class="modal fade" id="modalEventoRutina" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content" style="background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 20px; backdrop-filter: blur(30px);">
         <div class="modal-header" style="border-bottom: 1px solid rgba(16, 185, 129, 0.2); background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);">
           <div class="d-flex align-items-center">
-            <div style="width: 40px; height: 40px;" class="bg-success bg-opacity-25 text-success border border-success border-opacity-50 rounded-3 d-flex align-items-center justify-content-center me-3">
-              <i class="bi bi-journal-text fs-5"></i>
+            <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 12px;" class="bg-success bg-opacity-25">
+              <i class="bi bi-calendar-event text-success fs-5"></i>
             </div>
             <div>
-              <h5 class="modal-title text-white fw-bold mb-0" id="modalRutinaNombre">Cargando...</h5>
-              <small class="text-muted-flowfit">Detalles de la rutina</small>
+              <h5 class="modal-title text-white fw-bold mb-0" data-ff-title>Rutina</h5>
+              <small class="text-muted-flowfit" data-ff-date></small>
             </div>
           </div>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        
-        <!-- Body -->
-        <div class="modal-body p-4" style="max-height: 70vh;" id="modalRutinaContenido">
-          <!-- Loading State -->
-          <div class="text-center py-5" id="modalLoading">
-            <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;"></div>
-            <p class="text-muted-flowfit">Cargando detalles de la rutina...</p>
+        <div class="modal-body p-4">
+          <!-- Info del día -->
+          <div class="d-flex flex-wrap gap-2 mb-4">
+            <span class="badge" data-ff-dia-badge style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.5rem 0.9rem; font-size: 0.8rem; border-radius: 10px; border: 1px solid rgba(59, 130, 246, 0.3);">
+              <i class="bi bi-calendar3 me-1"></i><span data-ff-dia-nombre>Día</span>
+            </span>
+            <span class="badge" data-ff-estado-badge style="padding: 0.5rem 0.9rem; font-size: 0.8rem; border-radius: 10px;">
+              <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i><span data-ff-state></span>
+            </span>
           </div>
-
-          <!-- Error State -->
-          <div class="alert alert-danger d-none" id="modalError">
-            <i class="bi bi-exclamation-triangle me-2"></i>
-            <span id="modalErrorMensaje">Error al cargar la rutina</span>
+          <!-- Loading -->
+          <div class="text-center py-4" id="modalDiaLoading">
+            <div class="spinner-border text-success mb-3" style="width: 2.5rem; height: 2.5rem;"></div>
+            <p class="text-muted-flowfit mb-0">Cargando ejercicios...</p>
           </div>
-
-          <!-- Content (will be populated by JS) -->
-          <div class="d-none" id="modalContenido">
-            <!-- Información General -->
-            <div class="card-base card-usuario mb-4">
-              <div class="card-body p-3">
-                <div class="d-flex align-items-center mb-3">
-                  <i class="bi bi-info-circle text-success fs-5 me-2"></i>
-                  <h6 class="text-white mb-0 fw-bold">Información General</h6>
-                </div>
-                <div class="row g-3">
-                  <div class="col-md-8">
-                    <label class="text-white small mb-1" style="opacity: 0.8;">Descripción</label>
-                    <p class="text-white mb-0" id="modalRutinaDescripcion">-</p>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="d-flex flex-column gap-2">
-                      <div class="stat-badge w-100 justify-content-center flex-column text-center">
-                        <i class="bi bi-list-check"></i>
-                        <div>
-                          <div class="fw-bold text-white" id="modalRutinaEjerciciosCount">0</div>
-                          <small class="text-muted-flowfit">Ejercicios</small>
-                        </div>
-                      </div>
-                      <div class="stat-badge w-100 justify-content-center flex-column text-center">
-                        <i class="bi bi-clock"></i>
-                        <div>
-                          <div class="fw-bold text-white" id="modalRutinaDuracion">0</div>
-                          <small class="text-muted-flowfit">Minutos</small>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          <!-- Descanso message -->
+          <div class="text-center py-4 d-none" id="modalDiaDescanso">
+            <div style="width: 70px; height: 70px; background: rgba(100, 116, 139, 0.15); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+              <i class="bi bi-moon-stars" style="font-size: 2rem; color: #94a3b8;"></i>
+            </div>
+            <h5 class="text-white mb-2">Día de Descanso</h5>
+            <p class="text-muted-flowfit mb-0">Recupera energía para tu próximo entrenamiento</p>
+          </div>
+          <!-- Exercises list -->
+          <div class="d-none" id="modalDiaEjercicios">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h6 class="text-white mb-0 fw-bold"><i class="bi bi-list-ol text-success me-2"></i>Ejercicios del Día</h6>
+              <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);" id="modalDiaEjerciciosCount">0 ejercicios</span>
+            </div>
+            <div id="modalDiaEjerciciosLista" class="d-flex flex-column gap-2"></div>
+            <!-- Progreso general de la rutina -->
+            <div id="modalDiaProgreso" class="d-none mt-3">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <small style="color: #94a3b8; font-size: 0.78rem;">Progreso del día</small>
+                <small id="modalDiaProgresoVal" style="color: #10b981; font-weight: 600; font-size: 0.78rem;">0%</small>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); border-radius: 20px; height: 5px; overflow: hidden;">
+                <div id="modalDiaProgresoBar" style="height: 100%; border-radius: 20px; background: linear-gradient(90deg, #10b981, #059669); width: 0%; transition: width 0.8s ease;"></div>
               </div>
             </div>
-
-            <!-- Ejercicios -->
-            <div class="card-base card-usuario mb-4">
-              <div class="card-body p-3">
-                <div class="d-flex align-items-center mb-3">
-                  <i class="bi bi-list-ol text-success fs-5 me-2"></i>
-                  <h6 class="text-white mb-0 fw-bold">Ejercicios de la Rutina</h6>
-                </div>
-                <div id="modalEjerciciosLista" class="d-flex flex-column gap-2"></div>
-              </div>
+          </div>
+          <!-- Sin ejercicios -->
+          <div class="text-center py-4 d-none" id="modalDiaSinEjercicios">
+            <div style="width: 70px; height: 70px; background: rgba(251, 146, 60, 0.15); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+              <i class="bi bi-clipboard-x" style="font-size: 2rem; color: #fb923c;"></i>
             </div>
-
-            <!-- Mi Progreso (si está asignada) -->
-            <div class="card-base card-usuario d-none" id="modalProgresoContainer">
-              <div class="card-body p-3">
-                <div class="d-flex align-items-center mb-3">
-                  <i class="bi bi-graph-up text-success fs-5 me-2"></i>
-                  <h6 class="text-white mb-0 fw-bold">Mi Progreso</h6>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <span class="text-muted-flowfit small">Completado</span>
-                  <span class="fw-bold text-success" id="modalProgreso">0%</span>
-                </div>
-                <div class="progress" style="height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 10px;">
-                  <div class="progress-bar bg-success" id="modalProgresoBar"></div>
-                </div>
-              </div>
-            </div>
+            <h5 class="text-white mb-2">Sin ejercicios programados</h5>
+            <p class="text-muted-flowfit mb-0">Tu entrenador aún no ha programado ejercicios para este día</p>
           </div>
         </div>
-        
-        <!-- Footer -->
-        <div class="modal-footer" style="border-top: 1px solid rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.05);">
-          <button type="button" class="btn" data-bs-dismiss="modal"
-                  style="background: rgba(255, 255, 255, 0.1); 
-                         color: white; 
-                         border: 1px solid rgba(255, 255, 255, 0.2);
-                         transition: all 0.3s ease;"
-                  onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'"
-                  onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">
-            <i class="bi bi-x-lg me-2"></i>Cerrar
-          </button>
-          <button type="button" class="btn" id="modalDescargarPdfBtn"
-                  style="background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); 
-                         color: white; 
-                         border: none;
-                         font-weight: 600;
-                         box-shadow: 0 4px 12px rgba(251, 146, 60, 0.4);
-                         padding: 0.5rem 1rem;
-                         transition: all 0.3s ease;"
-                  onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(251, 146, 60, 0.5)'"
-                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(251, 146, 60, 0.4)'">
-            <i class="bi bi-file-pdf me-2"></i>Descargar PDF
-          </button>
-          <button type="button" class="btn d-none" id="modalCompletarBtn"
-                  style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
-                         color: white; 
-                         border: none;
-                         font-weight: 600;
-                         box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-                         padding: 0.5rem 1rem;
-                         transition: all 0.3s ease;"
-                  onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.5)'"
-                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)'">
-            <i class="bi bi-check-circle-fill me-2"></i>Marcar Completada
+        <div class="modal-footer" style="border-top: 1px solid rgba(16, 185, 129, 0.2);">
+          <button type="button" class="btn" data-bs-dismiss="modal" style="background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); padding: 0.7rem 1.1rem; border-radius: 12px;">Cerrar</button>
+          <button type="button" class="btn d-none" id="btnCompletarDia" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 0.7rem 1.5rem; font-weight: 600; border-radius: 12px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <i class="bi bi-check-circle-fill me-2"></i>Completar Seleccionados
           </button>
         </div>
       </div>
@@ -615,30 +233,79 @@
   </div>
 
   <style>
-    .stat-badge {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      border-radius: 8px;
-      padding: 0.5rem 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
+    /* Calendar title force white */
+    #calendarUsuario .fc .fc-toolbar-title,
+    #calendarUsuario .fc .fc-toolbar-title * {
+      color: #ffffff !important;
+      -webkit-text-fill-color: #ffffff !important;
+      text-shadow: none !important;
+      opacity: 1 !important;
     }
-    .stat-badge i {
-      color: #10b981;
-      font-size: 1.125rem;
-    }
+    /* Exercise list items */
     .ejercicio-item-modal {
       background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-left: 3px solid #10b981;
-      border-radius: 8px;
-      padding: 0.875rem;
-      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-left: 3px solid rgba(16, 185, 129, 0.5);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      transition: background 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
     }
     .ejercicio-item-modal:hover {
+      background: rgba(16, 185, 129, 0.07);
+      border-color: rgba(16, 185, 129, 0.35);
+      border-left-color: #10b981;
+    }
+    /* Completed state */
+    .ejercicio-item-modal.completado {
       background: rgba(16, 185, 129, 0.08);
-      border-color: #10b981;
+      border-left-color: #10b981;
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+    .ejercicio-item-modal.completado .ejercicio-info h6 {
+      text-decoration: line-through;
+      color: #94a3b8 !important;
+    }
+    .ejercicio-item-modal.completado .ejercicio-info p,
+    .ejercicio-item-modal.completado .ejercicio-info .d-flex {
+      opacity: 0.5;
+    }
+    /* Checkbox styling */
+    .ejercicio-check {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      accent-color: #10b981;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 3px;
+      border-radius: 4px;
+    }
+    /* Number badge */
+    .ej-num-badge {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #10b981;
+      font-size: 0.85rem;
+    }
+    .ejercicio-item-modal.completado .ej-num-badge {
+      background: rgba(16, 185, 129, 0.25);
+      color: #34d399;
+    }
+    .ejercicio-item-modal.completado .ej-num-badge::after {
+      content: '✓';
+      font-size: 0.95rem;
+    }
+    .ejercicio-item-modal.completado .ej-num-badge span {
+      display: none;
     }
   </style>
 
@@ -648,9 +315,6 @@
   <!-- FullCalendar -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
   <script th:src="@{/js/rutinas-calendario.js}"></script>
-  
-  <!-- Usuario Rutinas JS -->
-  <script th:src="@{/js/usuario-rutinas.js}"></script>
   
   <!-- Sidebar JS -->
   <script>

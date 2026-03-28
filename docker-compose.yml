@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Servicio de la base de datos MySQL
+  db:
+    image: mysql:8.0
+    container_name: flowfit-db
+    # Monta el script SQL para inicializar la base de datos
+    volumes:
+      - ./FLOWFIT_DATABASE_COMPLETE.sql:/docker-entrypoint-initdb.d/init.sql
+    # Variables de entorno para la base de datos
+    # DEBES CAMBIAR 'tu_password_seguro' por una contraseña real y segura
+    environment:
+      MYSQL_ROOT_PASSWORD: tu_password_seguro
+      MYSQL_DATABASE: flowfit_db
+    ports:
+      # Expone el puerto de MySQL al host (opcional, para debugging)
+      - "3307:3306"
+    networks:
+      - flowfit-network
+    # Reinicia el contenedor si falla
+    restart: unless-stopped
+
+  # Servicio de la aplicación Spring Boot
+  app:
+    container_name: flowfit-app
+    # Construye la imagen a partir del Dockerfile en el directorio actual
+    build: .
+    # Depende del servicio de la base de datos
+    depends_on:
+      - db
+    ports:
+      # Mapea el puerto 8081 del contenedor al puerto 8081 del host
+      - "8081:8081"
+    environment:
+      # Sobrescribe la configuración de la base de datos para que apunte al contenedor 'db'
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/flowfit_db?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=tu_password_seguro
+      # Asegura que Spring Boot espere a que la base de datos esté lista
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    networks:
+      - flowfit-network
+    # Reinicia el contenedor si falla
+    restart: unless-stopped
+
+# Define la red para que los contenedores se comuniquen entre sí
+networks:
+  flowfit-network:
+    driver: bridge

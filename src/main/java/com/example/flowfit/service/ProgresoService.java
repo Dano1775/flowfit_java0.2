@@ -36,6 +36,8 @@ public class ProgresoService {
 
     /**
      * Registrar progreso de un ejercicio con fecha explícita.
+     * Si ya existe un registro para el mismo usuario+asignación+ejercicio+fecha,
+     * se actualiza en lugar de crear uno duplicado.
      */
     @Transactional
     public ProgresoEjercicio registrarProgreso(Usuario usuario, Integer rutinaAsignadaId,
@@ -47,10 +49,17 @@ public class ProgresoService {
         EjercicioCatalogo ejercicio = ejercicioRepository.findById(ejercicioId)
                 .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
 
-        ProgresoEjercicio progreso = new ProgresoEjercicio(usuario, rutina, ejercicio);
-        if (fecha != null) {
-            progreso.setFecha(fecha);
-        }
+        LocalDate fechaFinal = fecha != null ? fecha : LocalDate.now();
+
+        // Deduplicación: buscar registro existente para evitar duplicados
+        ProgresoEjercicio progreso = progresoRepository
+                .findExistente(usuario, rutinaAsignadaId, ejercicioId, fechaFinal)
+                .orElseGet(() -> {
+                    ProgresoEjercicio nuevo = new ProgresoEjercicio(usuario, rutina, ejercicio);
+                    nuevo.setFecha(fechaFinal);
+                    return nuevo;
+                });
+
         progreso.setSeriesCompletadas(series);
         progreso.setRepeticionesRealizadas(repeticiones);
         progreso.setPesoUtilizado(peso);

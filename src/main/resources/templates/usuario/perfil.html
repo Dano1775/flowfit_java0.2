@@ -26,22 +26,18 @@
   <main class="main-content-base fade-in-up">
     <div class="container-fluid">
       <!-- Header Section -->
-      <div class="row mb-4">
-        <div class="col-12">
-          <div class="flowfit-page-header">
-            <div class="flowfit-page-title">
-              <h1 class="flowfit-title">
-                <i class="bi bi-person-circle me-2 icon-usuario"></i>
-                Mi Perfil
-              </h1>
-              <p class="flowfit-subtitle">Gestiona tu información personal y configuración</p>
-            </div>
-            <div class="flowfit-page-actions">
-              <a class="btn btn-usuario-primary" th:href="@{/perfil/editar}">
-                <i class="bi bi-pencil me-2"></i>
-                Editar Perfil
-              </a>
-            </div>
+      <div class="welcome-header-enhanced mb-4">
+        <div class="row align-items-center">
+          <div class="col-lg-8">
+            <h1 class="display-6 mb-2 text-white fw-bold">
+              <i class="bi bi-person-circle me-2"></i>Mi Perfil
+            </h1>
+            <p class="lead text-white-50">Gestiona tu información personal y configuración</p>
+          </div>
+          <div class="col-lg-4 text-lg-end">
+            <a class="btn-flowfit-primary btn-usuario-primary btn-enhanced" th:href="@{/editar-perfil}">
+              <i class="bi bi-pencil-square me-2"></i>Editar Perfil
+            </a>
           </div>
         </div>
       </div>
@@ -61,123 +57,50 @@
 
       <!-- Profile Information -->
       <div class="row">
-        <div class="col-lg-8">
-          <div class="flowfit-card card-usuario">
+        <div class="col-lg-12">
+          <div class="card-base card-usuario">
             <div class="card-header">
-              <h5 class="card-title mb-0 text-white">
-                <i class="bi bi-person-circle me-2 icon-usuario"></i>
-                Información Personal
-              </h5>
-            </div>
-                            <div class="card-body">
-                                <form id="perfilForm" method="post" th:action="@{/usuario/actualizar-perfil}">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="nombre" class="form-label">Nombre Completo</label>
-                                            <input type="text" class="form-control" id="nombre" name="nombre" 
-                                                   th:value="${usuario.nombre}" readonly>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="numeroDocumento" class="form-label">Número de Documento</label>
-                                            <input type="text" class="form-control" id="numeroDocumento" name="numeroDocumento" 
-                                                   th:value="${usuario.numeroDocumento}" readonly>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="correo" class="form-label">Correo Electrónico</label>
-                                            <input type="email" class="form-control" id="correo" name="correo" 
-                                                   th:value="${usuario.correo}" readonly>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="telefono" class="form-label">Teléfono</label>
-                                            <input type="tel" class="form-control" id="telefono" name="telefono" 
-                                                   th:value="${usuario.telefono}" readonly>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="perfilUsuario" class="form-label">Tipo de Usuario</label>
-                                            <input type="text" class="form-control" id="perfilUsuario" 
-                                                   th:value="${usuario.perfilUsuario}" readonly>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="estado" class="form-label">Estado</label>
-                                            <span class="badge bg-success fs-6" th:if="${usuario.estado == 'A'}">Activo</span>
-                                            <span class="badge bg-warning fs-6" th:if="${usuario.estado == 'I'}">Inactivo</span>
-                                            <span class="badge bg-secondary fs-6" th:if="${usuario.estado == 'P'}">Pendiente</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-none" id="botonesEdicion">
-                                        <button type="submit" class="btn btn-usuario-primary me-2">
-                                            <i class="bi bi-check-lg me-2"></i>
-                                            Guardar Cambios
-                                        </button>
-                                        <button type="button" class="btn btn-secondary" id="cancelarBtn">
-                                            <i class="bi bi-x-lg me-2"></i>
-                                            Cancelar
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-        <div class="col-lg-4">
-          <!-- Profile Stats -->
-          <div class="flowfit-card card-usuario mb-4">
-            <div class="card-header">
-              <h5 class="card-title mb-0 text-white">
-                <i class="bi bi-bar-chart me-2 icon-usuario"></i>
-                Estadísticas
-              </h5>
-            </div>
-            <div class="card-body text-center">
-              <div class="metric-card-usuario mb-4">
-                <div class="metric-value" th:text="${rutinasActivas != null ? rutinasActivas.size() : 0}">0</div>
-                <div class="metric-label">Rutinas Activas</div>
-              </div>
-              <div class="metric-card-usuario">
-                <div class="metric-value" th:text="${rutinasCompletadas != null ? rutinasCompletadas.size() : 0}">0</div>
-                <div class="metric-label">Rutinas Completadas</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Change Password -->
-          <div class="flowfit-card card-usuario">
-            <div class="card-header">
-              <h5 class="card-title mb-0 text-white">
-                <i class="bi bi-key me-2 icon-usuario"></i>
-                Cambiar Contraseña
-              </h5>
+                <h5 class="card-title mb-0 text-white">
+                    <i class="bi bi-person-vcard me-2"></i>
+                    Información Personal
+                </h5>
             </div>
             <div class="card-body">
-              <form method="post" th:action="@{/usuario/cambiar-password}">
-                <div class="mb-3">
-                  <label for="passwordActual" class="form-label text-white">Contraseña Actual</label>
-                  <input type="password" class="form-control" id="passwordActual" name="passwordActual" required>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="small text-white-50">Nombre Completo</div>
+                  <div class="text-white fw-semibold" th:text="${usuario.nombre}">-</div>
                 </div>
-                <div class="mb-3">
-                  <label for="passwordNuevo" class="form-label text-white">Nueva Contraseña</label>
-                  <input type="password" class="form-control" id="passwordNuevo" name="passwordNuevo" required>
+                <div class="col-md-6">
+                  <div class="small text-white-50">Número de Documento</div>
+                  <div class="text-white fw-semibold" th:text="${usuario.numeroDocumento}">-</div>
                 </div>
-                <div class="mb-3">
-                  <label for="passwordConfirmar" class="form-label text-white">Confirmar Nueva Contraseña</label>
-                  <input type="password" class="form-control" id="passwordConfirmar" name="passwordConfirmar" required>
+                <div class="col-md-6">
+                  <div class="small text-white-50">Correo Electrónico</div>
+                  <div class="text-white fw-semibold" th:text="${usuario.correo}">-</div>
                 </div>
-                <button type="submit" class="btn btn-warning w-100">
-                  <i class="bi bi-shield-lock me-2"></i>
-                  Cambiar Contraseña
-                </button>
-              </form>
+                <div class="col-md-6">
+                  <div class="small text-white-50">Teléfono</div>
+                  <div class="text-white fw-semibold" th:text="${usuario.telefono}">-</div>
+                </div>
+                <div class="col-md-6">
+                  <div class="small text-white-50">Tipo de Usuario</div>
+                  <div class="text-white fw-semibold" th:text="${usuario.perfilUsuario}">-</div>
+                </div>
+                <div class="col-md-6">
+                  <div class="small text-white-50">Estado</div>
+                  <div>
+                    <span class="badge bg-success fs-6" th:if="${usuario.estado == 'A'}">Activo</span>
+                    <span class="badge bg-warning fs-6" th:if="${usuario.estado == 'I'}">Inactivo</span>
+                    <span class="badge bg-secondary fs-6" th:if="${usuario.estado == 'P'}">Pendiente</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <footer class="footer-base mt-5">© 2025 FlowFit</footer>
     </div> <!-- Cierre container-fluid -->
   </main>
 

@@ -600,8 +600,11 @@ public class EntrenadorController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Sin permisos"));
             }
 
-            long totalPlan = rutinaEjercicioProgramadoRepository.countByRutinaAsignadaId(rutinaAsignadaId);
-            if (totalPlan <= 0) {
+            // Validar que haya ejercicios: programados por fecha O en la plantilla de la
+            // rutina
+            long totalProgramados = rutinaEjercicioProgramadoRepository.countByRutinaAsignadaId(rutinaAsignadaId);
+            long totalPlantilla = rutinaService.obtenerEjerciciosDeRutina(rutina.getId()).size();
+            if (totalProgramados <= 0 && totalPlantilla <= 0) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "Planifica al menos un ejercicio antes de guardar."));
             }
@@ -611,6 +614,8 @@ public class EntrenadorController {
             if (asignacion.getEstado() == RutinaAsignada.EstadoRutina.BORRADOR) {
                 asignacion.setEstado(RutinaAsignada.EstadoRutina.ACTIVA);
                 rutinaAsignadaRepository.save(asignacion);
+                // Crear sesiones en el calendario para que el usuario las vea
+                rutinaSesionProgramadaService.crearSesionesMesPorDefecto(rutinaAsignadaId);
             }
 
             return ResponseEntity.ok(Map.of("ok", true));

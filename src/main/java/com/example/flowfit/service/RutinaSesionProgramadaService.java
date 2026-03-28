@@ -214,6 +214,11 @@ public class RutinaSesionProgramadaService {
         RutinaAsignada asignada = rutinaAsignadaRepo.findById(rutinaAsignadaId)
                 .orElseThrow(() -> new RuntimeException("Rutina asignada no encontrada"));
         asignada.setProgreso(progreso);
+        // Auto-completar la rutina cuando se alcanza 100% de sesiones realizadas
+        if (progreso >= 100 && asignada.getEstado() == RutinaAsignada.EstadoRutina.ACTIVA) {
+            asignada.setEstado(RutinaAsignada.EstadoRutina.COMPLETADA);
+            asignada.setFechaCompletada(LocalDate.now());
+        }
         rutinaAsignadaRepo.save(asignada);
 
         return progreso;

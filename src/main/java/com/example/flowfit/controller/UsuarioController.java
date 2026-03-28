@@ -265,8 +265,20 @@ public class UsuarioController {
                     .count();
             long rutinasTotal = rutinasAsignadas.size();
 
-            // Calcular progreso general (porcentaje de rutinas completadas)
-            double progresoGeneral = rutinasTotal > 0 ? ((double) rutinasCompletadas / rutinasTotal) * 100 : 0.0;
+            // Calcular progreso general como promedio del progreso de rutinas activas (%
+            // sesiones realizadas)
+            double progresoGeneral = 0.0;
+            int _contRutinas = 0, _sumaProgreso = 0;
+            for (RutinaAsignada r : rutinasAsignadas) {
+                if (r.getEstado() == RutinaAsignada.EstadoRutina.ACTIVA
+                        || r.getEstado() == RutinaAsignada.EstadoRutina.COMPLETADA) {
+                    _sumaProgreso += r.getProgreso() != null ? r.getProgreso() : 0;
+                    _contRutinas++;
+                }
+            }
+            if (_contRutinas > 0) {
+                progresoGeneral = (double) _sumaProgreso / _contRutinas;
+            }
 
             // Obtener estadísticas reales del ProgresoService
             Map<String, Object> estadisticas = progresoService.getEstadisticasGenerales(usuario);
@@ -276,60 +288,35 @@ public class UsuarioController {
             int diasActivosEsteMes = progresoService.contarDiasEntrenadosEntre(usuario, inicioMes,
                     java.time.LocalDate.now());
 
-            // DATOS PARA GRÁFICA: Últimos 7 días de rutinas completadas
+            // DATOS PARA GRÁFICA: Sesiones realizadas en los últimos 7 días
             java.time.LocalDate hoy = java.time.LocalDate.now();
             java.time.LocalDate hace7Dias = hoy.minusDays(6); // Incluye hoy
 
-            // Crear mapa de fechas con 0 por defecto (últimos 7 días)
-            Map<java.time.LocalDate, Integer> rutinasPorFecha = new java.util.LinkedHashMap<>();
+            // Construir mapa de sesiones realizadas por fecha (últimos 7 días)
+            Map<java.time.LocalDate, Integer> sesionesPorFecha = new java.util.LinkedHashMap<>();
             for (int i = 0; i < 7; i++) {
-                java.time.LocalDate fecha = hace7Dias.plusDays(i);
-                rutinasPorFecha.put(fecha, 0);
+                sesionesPorFecha.put(hace7Dias.plusDays(i), 0);
             }
 
-            System.out.println("=== DEBUG PROGRESO SEMANAL (RUTINAS COMPLETADAS) ===");
-            System.out.println("Usuario: " + usuario.getCorreo() + " (ID: " + usuario.getId() + ")");
-            System.out.println("Rango: " + hace7Dias + " a " + hoy);
+            List<com.example.flowfit.model.RutinaSesionProgramada> sesionesSemana = rutinaSesionProgramadaService
+                    .obtenerSesionesUsuarioEnRango(usuario.getId(), hace7Dias, hoy);
 
-            // Obtener rutinas completadas por fecha desde rutina_asignada
-            List<Object[]> rutinasCompletadasPorFecha = rutinaService.obtenerRutinasCompletadasPorFecha(
-                    usuario.getId(), hace7Dias);
-
-            System.out.println(
-                    "Rutinas completadas encontradas: " + rutinasCompletadasPorFecha.size() + " días con actividad");
-
-            // Poblar con datos reales
-            for (Object[] row : rutinasCompletadasPorFecha) {
-                try {
-                    java.sql.Date sqlDate = (java.sql.Date) row[0];
-                    java.time.LocalDate fecha = sqlDate.toLocalDate();
-                    int cantidad = ((Number) row[1]).intValue();
-
-                    if (rutinasPorFecha.containsKey(fecha)) {
-                        rutinasPorFecha.put(fecha, cantidad);
-                        System.out.println("  ✓ " + fecha + ": " + cantidad + " rutina(s) completada(s)");
-                    }
-                } catch (Exception e) {
-                    System.out.println("  ✗ Error procesando fecha: " + e.getMessage());
+            for (com.example.flowfit.model.RutinaSesionProgramada s : sesionesSemana) {
+                if (s.getEstado() == com.example.flowfit.model.RutinaSesionProgramada.EstadoSesion.REALIZADA
+                        && sesionesPorFecha.containsKey(s.getFecha())) {
+                    sesionesPorFecha.merge(s.getFecha(), 1, Integer::sum);
                 }
             }
 
             // Convertir mapa a listas para el frontend
             List<String> fechasGrafica = new java.util.ArrayList<>();
-            List<Integer> rutinasGrafica = new java.util.ArrayList<>();
+            List<Integer> sesionesGrafica = new java.util.ArrayList<>();
 
             java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM");
-            for (Map.Entry<java.time.LocalDate, Integer> entry : rutinasPorFecha.entrySet()) {
+            for (Map.Entry<java.time.LocalDate, Integer> entry : sesionesPorFecha.entrySet()) {
                 fechasGrafica.add(entry.getKey().format(formatter));
-                rutinasGrafica.add(entry.getValue());
+                sesionesGrafica.add(entry.getValue());
             }
-
-            System.out.println("Datos finales para gráfica:");
-            System.out.println("  Fechas: " + fechasGrafica);
-            System.out.println("  Rutinas completadas: " + rutinasGrafica);
-            System.out.println("  Total días con rutinas: "
-                    + rutinasGrafica.stream().filter(v -> v > 0).count());
-            System.out.println("====================================================\n");
 
             // Agregar atributos al modelo
             model.addAttribute("rutinasAsignadas", rutinasAsignadas);
@@ -342,7 +329,7 @@ public class UsuarioController {
 
             // Pasar datos como arrays simples para JavaScript
             model.addAttribute("fechasArray", fechasGrafica);
-            model.addAttribute("ejerciciosArray", rutinasGrafica); // Ahora son rutinas, no ejercicios
+            model.addAttribute("ejerciciosArray", sesionesGrafica); // Sesiones realizadas por día
             model.addAttribute("currentPage", "progreso");
 
             return "usuario/progreso";
@@ -508,28 +495,9 @@ public class UsuarioController {
                 System.out.println("DEBUG - Completando rutina ID: " + rutinaAsignadaId);
                 System.out.println("DEBUG - Rutina: " + rutinaAsignada.getRutina().getNombre());
 
-                // Registrar progreso de ejercicios automáticamente
-                if (rutinaAsignada.getRutina() != null && rutinaAsignada.getRutina().getEjercicios() != null) {
-                    int ejerciciosRegistrados = 0;
-                    for (com.example.flowfit.model.RutinaEjercicio ejercicioRutina : rutinaAsignada.getRutina()
-                            .getEjercicios()) {
-                        try {
-                            progresoService.registrarProgreso(
-                                    usuario,
-                                    rutinaAsignadaId,
-                                    ejercicioRutina.getEjercicioCatalogo().getId(),
-                                    ejercicioRutina.getSeries() != null ? ejercicioRutina.getSeries() : 1,
-                                    ejercicioRutina.getRepeticiones() != null ? ejercicioRutina.getRepeticiones() : 1,
-                                    ejercicioRutina.getPesoKg(),
-                                    "Completado automáticamente");
-                            ejerciciosRegistrados++;
-                        } catch (Exception ex) {
-                            System.err.println("Error al registrar ejercicio: " + ex.getMessage());
-                            ex.printStackTrace();
-                        }
-                    }
-                    System.out.println("DEBUG - Ejercicios registrados: " + ejerciciosRegistrados);
-                }
+                // El progreso de ejercicios ya se registra sesión a sesión en
+                // completarSesion().
+                // No se duplica aquí para evitar estadísticas infladas.
             }
 
             // Marcar rutina como completada

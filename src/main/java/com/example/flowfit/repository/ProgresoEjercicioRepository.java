@@ -9,68 +9,82 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProgresoEjercicioRepository extends JpaRepository<ProgresoEjercicio, Integer> {
-    
+
+    // Buscar registro existente para deduplicación (mismo usuario + asignación +
+    // ejercicio + fecha)
+    @Query("SELECT p FROM ProgresoEjercicio p WHERE p.usuario = :usuario " +
+            "AND p.rutinaAsignada.id = :rutinaAsignadaId AND p.ejercicio.id = :ejercicioId " +
+            "AND p.fecha = :fecha")
+    Optional<ProgresoEjercicio> findExistente(
+            @Param("usuario") Usuario usuario,
+            @Param("rutinaAsignadaId") Integer rutinaAsignadaId,
+            @Param("ejercicioId") Integer ejercicioId,
+            @Param("fecha") LocalDate fecha);
+
     // Obtener progreso por usuario
     List<ProgresoEjercicio> findByUsuarioOrderByFechaDesc(Usuario usuario);
-    
+
     // Obtener progreso por usuario y rango de fechas
     @Query("SELECT p FROM ProgresoEjercicio p WHERE p.usuario = :usuario " +
-           "AND p.fecha BETWEEN :fechaInicio AND :fechaFin ORDER BY p.fecha DESC")
+            "AND p.fecha BETWEEN :fechaInicio AND :fechaFin ORDER BY p.fecha DESC")
     List<ProgresoEjercicio> findByUsuarioAndFechaBetween(
-        @Param("usuario") Usuario usuario,
-        @Param("fechaInicio") LocalDate fechaInicio,
-        @Param("fechaFin") LocalDate fechaFin
-    );
-    
+            @Param("usuario") Usuario usuario,
+            @Param("fechaInicio") LocalDate fechaInicio,
+            @Param("fechaFin") LocalDate fechaFin);
+
     // Contar ejercicios completados por usuario
     @Query("SELECT COUNT(p) FROM ProgresoEjercicio p WHERE p.usuario = :usuario")
     Long countByUsuario(@Param("usuario") Usuario usuario);
-    
+
     // Obtener progreso de un ejercicio específico
     @Query("SELECT p FROM ProgresoEjercicio p WHERE p.usuario = :usuario " +
-           "AND p.ejercicio.id = :ejercicioId ORDER BY p.fecha DESC")
+            "AND p.ejercicio.id = :ejercicioId ORDER BY p.fecha DESC")
     List<ProgresoEjercicio> findByUsuarioAndEjercicioId(
-        @Param("usuario") Usuario usuario,
-        @Param("ejercicioId") Integer ejercicioId
-    );
-    
+            @Param("usuario") Usuario usuario,
+            @Param("ejercicioId") Integer ejercicioId);
+
     // Estadísticas de la última semana
     @Query("SELECT COUNT(DISTINCT p.fecha) FROM ProgresoEjercicio p " +
-           "WHERE p.usuario = :usuario AND p.fecha >= :fechaInicio")
+            "WHERE p.usuario = :usuario AND p.fecha >= :fechaInicio")
     Long countDiasEntrenadosUltimaSemana(
-        @Param("usuario") Usuario usuario,
-        @Param("fechaInicio") LocalDate fechaInicio
-    );
-    
+            @Param("usuario") Usuario usuario,
+            @Param("fechaInicio") LocalDate fechaInicio);
+
     // Total de series completadas
     @Query("SELECT COALESCE(SUM(p.seriesCompletadas), 0) FROM ProgresoEjercicio p " +
-           "WHERE p.usuario = :usuario AND p.fecha >= :fechaInicio")
+            "WHERE p.usuario = :usuario AND p.fecha >= :fechaInicio")
     Integer sumSeriesCompletadasDesde(
-        @Param("usuario") Usuario usuario,
-        @Param("fechaInicio") LocalDate fechaInicio
-    );
-    
+            @Param("usuario") Usuario usuario,
+            @Param("fechaInicio") LocalDate fechaInicio);
+
     // Promedio de peso utilizado por ejercicio
     @Query("SELECT AVG(p.pesoUtilizado) FROM ProgresoEjercicio p " +
-           "WHERE p.usuario = :usuario AND p.ejercicio.id = :ejercicioId " +
-           "AND p.pesoUtilizado IS NOT NULL")
+            "WHERE p.usuario = :usuario AND p.ejercicio.id = :ejercicioId " +
+            "AND p.pesoUtilizado IS NOT NULL")
     Double avgPesoUtilizadoByEjercicio(
-        @Param("usuario") Usuario usuario,
-        @Param("ejercicioId") Integer ejercicioId
-    );
-    
+            @Param("usuario") Usuario usuario,
+            @Param("ejercicioId") Integer ejercicioId);
+
     // Obtener progreso agrupado por fecha (para gráficas)
     @Query("SELECT p.fecha as fecha, COUNT(p) as total, " +
-           "SUM(p.seriesCompletadas) as totalSeries, " +
-           "SUM(p.repeticionesRealizadas) as totalReps " +
-           "FROM ProgresoEjercicio p " +
-           "WHERE p.usuario = :usuario AND p.fecha >= :fechaInicio " +
-           "GROUP BY p.fecha ORDER BY p.fecha")
+            "SUM(p.seriesCompletadas) as totalSeries, " +
+            "SUM(p.repeticionesRealizadas) as totalReps " +
+            "FROM ProgresoEjercicio p " +
+            "WHERE p.usuario = :usuario AND p.fecha >= :fechaInicio " +
+            "GROUP BY p.fecha ORDER BY p.fecha")
     List<Object[]> getEstadisticasPorFecha(
-        @Param("usuario") Usuario usuario,
-        @Param("fechaInicio") LocalDate fechaInicio
-    );
+            @Param("usuario") Usuario usuario,
+            @Param("fechaInicio") LocalDate fechaInicio);
+
+    // Obtener todos los progresos de un día para una asignación específica
+    @Query("SELECT p FROM ProgresoEjercicio p WHERE p.usuario = :usuario " +
+            "AND p.rutinaAsignada.id = :rutinaAsignadaId AND p.fecha = :fecha")
+    List<ProgresoEjercicio> findByUsuarioAndAsignacionAndFecha(
+            @Param("usuario") Usuario usuario,
+            @Param("rutinaAsignadaId") Integer rutinaAsignadaId,
+            @Param("fecha") LocalDate fecha);
 }
