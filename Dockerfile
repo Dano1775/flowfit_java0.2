@@ -7,6 +7,7 @@ WORKDIR /app
 # Copia el wrapper de Maven y el archivo pom.xml
 # Esto permite a Docker cachear las dependencias si no cambian
 COPY mvnw .
+RUN chmod +x mvnw
 COPY .mvn .mvn
 COPY pom.xml .
 
